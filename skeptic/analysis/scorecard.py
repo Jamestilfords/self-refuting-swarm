@@ -1,4 +1,4 @@
 """R5 scaffold: report the eight registered scorecard configurations.
 
-Owner: Ryu. Implementation pending.
+Owner: @mid9t (Ryu). Implementation pending.
 """

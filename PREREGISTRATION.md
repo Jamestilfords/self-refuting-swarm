@@ -2,7 +2,8 @@
 
 **Status: DRAFT TEMPLATE - not registered or frozen.**
 
-Owner: Ryu (R3). Complete the sections below against slides 5 and 31 of the
+Owner: [@mid9t](https://github.com/mid9t) (Ryu, R3).
+Complete the sections below against slides 5 and 31 of the
 design document, resolve every proposed default, then commit and push before
 the first main run. Record that commit hash in the README. Creating this file
 does not approve any hypothesis, threshold, gate, or analysis decision.

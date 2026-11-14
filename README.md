@@ -72,11 +72,16 @@ including `skeptic/sandbox.py`, `skeptic/store.py`, and `skeptic/ledger.py`.
 
 ## Work ownership
 
-- **Ryu / PI:** preregistration, `skeptic/critic/`, truth and analysis, Testbed B
+Work owners are the repository's GitHub collaborators:
+
+- **[@mid9t](https://github.com/mid9t) (Ryu / PI):** preregistration,
+  `skeptic/critic/`, truth and analysis, Testbed B
   science specification, unblinding, and findings.
-- **Research engineer:** `skeptic/api.py`, `skeptic/streams/`,
+- **[@Jamestilfords](https://github.com/Jamestilfords) (research engineer):**
+  `skeptic/api.py`, `skeptic/streams/`,
   `skeptic/memory.py`, `proposals/`, and Experiment 2 (`skeptic/analysis/exp2.py`).
-- **Software engineer:** `modal_jobs/`, `skeptic/sandbox.py`,
+- **[@XayHanmonty](https://github.com/XayHanmonty) (software engineer):**
+  `modal_jobs/`, `skeptic/sandbox.py`,
   `skeptic/store.py`, `skeptic/ledger.py`, `skeptic/rules/`, `dashboard/`,
   and the Makefile/reproduction workflow.
 
@@ -109,7 +114,7 @@ Activation-Monitoring repository has been added by this scaffold.
 
 ## Research state
 
-`PREREGISTRATION.md` is a draft template, not a frozen registration. Ryu must
+`PREREGISTRATION.md` is a draft template, not a frozen registration. @mid9t must
 confirm the proposed defaults and record the preregistration commit before a
 main run. Keep sealed test arrays and scores outside git, the public ledger,
 shared memory, and agent inputs. E4 must implement and verify the guard and

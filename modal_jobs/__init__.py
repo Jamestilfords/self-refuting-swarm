@@ -1,1 +1,1 @@
-"""Modal job definitions for Skeptic; infrastructure work packages E1-E6."""
+"""Modal jobs for Skeptic; E1-E6 infrastructure owned by @XayHanmonty."""

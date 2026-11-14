@@ -1,1 +1,1 @@
-"""Research analysis; Ryu owns truth/reporting and L6 owns Experiment 2."""
+"""Analysis: @mid9t owns truth/reporting; @Jamestilfords owns Experiment 2 (L6)."""

@@ -1,0 +1,3 @@
+[submodule "third_party/er1"]
+	path = third_party/er1
+	url = https://github.com/mid9t/ER-1-Epistemic-Ranker-.git

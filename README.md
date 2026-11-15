@@ -5,11 +5,26 @@ Thresholdout, and a statistical critic on the same proposal stream, measuring
 false discoveries and recall. Testbed A uses ER-1; Testbed B extends the critic
 to probe deferral on a safety monitor.
 
-This repository is the scaffold from slide 22 of **Skeptic: Design Document and
-Agent Handoff** (November 14, 2026). The Python files describe their assigned
-components; the experiment pipeline and Modal infrastructure are not implemented
-yet. `make help` lists the planned commands. Other Makefile targets fail with an
-explicit implementation-pending message.
+This repository follows slide 22 of **Skeptic: Design Document and Agent
+Handoff** (November 14, 2026). **E1 is implemented:** `make setup` provisions
+the Modal app and separate open/sealed volumes, validates any configured named
+secrets, and checks both mounts. The experiment pipeline remains a scaffold.
+
+## Getting started
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and Git,
+then from a clone of this repository run:
+
+```sh
+uv sync --frozen
+uv run modal token new  # Skip if this computer already has a Modal login.
+make setup
+```
+
+Setup also initializes the pinned ER-1 submodule. `make setup-check` verifies
+the existing deployment; `make test` runs local infrastructure tests without
+Modal credentials. See [Modal setup and job integration](modal_jobs/README.md)
+for resource names, named-secret configuration, and mount boundaries.
 
 ## Repository layout
 
@@ -18,9 +33,14 @@ self-refuting-swarm/
 ├── PREREGISTRATION.md
 ├── README.md
 ├── Makefile
+├── pyproject.toml
+├── uv.lock
 ├── third_party/
 │   └── er1/                   # Pinned MIT-licensed git submodule
 ├── modal_jobs/
+│   ├── app.py                 # Shared Modal app and isolated mount checks
+│   ├── config.py              # Resource names, no credential values
+│   ├── setup.py               # E1 provision/check entrypoint
 │   ├── train40.py
 │   ├── seal.py
 │   ├── sandbox.py
@@ -89,12 +109,14 @@ The proposal API, ledger/decision rows, and verdict function are the shared
 interfaces described on slides 8-11. These files are placeholders, so their
 presence does not mean those contracts have been implemented or validated.
 
-## Planned commands
+## Commands
 
 Run `make help` for the full command list from slide 22 and the associated work
-packages. `setup`, `train40`, `sanity`, `smoke`, `stream`, `exp1`, `exp2`,
-`seal-hash`, `unblind`, `report`, `reproduce`, and `testbed-b` are reserved targets.
-No command currently launches compute, writes decisions, or unseals data.
+packages. `setup`, `setup-check`, `bootstrap`, and `test` are implemented.
+`train40`, `sanity`, `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
+`report`, `reproduce`, and `testbed-b` remain reserved targets that fail with an
+implementation-pending message. Setup runs small CPU storage checks; it does
+not start training or read dataset/test scores.
 
 ## ER-1 dependency and credit
 

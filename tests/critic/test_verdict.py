@@ -81,3 +81,32 @@ def test_helpers_match_their_constructions():
         if candidate.name == "canary_noise":
             assert decision.p == 1.0
             assert decision.fdr_t == 1
+
+
+def test_scorecard_mode_reaches_benefit_instead_of_matching_the_twin():
+    import numpy as np
+
+    from skeptic.critic.types import BaselineSet, ScoreSet
+
+    def scores(name, ident, oos, arm="ce"):
+        return ScoreSet(name, arm, (np.asarray(ident, dtype=np.float64),), (np.asarray(oos, dtype=np.float64),))
+
+    incumbent = scores("energy_ce", [0, 0, 0, 0], [4, 4, 4, 4])
+    twin = scores("d_port_ce", [0, 1, 2, 3], [0.4, 1.2, 1.8, 2.2])
+    candidate = scores("d_port_edl", [0, 1, 2, 3], [0.4, 1.2, 1.8, 2.2], arm="edl")
+    baselines = BaselineSet(
+        cell="clinc150/bert",
+        scores={"energy_ce": incumbent, "d_port_ce": twin, "d_port_edl": candidate},
+        g2_names=("energy_ce", "d_port_ce", "d_port_edl"),
+        plain_ece={"ce": (0.0,), "edl": (0.0,)},
+    )
+    stream = verdict(candidate, incumbent, baselines, LordPlusPlus(), "clinc150/bert", config=FAST)
+    scorecard = verdict(
+        candidate, incumbent, baselines, LordPlusPlus(), "clinc150/bert",
+        config=FAST, g2_mode="scorecard",
+    )
+    assert stream.verdict is Verdict.SCORE_MATCHED
+    assert scorecard.verdict is Verdict.NO_EFFECT
+    assert scorecard.comparator == "energy_ce"
+    assert scorecard.detail["g2_mode"] == "scorecard"
+    assert scorecard.fdr_t == 1

@@ -171,7 +171,14 @@ self-refuting-swarm/
 │   │   ├── canaries.py
 │   │   └── analyst.py
 │   ├── analysis/
+│   │   ├── config.py
+│   │   ├── bootstrap.py
+│   │   ├── sources.py
+│   │   ├── decisions.py
 │   │   ├── truth.py
+│   │   ├── ablation.py
+│   │   ├── hypotheses.py
+│   │   ├── report_tables.py
 │   │   ├── exp1.py
 │   │   ├── exp2.py
 │   │   └── scorecard.py
@@ -290,13 +297,34 @@ The design doc's organizer approval question about prior work remains a team
 decision. This scaffold does not establish that approval. No code from the
 Activation-Monitoring repository has been added by this scaffold.
 
+## Experiment 1 truth and metrics
+
+`skeptic/analysis/` is the pre-registered answer key for Experiment 1. It reads decision logs and, after unsealing, scores accepted changes on test data. It does not re-run the ratchet, Thresholdout, or the critic. `python -m skeptic.analysis.config --markdown` prints the definitions for `PREREGISTRATION.md` §4. Run it with `PYTHONPATH=third_party/er1/src` when you import the scoring code; the config table itself does not need ER-1.
+
+`paired_bootstrap_fast` is an equivalence-tested vectorisation of ER-1's `paired_bootstrap` at commit `e877e9159d`. It draws the same resample indices and returns the same tie-aware weighted AUROC. Truth intervals use B = 5,000. The first truth pair in a process is checked against ER-1 at B = 20.
+
+The filled draft records these choices. They freeze only when that file is registered:
+
+- **D1.** Recall's numerator is the accepted proposals that sit in S_cell, the set of real improvements over CE energy. The numerator and the denominator use that same set, so recall cannot exceed 1.
+- **D2.** Intervals use `paired_bootstrap_fast`, bit-identical to ER-1, with B = 5,000.
+- **D3.** The two-level bootstrap reweights accepted changes. It does not replay the rules.
+- **D4.** All four hypothesis p-values are two-sided: `p = max(2·min(P*(stat ≤ c), P*(stat ≥ c)), 1/B)`, with c = 0 for H1, H2 and H4 and c = 0.5 for H3. H2's p-value is the third-smallest per-cell p-value. H1, H2 and H4 are supported only when their interval rule holds and the Holm-adjusted p-value is at most 0.05. H3 is supported when the point estimate is at least 0.5.
+- **D5.** Final-pick ECE uses the proposal's in-scope test probabilities when those were stored, otherwise the plain-model ECE of its arm. The best single density is chosen by validation AUROC.
+- **D6.** Strict truth skips a cell whose scores are missing and does not call that a reversal. A reversal is a combined 95% interval lying entirely below 0.
+- **D7.** Truth is the gain over the incumbent at acceptance, even when the critic compared the proposal with a baseline rather than that incumbent.
+- **D8.** An ordering where either the ratchet or the critic accepted nothing is left out of H2's paired difference, and the count of those orderings is reported.
+
+A finite test set misses some real gains. In the low-power synthetic check (`delta_auc = 0.005`) no planted improvement cleared a 95% interval above zero, so S_cell was empty and measured recall was undefined rather than written as 0. When that recall is defined, the test requires it to be at most the recall against the planted effects.
+
 ## Research state
 
-`PREREGISTRATION.md` is a draft template, not a frozen registration. @mid9t must
-confirm the proposed defaults and record the preregistration commit before a
-main run. Keep sealed test arrays and scores outside git, the public ledger,
-shared memory, and agent inputs. E4 now supplies the guard and decision-hash
-checks; scoring integration and the approved unblinding analysis remain pending.
+`PREREGISTRATION.md` is a filled draft, not a frozen registration. @mid9t must
+resolve the remaining `[FILL]` items and commit it before a main run, then
+record that commit hash here. The critic's `g2_mode="scorecard"` is the
+scorecard rule in §4.6; the proposal stream stays on `g2_mode="stream"`.
+Keep sealed test arrays and scores outside git, the public ledger, shared
+memory, and agent inputs. E4 supplies the guard and decision-hash checks;
+scoring integration and the approved unblinding analysis remain pending.
 
 ### E5 decision replay
 

@@ -18,7 +18,7 @@ CELLS = (
     "banking77_oos/roberta",
 )
 COLUMNS = [
-    "hypothesis", "estimate", "ci_low", "ci_high", "p_one_sided", "p_holm", "reject",
+    "hypothesis", "estimate", "ci_low", "ci_high", "p_two_sided", "p_holm", "reject",
     "supported_by_rule", "n_orderings", "n_excluded_orderings", "n_changes", "config_digest",
 ]
 
@@ -69,11 +69,11 @@ def test_point_estimates():
 
 def test_h2_p_is_the_third_smallest_cell_p():
     _config, report = _report(_changes(False), hyp_b=30)
-    cell_p = sorted(row["p_one_sided"] for row in report["h2_by_cell"])
-    assert _row(report, "H2")["p_one_sided"] == cell_p[2]
+    cell_p = sorted(row["p_two_sided"] for row in report["h2_by_cell"])
+    assert _row(report, "H2")["p_two_sided"] == cell_p[2]
 
 
-def test_h3_p_is_small_when_the_ratio_clears_one_half_and_large_otherwise():
+def test_h3_p_is_two_sided_around_one_half():
     config = AnalysisConfig(hyp_B=40)
     truth_sets = {cell: frozenset({"t"}) for cell in config.h3_cells}
 
@@ -99,14 +99,17 @@ def test_h3_p_is_small_when_the_ratio_clears_one_half_and_large_otherwise():
     )
     high = run_hypotheses(frame(True), **common)
     low = run_hypotheses(frame(False), **common)
-    assert _row(high, "H3")["p_one_sided"] == pytest.approx(1.0 / config.hyp_B)
-    assert _row(low, "H3")["p_one_sided"] == pytest.approx(1.0)
-    assert _row(high, "H3")["p_one_sided"] < _row(low, "H3")["p_one_sided"]
+    assert _row(high, "H3")["p_two_sided"] == pytest.approx(1.0 / config.hyp_B)
+    assert _row(low, "H3")["p_two_sided"] == pytest.approx(1.0 / config.hyp_B)
+    assert _row(high, "H3")["estimate"] >= config.h3_threshold
+    assert _row(low, "H3")["estimate"] < config.h3_threshold
+    assert _row(high, "H3")["supported_by_rule"] is True
+    assert _row(low, "H3")["supported_by_rule"] is False
 
 
 def test_holm_receives_all_four_p_values():
     config, report = _report(_changes(False), hyp_b=20)
-    raw = {row["hypothesis"]: row["p_one_sided"] for row in report["hypotheses"]}
+    raw = {row["hypothesis"]: row["p_two_sided"] for row in report["hypotheses"]}
     assert set(raw) == {"H1", "H2", "H3", "H4"}
     adjusted = holm(raw, alpha=config.holm_alpha)
     for row in report["hypotheses"]:
@@ -166,3 +169,19 @@ def test_identical_rules_give_h2_zero_and_an_interval_covering_zero():
     assert h2["estimate"] == pytest.approx(0.0)
     assert h2["ci_low"] <= 0.0 <= h2["ci_high"]
     assert config.h2_min_cells == 3
+
+
+def test_h1_h2_and_h4_need_the_holm_rejection():
+    config, report = _report(_changes(False), hyp_b=20)
+    raw = {row["hypothesis"]: row["p_two_sided"] for row in report["hypotheses"]}
+    adjusted = holm(raw, alpha=config.holm_alpha)
+    h2_cells = sum(1 for row in report["h2_by_cell"] if row["supported"])
+    expected = {
+        "H1": _row(report, "H1")["ci_low"] is not None and _row(report, "H1")["ci_low"] > 0,
+        "H2": h2_cells >= config.h2_min_cells,
+        "H4": _row(report, "H4")["ci_low"] is not None and _row(report, "H4")["ci_low"] > 0,
+    }
+    for name, criterion in expected.items():
+        assert _row(report, name)["supported_by_rule"] is bool(criterion and adjusted[name]["reject"])
+    h3 = _row(report, "H3")
+    assert h3["supported_by_rule"] is (h3["estimate"] >= config.h3_threshold)

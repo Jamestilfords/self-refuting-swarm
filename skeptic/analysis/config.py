@@ -194,27 +194,30 @@ def definitions_markdown(config: AnalysisConfig = DEFAULT) -> str:
     lines.append(
         "**H1.** Mean of (validation gain − test gain) over every change the ratchet "
         "accepted in every ordering, pooling both CLINC150 cells. Supported when the "
-        "95% bootstrap interval lies above 0. One-sided p = max(mean(stat* ≤ 0), 1/B)."
+        "95% bootstrap interval lies above 0 and the Holm-adjusted two-sided p-value "
+        "is at most 0.05. Two-sided p = max(2·min(P*(stat ≤ 0), P*(stat ≥ 0)), 1/B)."
     )
     lines.append("")
     lines.append(
         "**H2.** In each cell, the mean over orderings of FDP(ratchet) − FDP(critic), "
         "using only orderings where both proportions are defined. An ordering where either "
         "rule accepted nothing is excluded and counted. Supported when the 95% interval "
-        "lies above 0 in at least 3 of the 4 cells. The single p-value is the "
-        "third-smallest of the four per-cell p-values."
+        "lies above 0 in at least 3 of the 4 cells and the Holm-adjusted p-value is at "
+        "most 0.05. The single p-value is the third-smallest of the four per-cell "
+        "two-sided p-values."
     )
     lines.append("")
     lines.append(
         "**H3.** Mean recall of the critic divided by mean recall of the ratchet, over "
         "the cell-ordering pairs in both Banking77 cells. Supported when the point "
-        "estimate is at least 0.5. The interval is reported either way. "
-        "One-sided p = max(mean(ratio* ≤ 0.5), 1/B)."
+        "estimate is at least 0.5. The interval and the Holm-adjusted p-value are "
+        "reported either way. Two-sided p = max(2·min(P*(ratio ≤ 0.5), P*(ratio ≥ 0.5)), 1/B)."
     )
     lines.append("")
     lines.append(
         "**H4.** Mean ratchet FDP on the CLINC150 cells minus mean ratchet FDP on the "
-        "Banking77 cells. Supported when the 95% interval lies above 0."
+        "Banking77 cells. Supported when the 95% interval lies above 0 and the "
+        "Holm-adjusted two-sided p-value is at most 0.05."
     )
     lines.append("")
     lines.append(

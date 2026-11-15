@@ -355,12 +355,12 @@ def write_all(
             _truth_rows(truth, len(orderings)),
         ),
         "hypotheses.csv": (
-            ["hypothesis", "estimate", "ci_low", "ci_high", "p_one_sided", "p_holm", "reject",
+            ["hypothesis", "estimate", "ci_low", "ci_high", "p_two_sided", "p_holm", "reject",
              "supported_by_rule", "n_orderings", "n_excluded_orderings", "n_changes", "config_digest"],
             hyp["hypotheses"],
         ),
         "h2_by_cell.csv": (
-            ["cell", "estimate", "ci_low", "ci_high", "p_one_sided", "n_orderings",
+            ["cell", "estimate", "ci_low", "ci_high", "p_two_sided", "n_orderings",
              "n_excluded_orderings", "n_changes", "supported", "config_digest"],
             hyp["h2_by_cell"],
         ),

@@ -120,3 +120,37 @@ def test_comparator_tie_prefers_incumbent_then_name():
         CriticConfig(),
     )
     assert result.detail["comparator"] == "d_full_ce"
+
+
+def test_scorecard_mode_drops_both_arms_and_keeps_the_incumbent():
+    inc = _set("energy_ce", [0, 1, 2], [0, 1, 2])
+    twin = _set("d_port_ce", [0, 0, 0], [1, 1, 1])
+    same = _set("d_port_edl", [0, 0, 0], [1, 1, 1], arm="edl")
+    other = _set("msp_ce", [3, 2, 1], [0, 0, 0])
+    cand = _set("d_port_edl", [0, 0, 0], [1, 1, 1], arm="edl")
+    names = ("d_port_ce", "d_port_edl", "msp_ce")
+    baselines = _baselines(
+        {"energy_ce": inc, "d_port_ce": twin, "d_port_edl": same, "msp_ce": other},
+        names,
+    )
+    stream = gate_g2(cand, inc, baselines, CriticConfig(), g2_mode="stream")
+    scorecard = gate_g2(cand, inc, baselines, CriticConfig(), g2_mode="scorecard")
+    assert stream.outcome == "fail"
+    assert stream.detail["matched_by"] == "d_port_ce"
+    assert set(scorecard.detail["family_excluded"]) == {"d_port_ce", "d_port_edl"}
+    assert "d_port_ce" not in scorecard.detail["max_rho"]
+    assert scorecard.detail["matched_by"] is None
+    assert scorecard.detail["comparator"] == "energy_ce"
+    assert scorecard.outcome == "pass"
+
+
+def test_scorecard_mode_does_not_apply_the_weak_incumbent_check():
+    inc = _set("inc", [0, 1, 2], [0, 1, 2])
+    best = _set("energy_ce", [0, 0, 0], [1, 1, 1])
+    cand = _set("cand", [0, 0, 0.2], [0.1, 1, 1])
+    baselines = _baselines({"energy_ce": best}, ("energy_ce",))
+    result = gate_g2(cand, inc, baselines, CriticConfig(), g2_mode="scorecard")
+    assert result.detail["gain_inc"] > 0
+    assert result.detail["gain_base"] <= 0
+    assert result.outcome == "pass"
+    assert result.detail["comparator"] == "inc"

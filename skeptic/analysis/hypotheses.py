@@ -40,12 +40,14 @@ def percentile_interval(reps: np.ndarray, alpha: float = 0.05) -> tuple[float | 
 
 
 def bootstrap_p(reps: np.ndarray, threshold: float, replicates: int) -> float:
-    """One-sided p with the 1/B floor from the pre-registration."""
+    """Two-sided bootstrap p, floored at 1/B. The value can exceed 1, as in ER-1."""
     array = np.asarray(reps, dtype=np.float64)
     usable = array[~np.isnan(array)]
     if usable.size == 0:
         return 1.0
-    return float(max(float(np.mean(usable <= threshold)), 1.0 / replicates))
+    p_le = float(np.mean(usable <= threshold))
+    p_ge = float(np.mean(usable >= threshold))
+    return float(max(2.0 * min(p_le, p_ge), 1.0 / replicates))
 
 
 def _as_change_index(changes: pd.DataFrame):
@@ -235,6 +237,10 @@ def _supported_positive(low: float | None) -> bool:
     return low is not None and low > 0.0
 
 
+def _with_holm(criterion: bool, name: str, adjusted: dict) -> bool:
+    return bool(criterion and adjusted[name]["reject"])
+
+
 def run_hypotheses(
     changes: pd.DataFrame,
     *,
@@ -286,7 +292,7 @@ def run_hypotheses(
             "estimate": estimate,
             "ci_low": low,
             "ci_high": high,
-            "p_one_sided": p_value,
+            "p_two_sided": p_value,
             "n_orderings": len(evaluator.orderings),
             "n_excluded_orderings": int(observed["H2_cells"][cell]["n_excluded"]),
             "n_changes": n_changes,
@@ -317,15 +323,17 @@ def run_hypotheses(
     h2_excluded = sum(row["n_excluded_orderings"] for row in cell_rows)
     h3_defined = observed["H3"]
     rows = [
-        _row("H1", observed["H1"], h1_low, h1_high, h1_p, adjusted, _supported_positive(h1_low),
+        _row("H1", observed["H1"], h1_low, h1_high, h1_p, adjusted,
+             _with_holm(_supported_positive(h1_low), "H1", adjusted),
              len(evaluator.orderings), 0, int(len(h1_changes)), config),
         _row("H2", _h2_estimate(observed, config), h2_low, h2_high, h2_p, adjusted,
-             h2_cells_clear >= config.h2_min_cells,
+             _with_holm(h2_cells_clear >= config.h2_min_cells, "H2", adjusted),
              len(evaluator.orderings), h2_excluded, int(len(changes)), config),
         _row("H3", h3_defined, h3_low, h3_high, h3_p, adjusted,
              h3_defined is not None and h3_defined >= config.h3_threshold,
              len(evaluator.orderings), 0, int(len(changes)), config),
-        _row("H4", observed["H4"], h4_low, h4_high, h4_p, adjusted, _supported_positive(h4_low),
+        _row("H4", observed["H4"], h4_low, h4_high, h4_p, adjusted,
+             _with_holm(_supported_positive(h4_low), "H4", adjusted),
              len(evaluator.orderings), 0, int(len(h4_changes)), config),
     ]
     return {"hypotheses": rows, "h2_by_cell": cell_rows}
@@ -346,7 +354,7 @@ def _row(name, estimate, low, high, p_value, adjusted, supported, n_orderings, n
         "estimate": estimate,
         "ci_low": low,
         "ci_high": high,
-        "p_one_sided": p_value,
+        "p_two_sided": p_value,
         "p_holm": adjusted[name]["p_holm"],
         "reject": adjusted[name]["reject"],
         "supported_by_rule": supported,

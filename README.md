@@ -125,12 +125,12 @@ Activation-Monitoring repository has been added by this scaffold.
 
 `paired_bootstrap_fast` is an equivalence-tested vectorisation of ER-1's `paired_bootstrap` at commit `e877e9159d`. It draws the same resample indices and returns the same tie-aware weighted AUROC. Truth intervals use B = 5,000. The first truth pair in a process is checked against ER-1 at B = 20.
 
-Defaults still to be confirmed in the preregistration:
+The filled draft records these choices. They freeze only when that file is registered:
 
 - **D1.** Recall's numerator is the accepted proposals that sit in S_cell, the set of real improvements over CE energy. The numerator and the denominator use that same set, so recall cannot exceed 1.
 - **D2.** Intervals use `paired_bootstrap_fast`, bit-identical to ER-1, with B = 5,000.
 - **D3.** The two-level bootstrap reweights accepted changes. It does not replay the rules.
-- **D4.** H2's p-value is the third-smallest per-cell p-value. H3's p-value is the bootstrap probability that the recall ratio is at most 0.5.
+- **D4.** All four hypothesis p-values are two-sided: `p = max(2·min(P*(stat ≤ c), P*(stat ≥ c)), 1/B)`, with c = 0 for H1, H2 and H4 and c = 0.5 for H3. H2's p-value is the third-smallest per-cell p-value. H1, H2 and H4 are supported only when their interval rule holds and the Holm-adjusted p-value is at most 0.05. H3 is supported when the point estimate is at least 0.5.
 - **D5.** Final-pick ECE uses the proposal's in-scope test probabilities when those were stored, otherwise the plain-model ECE of its arm. The best single density is chosen by validation AUROC.
 - **D6.** Strict truth skips a cell whose scores are missing and does not call that a reversal. A reversal is a combined 95% interval lying entirely below 0.
 - **D7.** Truth is the gain over the incumbent at acceptance, even when the critic compared the proposal with a baseline rather than that incumbent.
@@ -140,8 +140,10 @@ A finite test set misses some real gains. In the low-power synthetic check (`del
 
 ## Research state
 
-`PREREGISTRATION.md` is a draft template, not a frozen registration. @mid9t must
-confirm the proposed defaults and record the preregistration commit before a
-main run. Keep sealed test arrays and scores outside git, the public ledger,
-shared memory, and agent inputs. E4 must implement and verify the guard and
+`PREREGISTRATION.md` is a filled draft, not a frozen registration. @mid9t must
+resolve the remaining `[FILL]` items and commit it before a main run, then
+record that commit hash here. The critic's `g2_mode="scorecard"` is the
+scorecard rule in §4.6; the proposal stream stays on `g2_mode="stream"`.
+Keep sealed test arrays and scores outside git, the public ledger, shared
+memory, and agent inputs. E4 must implement and verify the guard and
 decision-hash checks before any unblinding workflow is enabled.

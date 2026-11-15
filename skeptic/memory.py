@@ -43,7 +43,7 @@ class LocalMemory:
         if kind not in KINDS or author not in AGENTS:
             raise ValueError(f"kind must be in {KINDS} and author in {AGENTS}")
         blob = json.dumps(content, sort_keys=True)
-        if any(w in blob for w in _SEALED_WORDS):
+        if any(w in blob.lower() for w in _SEALED_WORDS):
             raise ValueError("memory entries must not mention sealed test data")
         entry = {"id": f"m_{len(self._entries) + 1:04d}", "kind": kind, "author": author,
                  "time": round(time.time(), 1), "content": content}
@@ -97,7 +97,7 @@ class PastDevMemory(LocalMemory):
     BASE = "https://api.past.dev/api/v1"
 
     def __init__(self, path="runs/memory.jsonl", api_key: str | None = None, audience: str | None = None,
-                 timeout: float = 20.0):
+                 timeout: float = 20.0, namespace: str = ""):
         """No audience by default: past.dev then treats each entry as project-visible, readable by every
         identity, which is what a memory shared by all agents needs."""
         super().__init__(path)
@@ -105,6 +105,7 @@ class PastDevMemory(LocalMemory):
         if not self.key:
             raise ValueError("set PASTDEV_API_KEY in .env")
         self.audience, self.timeout = audience, timeout
+        self.namespace = namespace
         self.errors, self.ingested, self.recalls, self._warned = 0, 0, 0, False
 
     def _call(self, method: str, path: str, body: dict | None = None) -> dict:
@@ -121,8 +122,7 @@ class PastDevMemory(LocalMemory):
         except (urllib.error.URLError, TimeoutError, ValueError) as e:
             self.errors += 1
             if not self._warned:
-                detail = e.read().decode()[:300] if isinstance(e, urllib.error.HTTPError) else ""
-                print(f"[past.dev] {method} {path} failed: {type(e).__name__}: {e} {detail}")
+                print(f"[past.dev] {method} {path} failed: {type(e).__name__}; local memory retained")
                 self._warned = True
             return None
 
@@ -130,7 +130,9 @@ class PastDevMemory(LocalMemory):
         entry_id = super().write(kind, author, content)
         e = self.get(entry_id)
         stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(e["time"]))
-        body = {"id": entry_id, "content": f"[{entry_id}] {entry_text(e)}",
+        remote_id = f"{self.namespace}:{entry_id}" if self.namespace else entry_id
+        references = f"[{remote_id}] [{entry_id}]" if self.namespace else f"[{entry_id}]"
+        body = {"id": remote_id, "content": f"{references} {entry_text(e)}",
                 "label": f"{kind} written by the {author} agent", "timestamp": stamp}
         if self.audience:
             body["audience"] = self.audience
@@ -140,6 +142,7 @@ class PastDevMemory(LocalMemory):
 
     def recall(self, query: str, reader: str = "proposer", level: str = "medium") -> list[dict]:
         """Ranked evidence from past.dev. Each item: {"text", "ids"}; ids are the memory ids found in it."""
+        query = f"Within run {self.namespace}: {query}" if self.namespace else query
         out = self._safe("POST", "/recall", {"query": query, "identity": reader, "level": level})
         if not out:
             return []
@@ -148,15 +151,21 @@ class PastDevMemory(LocalMemory):
         for r in out.get("results", []):
             text = r.get("content") or ""
             blob = text + " " + json.dumps(r.get("sources", "")) + " " + json.dumps(r.get("artifact", ""))
+            if self.namespace and not any(f"{self.namespace}:{entry_id}" in blob for entry_id in known):
+                continue
+            if any(w in text.lower() for w in _SEALED_WORDS):
+                continue
             ids = sorted({w.strip("[](),.:\"'") for w in blob.replace('"', " ").split() if w.strip("[](),.:\"'") in known})
             items.append({"text": " ".join(text.split())[:400], "ids": ids})
         return items
 
 
-def get_memory(path="runs/memory.jsonl"):
+def get_memory(path="runs/memory.jsonl", *, backend="auto", namespace=""):
     """PastDevMemory when a key is set, otherwise LocalMemory."""
-    if os.environ.get("PASTDEV_API_KEY") or os.environ.get("PAST_API_KEY"):
-        return PastDevMemory(path)
+    if backend not in ("auto", "local", "pastdev"):
+        raise ValueError("Unknown memory backend")
+    if backend == "pastdev" or (backend == "auto" and (os.environ.get("PASTDEV_API_KEY") or os.environ.get("PAST_API_KEY"))):
+        return PastDevMemory(path, namespace=namespace)
     return LocalMemory(path)
 
 

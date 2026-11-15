@@ -75,7 +75,8 @@ def test_isolated_validation_scorer_writes_aligned_per_item_artifact(tmp_path, m
     assert again["rows"][0]["val"] == row["val"] and len(calls) == 10
 
 
-def test_cli_preserves_calibration_in_ledger(tmp_path, monkeypatch):
+@pytest.mark.parametrize("alternate", [False, True])
+def test_cli_preserves_calibration_in_ledger(tmp_path, monkeypatch, alternate):
     from contextlib import nullcontext
     from types import SimpleNamespace
     text = CANARIES[0]["text"]
@@ -98,14 +99,26 @@ def test_cli_preserves_calibration_in_ledger(tmp_path, monkeypatch):
                    "val_ece_plain": [.04] * 5} for s, arm in t["items"]]} for t in tasks]
     monkeypatch.setattr(score_stream, "_collect", collect)
     monkeypatch.setattr(score_stream, "calibrate_cell", SimpleNamespace(map=calibrate))
-    assert score_stream.main(["run", "--streams", "baseline"]) == 0
-    rows = [json.loads(line) for line in (tmp_path / "runs/ledger_isolated_partial.jsonl").read_text().splitlines()]
+    args = ["run", "--streams", "baseline"]
+    output = tmp_path / "runs/ledger_isolated_partial.jsonl"
+    if alternate:
+        monkeypatch.setattr(score_stream, "PROPOSALS", tmp_path / "unrelated-proposals")
+        output = tmp_path / "agent-run/validation-ledger.jsonl"
+        args += ["--proposals", str(proposals), "--ledger", str(output)]
+    assert score_stream.main(args) == 0
+    rows = [json.loads(line) for line in output.read_text().splitlines()]
     assert len(rows) == 4
     assert all(r["val"]["ece"] == [.03] * 5 and r["sealed"] == "not_run" for r in rows)
     assert not (tmp_path / "runs/ledger.jsonl").exists()
     monkeypatch.setattr(score_stream, "calibrate_cell", SimpleNamespace(map=lambda tasks: []))
     with pytest.raises(RuntimeError, match="incomplete"):
-        score_stream.main(["run", "--streams", "baseline"])
+        score_stream.main(args)
+
+
+def test_alternate_proposals_require_explicit_ledger(tmp_path):
+    with pytest.raises(SystemExit) as exc:
+        score_stream.main(["plan", "--proposals", str(tmp_path)])
+    assert exc.value.code == 2
 
 
 def test_legacy_seal_flag_is_unavailable():

@@ -218,7 +218,10 @@ and complete scoring/unblinding integration remain separate work.
 Run `make help` for the full command list from slide 22 and the associated work
 packages. `setup`, `setup-check`, `bootstrap`, `test`, `train40`, `sanity`,
 `e3-plan`, `e3-canaries`, `seal-hash`, `seal-check`, `exp1-plan`, and `exp1` are
-implemented. `smoke`, `stream`, `exp2`, `unblind`,
+implemented. The bounded `stream` agent workflow and `agents-bootstrap`,
+`agents-plan`, `agents-check`, and `agents-test` are also available; see
+[the Exa/past.dev agent guide](docs/agents.md) for private `.env` setup, run limits,
+Modal isolation, output files and resume behavior. `smoke`, `exp2`, `unblind`,
 `report`, `reproduce`, and `testbed-b` remain reserved targets. Setup runs small
 CPU storage checks; it does not start training or read dataset/test scores.
 

@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 
 UV ?= uv
-PIPELINE_TARGETS := smoke stream exp2 unblind report reproduce testbed-b
+PIPELINE_TARGETS := smoke exp2 unblind report reproduce testbed-b
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan agents-bootstrap agents-plan agents-check agents-test stream $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
@@ -18,7 +18,11 @@ help:
 	  'e3-plan    Preview four canary static checks locally (E3)' \
 	  'e3-canaries Run the four canaries on one CE validation cell (E3 CPU only)' \
 	  'smoke      Full canary verdicts and sealed guard (R1, L2, E3, E4; pending)' \
-	  'stream     Templated and LLM proposal streams (L3, L5)' \
+	  'agents-bootstrap Install locked agent SDK dependencies and pinned ER-1' \
+	  'agents-plan Preview the Scout/Proposer workflow without API calls' \
+	  'agents-check Check local agent configuration (does not authenticate)' \
+	  'agents-test Run offline tests for the agent workflow' \
+	  'stream     Run bounded Exa/Proposer workflow in Modal CPU sandboxes (L5)' \
 	  'exp1       Replay registered settings supplied via REPLAY_ARGS (E5)' \
 	  'exp1-plan  Validate replay configuration without writing decisions' \
 	  'exp2       Closed loop with three arms (L6)' \
@@ -41,6 +45,22 @@ setup-check:
 
 test:
 	$(UV) run --frozen python -m pytest tests -q
+
+agents-bootstrap:
+	$(UV) sync --frozen --group agents
+	git submodule update --init third_party/er1
+
+agents-plan:
+	$(UV) run --frozen --group agents python -m skeptic.agents plan $(AGENT_ARGS)
+
+agents-check:
+	$(UV) run --frozen --group agents python -m skeptic.agents check $(AGENT_ARGS)
+
+agents-test:
+	$(UV) run --frozen --group agents python -m pytest tests/test_agents.py tests/test_agent_runtime.py -q
+
+stream:
+	$(UV) run --frozen --group agents python -m skeptic.agents run $(AGENT_ARGS)
 
 train40:
 	$(UV) run --frozen python -m modal_jobs.train40 run --all

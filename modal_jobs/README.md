@@ -76,6 +76,13 @@ Import `app`, `open_volume`, `sealed_volume`, and `secrets_by_name` from
 `train40`, `seal`, `sandbox`, `cache_llama`, and `score_guard` before deploying
 the shared app. The app has no default volumes or secrets.
 
+E2's `train40.py` defines `TRAIN40_MODAL_OPTIONS` for one B300 GPU, eight CPU
+cores, and 32 GiB of RAM per fine-tune, with at most four containers running
+at once and a two-hour timeout per run. Apply that preset when implementing
+the training function. B300 needs a CUDA 13.1+ image and a compatible PyTorch
+build; verify one seeded run before scheduling all 40. The E1 setup image and
+volume-check functions do not use this training preset.
+
 - Trusted training jobs may mount both volumes. They write full caches to
   `/sealed` and copy only `train`, `val`, and `oos_val` arrays to `/open`.
 - Experiment/proposal execution mounts only `/open`, preferably using

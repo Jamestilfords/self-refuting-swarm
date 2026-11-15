@@ -1,20 +1,20 @@
 .DEFAULT_GOAL := help
 
 UV ?= uv
-PIPELINE_TARGETS := sanity smoke stream exp1 exp2 seal-hash unblind report reproduce testbed-b
+PIPELINE_TARGETS := smoke stream exp1 exp2 seal-hash unblind report reproduce testbed-b
 
-.PHONY: help bootstrap setup setup-check test train40 $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
-	  'Skeptic: E1 setup and E2 training are implemented; later targets are pending.' \
+	  'Skeptic: E1 setup and E2 training/sanity are implemented; later targets are pending.' \
 	  '' \
 	  'bootstrap  Install locked Python dependencies and initialize pinned ER-1' \
 	  'setup      Provision Modal app and two volumes; validate named secrets and mounts (E1)' \
 	  'setup-check Verify an existing deployment without creating resources' \
 	  'test       Run local project tests (no Modal credentials needed)' \
 	  'train40    Launch forty E2 fine-tunes on Modal B300s' \
-	  'sanity     Baseline AUROC against the paper (E2)' \
+	  'sanity     Audit 40 open caches and report validation AUROC (E2)' \
 	  'smoke      Four canaries, end to end (R1, L2, E3, E4)' \
 	  'stream     Templated and LLM proposal streams (L3, L5)' \
 	  'exp1       Three acceptance rules across matched orderings (E5)' \
@@ -40,6 +40,9 @@ test:
 
 train40:
 	$(UV) run --frozen python -m modal_jobs.train40 run --all
+
+sanity:
+	$(UV) run --frozen python -m modal_jobs.sanity
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

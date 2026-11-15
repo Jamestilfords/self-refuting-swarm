@@ -216,14 +216,15 @@ presence does not mean those contracts have been implemented or validated.
 ## Commands
 
 Run `make help` for the full command list from slide 22 and the associated work
-packages. `setup`, `setup-check`, `bootstrap`, `test`, and `train40` are
-implemented. `sanity`, `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
+packages. `setup`, `setup-check`, `bootstrap`, `test`, `train40`, and `sanity` are
+implemented. `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
 `report`, `reproduce`, and `testbed-b` remain reserved targets. Setup runs small
 CPU storage checks; it does not start training or read dataset/test scores.
 
 To preview the E2 matrix, run `uv run --frozen python -m modal_jobs.train40 plan`.
-See [the training guide](modal_jobs/README.md#e2-training) before launching a
-single run or all 40 B300 jobs.
+After all 40 runs finish, run `make sanity` with the Modal profile for the
+workspace containing their caches. It audits the open volume and reports
+validation AUROC without reading test data. See [the training guide](modal_jobs/README.md#e2-training).
 
 ## ER-1 dependency and credit
 

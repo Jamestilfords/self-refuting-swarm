@@ -106,6 +106,14 @@ needs neither.
 
 The E1 setup image and volume-check functions do not use the training preset.
 
+After all 40 runs finish, select the Modal profile for their workspace and run
+`make sanity`. It starts one CPU function with read-only access to the open
+volume. The function requires all 40 cache manifests, checks that no test
+arrays or validation labels were exported, and reports validation AUROC for
+MSP, energy, and vacuity by run plus the mean primary score for each group of
+five seeds. This check does not read the sealed volume or produce test AUROC;
+paper test comparisons wait for the later unblinding workflow.
+
 - Trusted training jobs may mount both volumes. They write full caches to
   `/sealed` and copy only `train`, `val`, and `oos_val` arrays to `/open`.
 - Experiment/proposal execution mounts only `/open`, preferably using

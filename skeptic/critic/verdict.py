@@ -27,7 +27,10 @@ def verdict(
     skip: frozenset[str] = frozenset(),
     exclude_baselines: frozenset[str] = frozenset(),
     cache: StatsCache | None = None,
+    g2_mode: str = "stream",
 ) -> Decision:
+    if g2_mode not in {"stream", "scorecard"}:
+        raise ValueError(f"g2_mode must be 'stream' or 'scorecard', got {g2_mode!r}")
     if cell != baselines.cell:
         raise ValueError(f"cell {cell!r} does not match baselines.cell {baselines.cell!r}")
     unknown = set(skip) - _SKIPPABLE
@@ -36,7 +39,7 @@ def verdict(
     if candidate.status == "guard":
         return _decision(
             candidate, cell, incumbent.name, None, None, None, None, None, None,
-            {"lock": "fail"}, Verdict.BUG, None, {"lock": {"status": "guard"}}, config,
+            {"lock": "fail"}, Verdict.BUG, None, {"lock": {"status": "guard"}, "g2_mode": g2_mode}, config,
         )
     if candidate.status in {"malformed", "timeout"}:
         raise ValueError(f"candidate status {candidate.status!r} is not a verdict")
@@ -47,7 +50,7 @@ def verdict(
     _same_shape(candidate, incumbent)
 
     gates: dict[str, str] = {}
-    detail: dict = {}
+    detail: dict = {"g2_mode": g2_mode}
 
     if "G1" in skip:
         gates["G1"] = "skipped"
@@ -65,7 +68,7 @@ def verdict(
         gates["G2"] = "skipped"
         comparator = incumbent
     else:
-        g2 = gate_g2(candidate, incumbent, baselines, config, exclude_baselines)
+        g2 = gate_g2(candidate, incumbent, baselines, config, exclude_baselines, g2_mode)
         gates["G2"] = g2.outcome
         detail["G2"] = g2.detail
         comparator = _lookup_comparator(g2.detail["comparator"], incumbent, baselines)

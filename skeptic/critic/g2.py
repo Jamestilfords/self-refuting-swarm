@@ -53,19 +53,42 @@ def _comparator_key(item: tuple[str, ScoreSet]):
     return (-score.mean_auroc(), 0 if kind == "incumbent" else 1, score.name)
 
 
+_ARMS = ("ce", "edl")
+
+
+def score_family(name: str) -> str | None:
+    """Stem of a registered score, so ``d_port_edl`` and ``d_port_ce`` share ``d_port``."""
+    for arm in _ARMS:
+        suffix = f"_{arm}"
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return None
+
+
+def family_members(name: str) -> frozenset[str]:
+    family = score_family(name)
+    if family is None:
+        return frozenset()
+    return frozenset(f"{family}_{arm}" for arm in _ARMS)
+
+
 def gate_g2(
     candidate: ScoreSet,
     incumbent: ScoreSet,
     baselines: BaselineSet,
     config: CriticConfig,
     exclude_baselines: frozenset[str] = frozenset(),
+    g2_mode: str = "stream",
 ) -> GateResult:
     if config.seed_majority != "ceil_half":
         raise ValueError(f"unknown seed_majority rule: {config.seed_majority}")
+    if g2_mode not in {"stream", "scorecard"}:
+        raise ValueError(f"g2_mode must be 'stream' or 'scorecard', got {g2_mode!r}")
+    family_excluded = family_members(candidate.name) if g2_mode == "scorecard" else frozenset()
     names = [
         name
         for name in baselines.g2_names
-        if name not in exclude_baselines and name != candidate.name
+        if name not in exclude_baselines and name != candidate.name and name not in family_excluded
     ]
     max_rho: dict[str, list[float | None]] = {}
     for name in names:
@@ -88,17 +111,23 @@ def gate_g2(
         gain_base = None
 
     weak_fail = bool(
-        config.g2_weak_incumbent_check
+        g2_mode == "stream"
+        and config.g2_weak_incumbent_check
         and gain_base is not None
         and gain_inc > 0.0
         and gain_base <= 0.0
     )
-    pool = [("incumbent", incumbent)] + [("baseline", baselines.scores[name]) for name in names]
-    comparator = min(pool, key=_comparator_key)[1]
+    if g2_mode == "scorecard":
+        comparator = incumbent
+    else:
+        pool = [("incumbent", incumbent)] + [("baseline", baselines.scores[name]) for name in names]
+        comparator = min(pool, key=_comparator_key)[1]
     return GateResult(
         "G2",
         "fail" if matched_by is not None or weak_fail else "pass",
         {
+            "mode": g2_mode,
+            "family_excluded": sorted(family_excluded),
             "max_rho": max_rho,
             "matched_by": matched_by,
             "gain_inc": gain_inc,

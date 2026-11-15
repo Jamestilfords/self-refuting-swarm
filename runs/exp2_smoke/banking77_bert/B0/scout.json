@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "skipped": [
+    "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+    "https://github.com/kimjeyoung/Mahalanobis-BERT",
+    "https://github.com/pradhyumnaag30/CLINC150"
+  ],
+  "usage": {
+    "input_tokens": 2348,
+    "output_tokens": 280,
+    "searches": 1
+  }
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "accepted": 2,
+    "arm": "A",
+    "cell": "banking77_oos/bert",
+    "final_val_auroc": 0.90773,
+    "judged": 3,
+    "not_scored": 0,
+    "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2_smoke/banking77_bert/A0",
+    "slots": 3,
+    "verdicts": {
+      "DISCARDED": 1,
+      "KEPT": 2
+    },
+    "wasted": 0,
+    "wasted_change": 0.0,
+    "wasted_first_half": 0.0,
+    "wasted_second_half": 0.0
+  },
+  {
+    "accepted": 0,
+    "arm": "B",
+    "cell": "banking77_oos/bert",
+    "final_val_auroc": null,
+    "judged": 3,
+    "not_scored": 0,
+    "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2_smoke/banking77_bert/B0",
+    "slots": 3,
+    "verdicts": {
+      "NO EFFECT": 1,
+      "SCORE-MATCHED": 2
+    },
+    "wasted": 0,
+    "wasted_change": 0.0,
+    "wasted_first_half": 0.0,
+    "wasted_second_half": 0.0
+  },
+  {
+    "accepted": 0,
+    "arm": "C",
+    "cell": "banking77_oos/bert",
+    "final_val_auroc": null,
+    "judged": 3,
+    "not_scored": 0,
+    "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2_smoke/banking77_bert/C0",
+    "slots": 3,
+    "verdicts": {
+      "SCORE-MATCHED": 3
+    },
+    "wasted": 1,
+    "wasted_change": -0.5,
+    "wasted_first_half": 0.5,
+    "wasted_second_half": 0.0
+  }
+]

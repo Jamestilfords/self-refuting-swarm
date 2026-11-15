@@ -1,0 +1,12 @@
+{
+  "arm": "A",
+  "cell": "banking77_oos/bert",
+  "incumbent": "f3ada5eb5085",
+  "lord": {
+    "alpha": 0.1,
+    "rejections": [],
+    "t": 0,
+    "w0": 0.05
+  },
+  "slots": 3
+}

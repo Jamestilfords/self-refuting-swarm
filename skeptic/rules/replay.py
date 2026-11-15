@@ -9,7 +9,7 @@ from pathlib import Path
 import math
 import numpy as np
 
-from skeptic.rules.common import CELLS, load_ledger, matched_orderings
+from skeptic.rules.common import CELLS, IGNORE_PARENTS, load_ledger, matched_orderings
 from skeptic.rules.critic_bridge import ensure_er1_path, critic_factory
 from skeptic.rules.engine import replay_cell, combine_cells, write_decision_logs
 from skeptic.score_artifacts import load_scores, auroc
@@ -48,7 +48,8 @@ def read_config(path, rows):
     def invalid(value):
         raise ValueError(f"Non-finite configuration value: {value}")
     config = json.loads(Path(path).read_text(), parse_constant=invalid)
-    required = {"orderings", "ordering_seed", "initial", "r1_threshold", "r1_split_seed", "r1_noise", "critic"}
+    required = {"orderings", "ordering_seed", "initial", "r1_threshold", "r1_split_seed",
+                "r1_noise", "critic", "ignore_parents"}
     if not isinstance(config, dict) or set(config) != required:
         raise ValueError("Replay configuration must explicitly supply every required field")
     for name in ("orderings", "ordering_seed", "r1_split_seed"):
@@ -56,6 +57,8 @@ def read_config(path, rows):
             raise ValueError(f"Invalid {name}")
     if type(config["r1_threshold"]) not in (int, float) or not math.isfinite(config["r1_threshold"]) or config["r1_threshold"] < 0:
         raise ValueError("R1 needs a finite nonnegative threshold")
+    if config["ignore_parents"] != sorted(IGNORE_PARENTS):
+        raise ValueError("ignore_parents must be the three registered coupling shas")
     for name in ("initial", "r1_noise"):
         if not isinstance(config[name], dict) or set(config[name]) != set(CELLS):
             raise ValueError(f"{name} must cover all four cells")
@@ -111,6 +114,9 @@ def main(argv=None):
         print(json.dumps(summary, sort_keys=True))
         return 0
     _check_registration(args.output)
+    manifest = args.output / "runs" / "score_manifest.sha256"
+    if not manifest.is_file() or manifest.is_symlink() or not manifest.stat().st_size:
+        raise ValueError("Replay requires runs/score_manifest.sha256 before the first decision file")
     ensure_er1_path()
     from skeptic.critic_inputs import load_cell
     folder = "scores_isolated" if args.source == "isolated" else "scores"

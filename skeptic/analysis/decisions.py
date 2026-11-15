@@ -16,6 +16,7 @@ from pathlib import Path
 import pandas as pd
 
 from skeptic.analysis.config import DEFAULT, AnalysisConfig
+from skeptic.rules.common import REGISTERED_SCORE_SHAS
 
 _ORD = re.compile(r"ord_(\d+)$")
 _REFERENCE = "energy_ce"
@@ -35,7 +36,7 @@ def canary_mask(frame: pd.DataFrame) -> pd.Series:
 
 
 def eligible_shas(ledger: pd.DataFrame, cell: str | None = None) -> list[str]:
-    """Status-ok, non-canary proposal shas, in ledger order."""
+    """Registered candidates: status-ok, not a canary, and not a registered score."""
     frame = ledger
     if cell is not None and "cell" in frame.columns:
         frame = frame.loc[frame["cell"].astype(str) == str(cell)]
@@ -44,6 +45,9 @@ def eligible_shas(ledger: pd.DataFrame, cell: str | None = None) -> list[str]:
     if frame.empty:
         return []
     frame = frame.loc[~canary_mask(frame)]
+    if "stream" in frame.columns:
+        frame = frame.loc[frame["stream"].astype(str).str.lower() != "baseline"]
+    frame = frame.loc[~frame["sha"].astype(str).isin(REGISTERED_SCORE_SHAS)]
     seen: set[str] = set()
     ordered: list[str] = []
     for sha in frame["sha"].astype(str):
@@ -202,7 +206,7 @@ def _validate(frame: pd.DataFrame, ledger: pd.DataFrame | None, reference: str) 
             if len(idx) != expected:
                 raise ValueError(
                     f"{rule} {cell} ordering {int(ordering)} has {len(idx)} proposals; "
-                    f"the ledger has {expected} status-ok non-canary proposals"
+                    f"the ledger has {expected} registered candidates"
                 )
         sequences.setdefault((str(cell), int(ordering)), {})[str(rule)] = tuple(ordered["sha"].astype(str))
         _check_chain(ordered, reference)

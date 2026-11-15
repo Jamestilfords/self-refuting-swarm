@@ -35,6 +35,7 @@ def experiment(tmp_path):
     config = {"orderings": 2, "ordering_seed": 8, "initial": {c: names["energy_ce"] for c in CELLS},
               "r1_threshold": .01, "r1_split_seed": 7,
               "r1_noise": {c: [[[0., 0.], [0., 0.]]] * 2 for c in CELLS},
+              "ignore_parents": ["03e0017097f5", "2d5e3b3523bd", "cddf9272a0a9"],
               "critic": asdict(CriticConfig(bootstrap_B=40))}
     (tmp_path / "config.json").write_text(json.dumps(config))
     (tmp_path / "ledger.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
@@ -53,6 +54,9 @@ def test_plan_run_and_freeze_are_separate(experiment, capsys):
     with pytest.raises(GuardError, match="Preregistration"):
         main(["run", *args])
     (root / "PREREGISTRATION.md").write_text("Status: FROZEN\nSynthetic test fixture only.\n")
+    manifest = root / "runs" / "score_manifest.sha256"
+    manifest.parent.mkdir()
+    manifest.write_text("pending  scores/placeholder.npz\n")
     assert main(["run", *args]) == 0
     paths = list((root / "runs/decisions").glob("R*/ord_*.jsonl"))
     assert len(paths) == 6
@@ -84,10 +88,13 @@ def test_configuration_and_score_mismatch_fail_before_writing(experiment):
     config["critic"]["fdr_alpha"] = .1
     config_path.write_text(json.dumps(config))
     (root / "PREREGISTRATION.md").write_text("Status: FROZEN\n")
+    manifest = root / "runs" / "score_manifest.sha256"
+    manifest.parent.mkdir()
+    manifest.write_text("pending  scores/placeholder.npz\n")
     ledger = root / "ledger.jsonl"
     rows = [json.loads(line) for line in ledger.read_text().splitlines()]
     rows[0]["val"]["auroc"] = [0.] * 5
     ledger.write_text("".join(json.dumps(r) + "\n" for r in rows))
     with pytest.raises(ValueError, match="AUROC and score artifact differ"):
         main(["run", *args])
-    assert not (root / "runs").exists()
+    assert not (root / "runs" / "decisions").exists()

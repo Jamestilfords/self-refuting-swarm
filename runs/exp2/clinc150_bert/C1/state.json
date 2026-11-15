@@ -1,0 +1,12 @@
+{
+  "arm": "C",
+  "cell": "clinc150/bert",
+  "incumbent": "energy_ce",
+  "lord": {
+    "alpha": 0.1,
+    "rejections": [],
+    "t": 64,
+    "w0": 0.05
+  },
+  "slots": 80
+}

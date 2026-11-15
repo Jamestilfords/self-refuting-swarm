@@ -1,0 +1,1149 @@
+{
+  "model": "gpt-5.6-terra",
+  "proposals": [
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 0,
+      "memory_id": "m_0002",
+      "memory_used": [
+        "m_0001"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "24505c1c5857",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 1,
+      "memory_id": "m_0004",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "5e8b4fda40df",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 2,
+      "memory_id": "m_0006",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "a494ab3159ee",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 3,
+      "memory_id": "m_0008",
+      "memory_used": [
+        "m_0001"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "537327a5e1c3",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 4,
+      "memory_id": "m_0010",
+      "memory_used": [
+        "m_0001"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "f6b8a3570407",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 5,
+      "memory_id": "m_0012",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "6f967e0dfec4",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 6,
+      "memory_id": "m_0014",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "f0a632a687b9",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 7,
+      "memory_id": "m_0016",
+      "memory_used": [
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8d5d325f234b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 8,
+      "memory_id": "m_0018",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "545a0bda304f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 9,
+      "memory_id": "m_0020",
+      "memory_used": [
+        "m_0016"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5c98721d465d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 10,
+      "memory_id": "m_0025",
+      "memory_used": [
+        "m_0010"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "917059e7a15e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 11,
+      "memory_id": "m_0027",
+      "memory_used": [
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "32b5b05155e6",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 13,
+      "memory_id": "m_0029",
+      "memory_used": [
+        "m_0027"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "fabd397db369",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 14,
+      "memory_id": "m_0031",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "ae6eb934d9e7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 15,
+      "memory_id": "m_0033",
+      "memory_used": [
+        "m_0027"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "feae0ffdf42a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 16,
+      "memory_id": "m_0035",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "cb86f5a70928",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 17,
+      "memory_id": "m_0037",
+      "memory_used": [
+        "m_0012"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5ade359f8aea",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 18,
+      "memory_id": "m_0039",
+      "memory_used": [
+        "m_0031"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7be3d4b71eda",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 19,
+      "memory_id": "m_0041",
+      "memory_used": [
+        "m_0016"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "10f815d66273",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 20,
+      "memory_id": "m_0046",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "abb8582c4abc",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 21,
+      "memory_id": "m_0048",
+      "memory_used": [
+        "m_0041"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ed03735d22c8",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 22,
+      "memory_id": "m_0050",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "fbb877fc2ec8",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 23,
+      "memory_id": "m_0052",
+      "memory_used": [
+        "m_0033"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "fe6c528a05f8",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 25,
+      "memory_id": "m_0054",
+      "memory_used": [
+        "m_0044",
+        "m_0045"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1744c75e2868",
+      "source": "https://arxiv.org/pdf/2203.10807",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 26,
+      "memory_id": "m_0056",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "33ae67579355",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 27,
+      "memory_id": "m_0059",
+      "memory_used": [
+        "m_0044",
+        "m_0045",
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "363ba52865a0",
+      "source": "https://doi.org/10.48550/arxiv.2203.10807",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 29,
+      "memory_id": "m_0061",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c70959eabacf",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 30,
+      "memory_id": "m_0066",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "41f9b36af109",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 31,
+      "memory_id": "m_0068",
+      "memory_used": [
+        "m_0058",
+        "m_0061"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "970e40209be3",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 32,
+      "memory_id": "m_0070",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "f2f13aa3cf8e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 33,
+      "memory_id": "m_0072",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8c6885c54a0f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 34,
+      "memory_id": "m_0074",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a8d141cee60f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 35,
+      "memory_id": "m_0076",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "91eccbcbe746",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 37,
+      "memory_id": "m_0078",
+      "memory_used": [
+        "m_0063",
+        "m_0065"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c0a1e3e6a05d",
+      "source": "https://openaccess.thecvf.com/content/CVPR2022/html/Wang_ViM_Out-of-Distribution_With_Virtual-Logit_Matching_CVPR_2022_paper.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 38,
+      "memory_id": "m_0080",
+      "memory_used": [
+        "m_0058"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "458c5ce2514a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 39,
+      "memory_id": "m_0082",
+      "memory_used": [
+        "m_0064"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ba5f07bce907",
+      "source": "https://deel-ai.github.io/oodeel/latest/notebooks/torch/demo_vim_torch/",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 40,
+      "memory_id": "m_0087",
+      "memory_used": [
+        "m_0086"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "2bba6cfafd2c",
+      "source": "https://arxiv.org/html/2510.15202v2",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 41,
+      "memory_id": "m_0089",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "b43978ade1e1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 42,
+      "memory_id": "m_0091",
+      "memory_used": [
+        "m_0084"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b7ef7ca755ad",
+      "source": "https://arxiv.org/html/2505.18032",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 43,
+      "memory_id": "m_0093",
+      "memory_used": [
+        "m_0084"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "661d2034806f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 44,
+      "memory_id": "m_0095",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "064bc51d6719",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 45,
+      "memory_id": "m_0097",
+      "memory_used": [
+        "m_0072",
+        "m_0084",
+        "m_0093"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5aef6a64a552",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 46,
+      "memory_id": "m_0099",
+      "memory_used": [
+        "m_0074"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7167fea9d1a4",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 47,
+      "memory_id": "m_0101",
+      "memory_used": [
+        "m_0076",
+        "m_0080"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "09b5bc225f56",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 49,
+      "memory_id": "m_0103",
+      "memory_used": [
+        "m_0078"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "2eb16d67d8e7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 50,
+      "memory_id": "m_0107",
+      "memory_used": [
+        "m_0085"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "cd86d8b20279",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 52,
+      "memory_id": "m_0109",
+      "memory_used": [
+        "m_0086"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8c90a990acda",
+      "source": "https://arxiv.org/html/2510.15202v2",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 53,
+      "memory_id": "m_0111",
+      "memory_used": [
+        "m_0089"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b85547f0dfda",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 55,
+      "memory_id": "m_0113",
+      "memory_used": [
+        "m_0093"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d06aafcfc9f5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 56,
+      "memory_id": "m_0115",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "600c77209eff",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 57,
+      "memory_id": "m_0118",
+      "memory_used": [
+        "m_0097",
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "27eb847cde2b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 58,
+      "memory_id": "m_0120",
+      "memory_used": [
+        "m_0099",
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "af9c94323668",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 59,
+      "memory_id": "m_0122",
+      "memory_used": [
+        "m_0101",
+        "m_0103",
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "2cfaf0a344c7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 61,
+      "memory_id": "m_0127",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "3f1af75af06f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 62,
+      "memory_id": "m_0129",
+      "memory_used": [
+        "m_0107"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "57bdf4b1950a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 63,
+      "memory_id": "m_0131",
+      "memory_used": [
+        "m_0117",
+        "m_0122"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "f226fc27cbfc",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 64,
+      "memory_id": "m_0133",
+      "memory_used": [
+        "m_0117",
+        "m_0125"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d087fe9da811",
+      "source": "https://github.com/mueller-mp/maha-norm",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 65,
+      "memory_id": "m_0135",
+      "memory_used": [
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8466e4c3744e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 67,
+      "memory_id": "m_0137",
+      "memory_used": [
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9622f3d57fc1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 68,
+      "memory_id": "m_0139",
+      "memory_used": [
+        "m_0117"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9ef2e91d7e8a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 69,
+      "memory_id": "m_0141",
+      "memory_used": [
+        "m_0118",
+        "m_0119",
+        "m_0137",
+        "m_0138"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "de74b6dd16d7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "density",
+      "idx": 70,
+      "memory_id": "m_0143",
+      "memory_used": [
+        "m_0120"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c9416c3ca213",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 71,
+      "memory_id": "m_0145",
+      "memory_used": [
+        "m_0122"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a1155d782072",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "other",
+      "idx": 73,
+      "memory_id": "m_0147",
+      "memory_used": [
+        "m_0127"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ef44e8137c19",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 74,
+      "memory_id": "m_0149",
+      "memory_used": [
+        "m_0129"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8d3ba77c5a15",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "knn",
+      "idx": 75,
+      "memory_id": "m_0151",
+      "memory_used": [
+        "m_0131",
+        "m_0145"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "aa1b5b7d30fe",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "logit",
+      "idx": 77,
+      "memory_id": "m_0153",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "47e5e6776904",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "clinc150/bert",
+      "family": "fusion",
+      "idx": 79,
+      "memory_id": "m_0155",
+      "memory_used": [
+        "m_0137"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e11bfb46f23b",
+      "source": "",
+      "stream": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 12,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 24,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9999 with cb86f5a70928: this ranks items the same way",
+      "idx": 28,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 36,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 48,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 363ba52865a0: this ranks items the same way",
+      "idx": 51,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with b7ef7ca755ad: this ranks items the same way",
+      "idx": 54,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 60,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9999 with 7be3d4b71eda: this ranks items the same way",
+      "idx": 66,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 24505c1c5857: this ranks items the same way",
+      "idx": 72,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with cb86f5a70928: this ranks items the same way",
+      "idx": 76,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9999 with f0a632a687b9: this ranks items the same way",
+      "idx": 78,
+      "reason": "duplicate"
+    }
+  ],
+  "stream": "llm",
+  "usage": {
+    "calls": 106,
+    "input_tokens": 286481,
+    "output_tokens": 96996
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "round": 8,
+  "skipped": [
+    "https://arxiv.org/pdf/2302.09852v3.pdf",
+    "https://arxiv.org/pdf/2510.05782",
+    "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+    "https://doi.org/10.18653/v1/2023.acl-srw.20",
+    "https://github.com/pradhyumnaag30/CLINC150",
+    "https://openreview.net/attachment?id=HJf2ds2ssm&name=pdf"
+  ],
+  "usage": {
+    "input_tokens": 17376,
+    "output_tokens": 6341,
+    "searches": 8
+  }
+}

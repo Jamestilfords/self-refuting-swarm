@@ -1,0 +1,12 @@
+{
+  "arm": "A",
+  "cell": "clinc150/bert",
+  "incumbent": "1ff57dd66613",
+  "lord": {
+    "alpha": 0.1,
+    "rejections": [],
+    "t": 0,
+    "w0": 0.05
+  },
+  "slots": 80
+}

@@ -1,0 +1,16 @@
+{
+  "round": 8,
+  "skipped": [
+    "https://arxiv.org/html/2302.09852v3",
+    "https://arxiv.org/html/2610.26323",
+    "https://arxiv.org/pdf/2302.09852v3.pdf",
+    "https://doi.org/10.18653/v1/2023.acl-srw.20",
+    "https://github.com/pradhyumnaag30/CLINC150",
+    "https://papers.neurips.cc/paper_files/paper/2022/file/70fa5df8e3300dc30bf19bee44a56155-Paper-Conference.pdf"
+  ],
+  "usage": {
+    "input_tokens": 17440,
+    "output_tokens": 6258,
+    "searches": 8
+  }
+}

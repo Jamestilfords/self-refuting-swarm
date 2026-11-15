@@ -1,0 +1,15 @@
+{
+  "limits": {
+    "max_calls": 1000,
+    "max_output_tokens": 2048,
+    "max_searches": 40,
+    "max_tokens": 8000000
+  },
+  "used": {
+    "calls": 97,
+    "charged_tokens": 331268,
+    "input_tokens": 235694,
+    "output_tokens": 95574,
+    "searches": 0
+  }
+}

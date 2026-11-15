@@ -1,0 +1,1255 @@
+{
+  "model": "gpt-5.6-terra",
+  "proposals": [
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 0,
+      "memory_id": "m_0004",
+      "memory_used": [
+        "m_0001",
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5f9f5b82ee23",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 1,
+      "memory_id": "m_0006",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "6275965d478e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 2,
+      "memory_id": "m_0008",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "2eb95480604e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 3,
+      "memory_id": "m_0010",
+      "memory_used": [
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7879002f75e6",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 4,
+      "memory_id": "m_0012",
+      "memory_used": [
+        "m_0001",
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "cde3980fd5de",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 5,
+      "memory_id": "m_0014",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "f14bc1ebccdb",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 6,
+      "memory_id": "m_0016",
+      "memory_used": [
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e677b669a5ca",
+      "source": "https://github.com/pradhyumnaag30/CLINC150",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 7,
+      "memory_id": "m_0018",
+      "memory_used": [
+        "m_0008",
+        "m_0009"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a2ad1e3e0109",
+      "source": "https://github.com/pradhyumnaag30/CLINC150",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 8,
+      "memory_id": "m_0020",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "e52fc1a113ce",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 9,
+      "memory_id": "m_0022",
+      "memory_used": [
+        "m_0003",
+        "m_0012",
+        "m_0018"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "2e5bfd387e37",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 10,
+      "memory_id": "m_0026",
+      "memory_used": [
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a62ccb3241c1",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 11,
+      "memory_id": "m_0028",
+      "memory_used": [
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b8a00c662a91",
+      "source": "https://github.com/pradhyumnaag30/CLINC150",
+      "stream": "llm"
+    },
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 12,
+      "memory_id": "m_0030",
+      "memory_used": [
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "332c37c5ebae",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 13,
+      "memory_id": "m_0032",
+      "memory_used": [
+        "m_0006"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "224210e57f74",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 14,
+      "memory_id": "m_0034",
+      "memory_used": [
+        "m_0008"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "4c75f4a2b61b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 15,
+      "memory_id": "m_0036",
+      "memory_used": [
+        "m_0010",
+        "m_0012"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "382f5746f0a5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 16,
+      "memory_id": "m_0038",
+      "memory_used": [
+        "m_0028"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "0b96ff3460f4",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 17,
+      "memory_id": "m_0040",
+      "memory_used": [
+        "m_0014"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "96baa31e6590",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 18,
+      "memory_id": "m_0042",
+      "memory_used": [
+        "m_0016"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "6caa7f5e87de",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 19,
+      "memory_id": "m_0044",
+      "memory_used": [
+        "m_0018",
+        "m_0022",
+        "m_0034"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b9405655214c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 20,
+      "memory_id": "m_0049",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "a5e0e1c23405",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 21,
+      "memory_id": "m_0051",
+      "memory_used": [
+        "m_0030",
+        "m_0044"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1a90d93cef20",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 22,
+      "memory_id": "m_0053",
+      "memory_used": [
+        "m_0036",
+        "m_0040"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "bc94a816e839",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 23,
+      "memory_id": "m_0055",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "276a152e222b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 25,
+      "memory_id": "m_0057",
+      "memory_used": [
+        "m_0046"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1d5d64b4c77d",
+      "source": "https://openaccess.thecvf.com/content/CVPR2022/html/Wang_ViM_Out-of-Distribution_With_Virtual-Logit_Matching_CVPR_2022_paper.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 26,
+      "memory_id": "m_0060",
+      "memory_used": [
+        "m_0059"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b641f8db185a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 27,
+      "memory_id": "m_0062",
+      "memory_used": [
+        "m_0059",
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "0abf80933f5d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 28,
+      "memory_id": "m_0064",
+      "memory_used": [
+        "m_0047",
+        "m_0060",
+        "m_0059"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "efad017af80b",
+      "source": "https://ar5iv.labs.arxiv.org/html/2203.07798",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 29,
+      "memory_id": "m_0066",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "b8e5c703ad23",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 30,
+      "memory_id": "m_0069",
+      "memory_used": [
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5f95ed99949c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 31,
+      "memory_id": "m_0071",
+      "memory_used": [
+        "m_0048"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c97212fc5303",
+      "source": "https://ar5iv.labs.arxiv.org/html/2305.16966",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 32,
+      "memory_id": "m_0073",
+      "memory_used": [
+        "m_0049"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "bcd6486b108b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 33,
+      "memory_id": "m_0075",
+      "memory_used": [
+        "m_0051",
+        "m_0059"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "91d9dde05ccd",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 34,
+      "memory_id": "m_0077",
+      "memory_used": [
+        "m_0053",
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "f389f4d782ea",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 35,
+      "memory_id": "m_0079",
+      "memory_used": [
+        "m_0055",
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "184cd169eeec",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 37,
+      "memory_id": "m_0081",
+      "memory_used": [
+        "m_0068"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "176777679780",
+      "source": "https://deel-ai.github.io/oodeel/latest/notebooks/torch/demo_vim_torch/",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 38,
+      "memory_id": "m_0083",
+      "memory_used": [
+        "m_0060",
+        "m_0061"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9cb9ab46e52d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 39,
+      "memory_id": "m_0085",
+      "memory_used": [
+        "m_0060",
+        "m_0062",
+        "m_0068"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "45101012b01e",
+      "source": "https://deel-ai.github.io/oodeel/latest/notebooks/torch/demo_vim_torch/",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 40,
+      "memory_id": "m_0090",
+      "memory_used": [
+        "m_0066",
+        "m_0077"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c196a3be4f73",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 41,
+      "memory_id": "m_0092",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "3a8ed4fb8490",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 42,
+      "memory_id": "m_0094",
+      "memory_used": [
+        "m_0069",
+        "m_0070"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "14a5e063104f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 43,
+      "memory_id": "m_0096",
+      "memory_used": [
+        "m_0071"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "3a0aa662aa42",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 44,
+      "memory_id": "m_0098",
+      "memory_used": [
+        "m_0073"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7504f483d6bf",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 45,
+      "memory_id": "m_0100",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "acd205912371",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 46,
+      "memory_id": "m_0102",
+      "memory_used": [
+        "m_0077"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ffc0000acc94",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 47,
+      "memory_id": "m_0104",
+      "memory_used": [
+        "m_0079",
+        "m_0081"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a14ee9ee3b11",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 49,
+      "memory_id": "m_0106",
+      "memory_used": [
+        "m_0081"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "457a92ce0231",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 50,
+      "memory_id": "m_0109",
+      "memory_used": [
+        "m_0087",
+        "m_0088"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c5e041dfb62f",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 51,
+      "memory_id": "m_0111",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "623e8ba3ec77",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 52,
+      "memory_id": "m_0113",
+      "memory_used": [
+        "m_0089",
+        "m_0090"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "02cd8bed9b83",
+      "source": "https://arxiv.org/html/2505.18032",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 53,
+      "memory_id": "m_0116",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "3bfd0d966ef9",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 54,
+      "memory_id": "m_0118",
+      "memory_used": [
+        "m_0094",
+        "m_0116"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e66164e3884d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 55,
+      "memory_id": "m_0120",
+      "memory_used": [
+        "m_0096"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8b5a64edbce9",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 56,
+      "memory_id": "m_0122",
+      "memory_used": [
+        "m_0098",
+        "m_0115"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8316a1cf64a1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 57,
+      "memory_id": "m_0124",
+      "memory_used": [
+        "m_0100",
+        "m_0115"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ffbd73dcf938",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 58,
+      "memory_id": "m_0126",
+      "memory_used": [
+        "m_0102",
+        "m_0113"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "348fbeb820ab",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 59,
+      "memory_id": "m_0128",
+      "memory_used": [
+        "m_0104"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "658fabc872e5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 60,
+      "memory_id": "m_0133",
+      "memory_used": [
+        "m_0115",
+        "m_0130"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "969fe13dd999",
+      "source": "https://arxiv.org/abs/2106.09022",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 61,
+      "memory_id": "m_0135",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "2419e8122ad8",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 62,
+      "memory_id": "m_0137",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "ffb8e0cbb747",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 63,
+      "memory_id": "m_0139",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "06b3381b8d7f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 64,
+      "memory_id": "m_0141",
+      "memory_used": [
+        "m_0131",
+        "m_0132"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "71dad147da26",
+      "source": "https://proceedings.mlr.press/v267/muller25a.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 65,
+      "memory_id": "m_0143",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "30ef2ea6570f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 66,
+      "memory_id": "m_0145",
+      "memory_used": [
+        "m_0131",
+        "m_0132"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9da0d31f91a5",
+      "source": "https://proceedings.mlr.press/v267/muller25a.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 67,
+      "memory_id": "m_0147",
+      "memory_used": [
+        "m_0133"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "0ddb4c668e56",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 68,
+      "memory_id": "m_0149",
+      "memory_used": [
+        "m_0126",
+        "m_0143"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a7b00ec86bc2",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 69,
+      "memory_id": "m_0151",
+      "memory_used": [
+        "m_0147"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5fb9f76c270d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 70,
+      "memory_id": "m_0153",
+      "memory_used": [
+        "m_0139",
+        "m_0141"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "3f462c2999a2",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "other",
+      "idx": 71,
+      "memory_id": "m_0155",
+      "memory_used": [
+        "m_0135"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "aabb5a4a66f5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 73,
+      "memory_id": "m_0157",
+      "memory_used": [
+        "m_0135",
+        "m_0147"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a68ffdc2d44c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "knn",
+      "idx": 74,
+      "memory_id": "m_0159",
+      "memory_used": [
+        "m_0137"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b6ac4421c045",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 75,
+      "memory_id": "m_0161",
+      "memory_used": [
+        "m_0139"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ea0277b09140",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 76,
+      "memory_id": "m_0163",
+      "memory_used": [
+        "m_0141"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "04c3e2822269",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "logit",
+      "idx": 77,
+      "memory_id": "m_0165",
+      "memory_used": [
+        "m_0143"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "141390d0373c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "banking77_oos/bert",
+      "family": "density",
+      "idx": 78,
+      "memory_id": "m_0167",
+      "memory_used": [
+        "m_0145"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8b99cf66dc96",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "banking77_oos/bert",
+      "family": "fusion",
+      "idx": 79,
+      "memory_id": "m_0170",
+      "memory_used": [
+        "m_0143",
+        "m_0167",
+        "m_0169"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "50d7d080be3e",
+      "source": "",
+      "stream": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "detail": "Spearman 0.9992 with 5f9f5b82ee23: this ranks items the same way",
+      "idx": 24,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "invalid syntax (<unknown>, line 1)",
+      "idx": 36,
+      "reason": "syntax"
+    },
+    {
+      "detail": "Spearman 0.9997 with 5f9f5b82ee23: this ranks items the same way",
+      "idx": 48,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9998 with 5f9f5b82ee23: this ranks items the same way",
+      "idx": 72,
+      "reason": "duplicate"
+    }
+  ],
+  "stream": "llm",
+  "usage": {
+    "calls": 97,
+    "input_tokens": 255422,
+    "output_tokens": 89803
+  }
+}

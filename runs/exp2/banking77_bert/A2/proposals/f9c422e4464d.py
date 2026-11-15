@@ -1,0 +1,26 @@
+import numpy as np
+
+FAMILY = "density"
+ARM = "ce"
+RATIONALE = "In-scope queries should align closely with the normalized prototype of their predicted intent, whereas OOS queries often have weaker cosine support even when the classifier assigns them confidently."
+SOURCE = ""
+PARENTS = []
+MEMORY_USED = ["m_0035"]
+
+
+def score(ctx):
+    tr, ev = ctx.train, ctx.eval
+    x_train = ctx.h.l2(tr.feats)
+    x_eval = ctx.h.l2(ev.feats)
+    labels = tr.labels.astype(int)
+    n_classes = tr.logits.shape[1]
+
+    prototypes = np.zeros((n_classes, x_train.shape[1]), dtype=float)
+    counts = np.bincount(labels, minlength=n_classes).astype(float)
+    np.add.at(prototypes, labels, x_train)
+    prototypes /= np.maximum(counts[:, None], 1.0)
+    prototypes = ctx.h.l2(prototypes)
+
+    predicted = np.argmax(ev.logits, axis=1)
+    similarity = np.sum(x_eval * prototypes[predicted], axis=1)
+    return 1.0 - similarity

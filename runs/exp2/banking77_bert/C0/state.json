@@ -1,0 +1,12 @@
+{
+  "arm": "C",
+  "cell": "banking77_oos/bert",
+  "incumbent": "energy_ce",
+  "lord": {
+    "alpha": 0.1,
+    "rejections": [],
+    "t": 24,
+    "w0": 0.05
+  },
+  "slots": 80
+}

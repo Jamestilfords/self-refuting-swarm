@@ -1,0 +1,17 @@
+{
+  "round": 8,
+  "skipped": [
+    "http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-021.pdf",
+    "https://ar5iv.labs.arxiv.org/html/2203.07798",
+    "https://arxiv.org/html/2610.26323",
+    "https://arxiv.org/pdf/2510.05782",
+    "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+    "https://doi.org/10.48550/arxiv.2310.02832",
+    "https://ojs.aaai.org/index.php/AAAI/article/view/29742"
+  ],
+  "usage": {
+    "input_tokens": 16745,
+    "output_tokens": 5444,
+    "searches": 8
+  }
+}

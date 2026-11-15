@@ -1,0 +1,16 @@
+{
+  "round": 8,
+  "skipped": [
+    "https://ar5iv.labs.arxiv.org/html/2203.07798",
+    "https://arxiv.org/html/2610.26323",
+    "https://arxiv.org/pdf/2302.09852v3.pdf",
+    "https://arxiv.org/pdf/2510.05782",
+    "https://doi.org/10.18653/v1/2023.acl-srw.20",
+    "https://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-007.pdf"
+  ],
+  "usage": {
+    "input_tokens": 17155,
+    "output_tokens": 5833,
+    "searches": 8
+  }
+}

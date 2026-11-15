@@ -8,7 +8,8 @@ to probe deferral on a safety monitor.
 This repository follows slide 22 of **Skeptic: Design Document and Agent
 Handoff** (November 14, 2026). **E1 is implemented:** `make setup` provisions
 the Modal app and separate open/sealed volumes, validates any configured named
-secrets, and checks both mounts. The experiment pipeline remains a scaffold.
+secrets, and checks both mounts. The E2 training runner is implemented; later
+experiment and unblinding targets remain pending.
 
 ## Getting started
 
@@ -22,11 +23,12 @@ is not already available. You do not need a local GPU.
 ```sh
 git clone https://github.com/Jamestilfords/self-refuting-swarm.git
 cd self-refuting-swarm
-uv sync --frozen
+make bootstrap
 ```
 
-This creates `.venv/` and installs the versions recorded in `uv.lock`, including
-the Modal SDK. You can run all commands through uv without activating the venv.
+This creates `.venv/`, installs the versions recorded in `uv.lock`, and checks
+out the pinned ER-1 submodule. You can run all commands through uv without
+activating the venv.
 
 ### 2. Sign in to Modal and choose the workspace
 
@@ -81,12 +83,12 @@ the proposal sandbox and sealed-test guard still belong to E3 and E4.
 
 ```sh
 make setup-check  # Check the existing app and mounts without redeploying.
-make test         # Run local infrastructure tests; no Modal credentials needed.
+make test         # Run local project tests; no Modal credentials needed.
 make help         # Show implemented and pending commands.
 ```
 
 `setup-check` performs the same temporary-marker checks and requires a Modal
-login. For local development only, `uv sync --frozen` followed by `make test`
+login. For local development only, `make bootstrap` followed by `make test`
 is sufficient; you do not need to provision Modal resources.
 
 ### 5. Configure optional provider secrets
@@ -124,9 +126,9 @@ details and the interfaces future job modules should use.
   volume creation, use `make setup` before `make setup-check`.
 - **An existing volume has the wrong version:** E1 requires v2. Choose new
   volume names for a separate setup; existing data is not migrated automatically.
-- **`make train40` or another experiment target says `Not implemented`:** that
-  work package is still pending. The working E1 commands are `bootstrap`,
-  `setup`, `setup-check`, and `test`.
+- **An experiment target says `Not implemented`:** that work package is still
+  pending. `train40` is implemented for E2 training; the E2 baseline check
+  (`sanity`) remains pending.
 
 ## Repository layout
 
@@ -214,11 +216,14 @@ presence does not mean those contracts have been implemented or validated.
 ## Commands
 
 Run `make help` for the full command list from slide 22 and the associated work
-packages. `setup`, `setup-check`, `bootstrap`, and `test` are implemented.
-`train40`, `sanity`, `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
-`report`, `reproduce`, and `testbed-b` remain reserved targets that fail with an
-implementation-pending message. Setup runs small CPU storage checks; it does
-not start training or read dataset/test scores.
+packages. `setup`, `setup-check`, `bootstrap`, `test`, and `train40` are
+implemented. `sanity`, `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
+`report`, `reproduce`, and `testbed-b` remain reserved targets. Setup runs small
+CPU storage checks; it does not start training or read dataset/test scores.
+
+To preview the E2 matrix, run `uv run --frozen python -m modal_jobs.train40 plan`.
+See [the training guide](modal_jobs/README.md#e2-training) before launching a
+single run or all 40 B300 jobs.
 
 ## ER-1 dependency and credit
 

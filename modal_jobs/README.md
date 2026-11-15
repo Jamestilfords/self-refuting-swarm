@@ -11,8 +11,8 @@ it when necessary. Dependencies are pinned in `uv.lock`.
 ```sh
 git clone https://github.com/Jamestilfords/self-refuting-swarm.git
 cd self-refuting-swarm
-uv sync --frozen
-uv run modal token new  # Only if this computer is not already authenticated.
+make bootstrap
+uv run --frozen modal token new  # Only if this computer is not already authenticated.
 make setup
 ```
 
@@ -76,12 +76,35 @@ Import `app`, `open_volume`, `sealed_volume`, and `secrets_by_name` from
 `train40`, `seal`, `sandbox`, `cache_llama`, and `score_guard` before deploying
 the shared app. The app has no default volumes or secrets.
 
-E2's `train40.py` defines `TRAIN40_MODAL_OPTIONS` for one B300 GPU, eight CPU
-cores, and 32 GiB of RAM per fine-tune, with at most four containers running
-at once and a two-hour timeout per run. Apply that preset when implementing
-the training function. B300 needs a CUDA 13.1+ image and a compatible PyTorch
-build; verify one seeded run before scheduling all 40. The E1 setup image and
-volume-check functions do not use this training preset.
+### E2 training
+
+`train40.py` launches from the local clone and runs each fine-tune on Modal.
+It fetches pinned public CLINC150 and Banking77-OOS data plus pinned BERT and
+RoBERTa snapshots into `/sealed/e2/assets`. Each run uses one B300, eight CPU
+cores, 32 GiB of RAM, and a two-hour timeout. Modal runs at most four training
+containers concurrently. The CUDA 13.2 image and PyTorch build meet Modal's
+B300 requirement of CUDA 13.1 or newer.
+
+```sh
+make bootstrap
+uv run --frozen python -m modal_jobs.train40 plan
+uv run --frozen python -m modal_jobs.train40 prepare
+uv run --frozen python -m modal_jobs.train40 run \
+  --dataset clinc150 --backbone bert --arm ce --seed 0
+make train40  # all 40 runs, after the single run succeeds
+```
+
+The trusted trainer mounts both volumes. It stores model checkpoints and full
+five-split caches under `/sealed/<dataset>_<backbone>/<arm>_seed<N>/`. It writes
+only train logits, features, pooled vectors, and labels plus label-free `val`
+and `oos_val` features to the matching `/open/` path. Test labels and test
+scores stay sealed. The local command reports run status, not test metrics.
+Existing runs with the same recipe are reused; a mismatched or incomplete run
+fails instead of overwriting results. `prepare` and `run` need a Modal login
+and network access from the trusted preparation container. The `plan` command
+needs neither.
+
+The E1 setup image and volume-check functions do not use the training preset.
 
 - Trusted training jobs may mount both volumes. They write full caches to
   `/sealed` and copy only `train`, `val`, and `oos_val` arrays to `/open`.

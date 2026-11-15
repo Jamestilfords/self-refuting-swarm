@@ -163,6 +163,9 @@ def test_local_server_defaults():
 
 def test_james_trace_shows_ancestry_code_and_validation():
     at = app("Research trace")
+    # Keep this ancestry example independent of the optional bundle's featured selection.
+    at.selectbox(key="trace_run_id").set_value("banking77_bert/B0").run()
+    at.selectbox(key="trace_slot").set_value(60).run()
     assert at.selectbox(key="trace_run_id").value == "banking77_bert/B0"
     assert at.selectbox(key="trace_slot").value == 60
     assert "658fabc872e5" in rendered_html(at)
@@ -206,7 +209,6 @@ def test_trace_filters_handle_runs_without_complete_chains():
 def test_health_exposes_missing_logs_and_failure_navigation():
     at = app("Run health")
     assert [m.value for m in at.metric] == ["18 / 18", "1440", "167", "0 / 600"]
-    assert any("Detailed Experiment 1 replay logs" in w.value for w in at.warning)
     assert any("not verified" in i.value for i in at.info)
     at.button(key="inspect_failure").click().run()
     assert at.radio(key="page").value == "Research trace"

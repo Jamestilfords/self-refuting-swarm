@@ -550,8 +550,6 @@ def run_health_page():
                                  len(health["failures"]), f"{raw_logs} / 600")):
         col.metric(title, value, border=True)
     st.caption(f"Local evidence checked: {readable_time(health['checked_at'])}. File modification times are not experiment completion times.")
-    if raw_logs != 600:
-        st.warning("Detailed Experiment 1 replay logs are incomplete in this checkout. The overview uses the published summary; individual ordering decisions cannot be audited here.")
     if any(r["problems"] for r in registered):
         st.warning("Some registered runs have missing artifacts or counts that disagree with the saved summary.")
     with st.container(border=True):

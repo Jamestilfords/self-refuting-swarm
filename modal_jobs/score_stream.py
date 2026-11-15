@@ -193,14 +193,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("command", choices=("plan", "run"))
     parser.add_argument("--streams", default=None, help="comma-separated: canary,baseline,templated,llm")
     parser.add_argument("--limit", type=int, default=None, help="score only the first N proposals")
+    parser.add_argument("--proposals", type=Path, help="Alternate proposal directory, e.g. a new agent run")
+    parser.add_argument("--ledger", type=Path, help="Output ledger; required with --proposals to keep runs separate")
     parser.add_argument("--skip-test", action="store_true", help="accepted for old scripts; E4 always scores test separately")
     args = parser.parse_args(argv)
     if args.limit is not None and args.limit <= 0:
         parser.error("--limit must be positive")
-    found = runner.discover(PROPOSALS, set(args.streams.split(",")) if args.streams else None)
+    if args.proposals is not None and args.ledger is None:
+        parser.error("--proposals requires an explicit --ledger output path")
+    proposal_dir = args.proposals if args.proposals is not None else PROPOSALS
+    found = runner.discover(proposal_dir, set(args.streams.split(",")) if args.streams else None)
     tasks = runner.build_tasks(found, args.limit)
     jobs = [{"cell": task["cell"], "arm": task["arm"], "sha": sha,
-             "text": (PROPOSALS / f"{sha}.py").read_text(encoding="utf-8")}
+             "text": (proposal_dir / f"{sha}.py").read_text(encoding="utf-8")}
             for task in tasks for sha in task["shas"]]
     if not jobs:
         parser.error("No matching proposals")
@@ -223,10 +228,10 @@ def main(argv: list[str] | None = None) -> int:
                 raise RuntimeError("Calibration results are incomplete; retry before using the ledger")
     ledger = runner.merge_ledger(found, tasks, val_rows, cal_rows, {})
     partial = args.streams or args.limit
-    path = REPO / "runs" / ("ledger_isolated_partial.jsonl" if partial else "ledger_isolated.jsonl")
+    path = args.ledger or REPO / "runs" / ("ledger_isolated_partial.jsonl" if partial else "ledger_isolated.jsonl")
     runner.write_ledger(ledger, path)
     print(runner.summarize(ledger))
-    print(f"wrote {len(ledger)} rows to {path.relative_to(REPO)}")
+    print(f"wrote {len(ledger)} rows to {path}")
     return int(any(row["status"] in {"infra_error", "runner_error"} for row in ledger))
 
 

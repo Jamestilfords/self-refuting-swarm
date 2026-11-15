@@ -14,6 +14,7 @@ from skeptic.critic.config import DEFAULT_CONFIG, CriticConfig
 from skeptic.critic.lord import LordPlusPlus
 from skeptic.critic.types import BaselineSet, ScoreSet
 from skeptic.critic.verdict import verdict
+from skeptic.rules.critic_bridge import drop_ignored_parents
 
 PairKey = tuple[str, str]
 
@@ -110,7 +111,7 @@ def run_scorecard(
     """
     rows = []
     for pair in PAIRS:
-        candidate = scores[(pair.cell, pair.candidate)]
+        candidate = drop_ignored_parents(scores[(pair.cell, pair.candidate)])
         incumbent = scores[(pair.cell, pair.incumbent)]
         cell_baselines = baselines[pair.cell]
         scorecard = verdict(

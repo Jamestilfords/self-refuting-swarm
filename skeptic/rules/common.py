@@ -7,6 +7,27 @@ from pathlib import Path
 import numpy as np
 from skeptic.score_artifacts import CELLS, ScoreArtifact, load_scores, auroc
 PROPOSAL_STREAMS = frozenset({"templated", "llm"})
+# Every sha in proposals/baselines.json. Replay retags these to stream baseline,
+# including vacuity, then keeps them out of the orderings.
+REGISTERED_SCORE_SHAS = frozenset({
+    "b1e4ba2e46d5",  # energy@ce
+    "39d3e8c0e810",  # energy@edl
+    "a5325abe3321",  # msp@edl
+    "3fee8950d4d1",  # d_port@ce
+    "926c1ced9316",  # d_full@ce
+    "fe47292dc266",  # msp@ce, also a templated scorecard file
+    "6cc76a18b82b",  # vacuity@edl, a registered score and not a G2 baseline
+    "71faf9e6269e",  # d_port@edl, also a templated scorecard file
+    "2de1c4943af0",  # d_full@edl, also a templated scorecard file
+})
+# Couplings that still declare PARENTS. The files stay as generated.
+# Replay and the scorecard ignore PARENTS for these shas, so G6 does not run.
+IGNORE_PARENTS = frozenset({"03e0017097f5", "cddf9272a0a9", "2d5e3b3523bd"})
+# Names the scorecard uses for two of those files. Pair 7 is 2d5e3b3523bd.
+IGNORE_PARENT_NAMES = IGNORE_PARENTS | frozenset({
+    "ecdf_add_log_d_full_edl",
+    "qsigmoid_mul_d_port_edl",
+})
 _SHA = re.compile(r"[0-9a-f]{12}\Z")
 
 def load_ledger(path: str | Path) -> dict[tuple[str, str], dict]:

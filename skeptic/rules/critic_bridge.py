@@ -3,8 +3,17 @@ from __future__ import annotations
 
 import os
 import sys
+from dataclasses import replace
 from pathlib import Path
+from skeptic.rules.common import IGNORE_PARENT_NAMES
 from skeptic.rules.critic import Critic
+
+
+def drop_ignored_parents(score):
+    """G6 does not apply to the three couplings whose files still declare PARENTS."""
+    if getattr(score, "name", None) in IGNORE_PARENT_NAMES and getattr(score, "parents", ()):
+        return replace(score, parents=())
+    return score
 
 
 def ensure_er1_path() -> None:
@@ -29,7 +38,8 @@ def critic_factory(cells, config):
         state = LordPlusPlus(alpha=config.fdr_alpha, w0=config.fdr_w0)
 
         def decide(row, incumbent_sha, fdr_state, position):
-            return verdict(loaded.candidates[row["sha"]], loaded.candidates[incumbent_sha],
+            return verdict(drop_ignored_parents(loaded.candidates[row["sha"]]),
+                           loaded.candidates[incumbent_sha],
                            loaded.baselines, fdr_state, cell, config=config)
 
         return Critic(initial_sha, state, decide)

@@ -188,3 +188,24 @@ def test_coupling_proposal_switches_on_probs(tmp_path, ctx):
     """
     out = api.validate(load(tmp_path, body(code)), ctx)
     assert out["probs"].shape == (len(ctx.eval), 5)
+
+
+def test_wrappers_match_er1(ctx):
+    """Chunked and re-stated helpers give ER-1's own numbers."""
+    _, _, variants = api._er1()
+    h, tr, ev = ctx.h, ctx.train, ctx.eval
+    assert np.allclose(h.relative_mahalanobis(tr.feats, tr.labels, ev.feats, pca=8),
+                       variants.relative_mahalanobis(tr.feats, tr.labels, ev.feats, pca_dim=8))
+    assert np.allclose(h.mahalanobis_pp(tr.feats, tr.labels, ev.feats),
+                       variants.mahalanobis_pp(tr.feats, tr.labels, ev.feats))
+    ref = variants.partial_mahalanobis(tr.pooled, tr.labels, ev.pooled, top_k=8)
+    p = h.partial(tr.pooled, tr.labels, top_k=8)
+    assert np.allclose(p.top(ev.pooled), ref["top"]) and np.allclose(p.bottom(ev.pooled), ref["bottom"])
+
+
+def test_chunked_queries_match_unchunked(ctx, monkeypatch):
+    g = ctx.h.gda(ctx.train.pooled, ctx.train.labels)
+    whole = g.log_density(ctx.eval.pooled)
+    monkeypatch.setattr(api, "_chunks", lambda n, width, budget=0: [slice(i, i + 7) for i in range(0, n, 7)])
+    assert np.allclose(g.log_density(ctx.eval.pooled), whole)
+    assert np.allclose(g.min_mahalanobis_sq(ctx.eval.pooled), g._m.class_sq_mahalanobis(ctx.eval.pooled).min(1))

@@ -1,0 +1,31 @@
+[
+  {
+    "expected": "INERT",
+    "name": "inert_rescale",
+    "sha": "6cef58e34d00",
+    "stream": "canary",
+    "why": "2 * energy + 1 is a monotone transform of the incumbent, so no in-scope/OOS pair changes order."
+  },
+  {
+    "expected": "SCORE-MATCHED",
+    "name": "msp_renamed",
+    "sha": "abf73d1f409c",
+    "stream": "canary",
+    "why": "CE max-softmax probability under a new name: Spearman 1.0 with a registered baseline."
+  },
+  {
+    "expected": "NO EFFECT",
+    "name": "gaussian_noise",
+    "sha": "10fe09ef7c7c",
+    "stream": "canary",
+    "why": "Pseudo-random Gaussian noise, a fixed function of each item so it passes the subset check. Its AUROC is about 0.5, far below the incumbent, so the interval for the gain lies below 0."
+  },
+  {
+    "expected": "BUG",
+    "name": "test_leak",
+    "sha": "b9cf295b6966",
+    "stream": "canary",
+    "validator_status": "io",
+    "why": "Reads the sealed OOS test logits. The validator rejects it with status 'io' before it runs; if it is run anyway (static=False), the sandbox has no /sealed mount and the guard raises."
+  }
+]

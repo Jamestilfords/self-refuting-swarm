@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from scipy.linalg import solve_triangular
 from scipy.special import logsumexp, softmax as _softmax
 
 FAMILIES = ("logit", "density", "knn", "fusion", "other")
@@ -116,23 +117,58 @@ def subset_ctx(ctx: Ctx, idx) -> Ctx:
 
 
 # ------------------------------------------------------------------ helpers
-class GDA:
-    """Fitted Gaussian discriminant density (ER-1 GaussianDensityModel)."""
+def _chunks(n: int, width: int, budget: float = 3.2e7):
+    """Row ranges small enough that an (rows, classes, dims) float64 array stays near 256 MB."""
+    step = max(1, int(budget // max(width, 1)))
+    return [slice(i, min(i + step, n)) for i in range(0, n, step)]
 
-    def __init__(self, model):
-        self._m = model
+
+class GDA:
+    """Fitted Gaussian discriminant density (ER-1 GaussianDensityModel). Queries run in chunks,
+    because ER-1 builds an (items, classes, dims) array and 15,000 x 150 x 768 would need 14 GB."""
+
+    def __init__(self, model, train_x):
+        self._m, self._train_x, self._bg = model, train_x, None
 
     def class_mahalanobis_sq(self, x) -> np.ndarray:      # (N, C)
-        return self._m.class_sq_mahalanobis(x)
+        x = np.asarray(x, np.float64)
+        width = len(self._m.classes_) * self._m.k_
+        return np.concatenate([self._m.class_sq_mahalanobis(x[c]) for c in _chunks(len(x), width)])
 
     def min_mahalanobis_sq(self, x) -> np.ndarray:        # (N,) higher = more OOS
-        return self._m.class_sq_mahalanobis(x).min(axis=1)
+        return self.class_mahalanobis_sq(x).min(axis=1)
 
     def log_density(self, x) -> np.ndarray:               # (N,) higher = more like training data
-        return self._m.marginal_log_prob(x)
+        x = np.asarray(x, np.float64)
+        width = len(self._m.classes_) * self._m.k_
+        return np.concatenate([self._m.marginal_log_prob(x[c]) for c in _chunks(len(x), width)])
 
     def neg_log_density(self, x) -> np.ndarray:           # (N,) higher = more OOS
-        return -self._m.marginal_log_prob(x)
+        return -self.log_density(x)
+
+    def relative_mahalanobis_sq(self, x) -> np.ndarray:
+        """Min class distance minus the distance to one background Gaussian (ER-1 relative_mahalanobis)."""
+        if self._bg is None:
+            z = self._m._transform(self._train_x)
+            cov = np.atleast_2d(np.cov(z, rowvar=False))
+            self._bg = (z.mean(0), _er1()[2]._chol(cov))
+        mu, chol = self._bg
+        sol = solve_triangular(chol, (self._m._transform(x) - mu).T, lower=True)
+        return self.min_mahalanobis_sq(x) - np.sum(sol * sol, axis=0)
+
+
+class Partial:
+    """Distance on the top-k eigen-directions of the tied within-class covariance, and on the rest
+    (ER-1 partial_basis / partial_sq)."""
+
+    def __init__(self, train_x, labels, top_k: int):
+        self._mus, self._evecs, self._evals, self._k = _er1()[2].partial_basis(train_x, labels, top_k)
+
+    def top(self, x) -> np.ndarray:
+        return _er1()[2].partial_sq(self._mus, self._evecs, self._evals, x, np.arange(self._k))
+
+    def bottom(self, x) -> np.ndarray:
+        return _er1()[2].partial_sq(self._mus, self._evecs, self._evals, x, np.arange(self._k, len(self._evals)))
 
 
 class PCA:
@@ -184,22 +220,34 @@ class Helpers:
 
     # ---- densities and distances (ER-1 density/gda.py, posthoc/gda_variants.py)
     @staticmethod
+    def l2(x) -> np.ndarray:
+        x = np.asarray(x, np.float64)
+        return x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-12)
+
+    @staticmethod
     def gda(x, labels, cov: str = "tied", pca: int | None = None, whiten: bool = True) -> GDA:
         cfg_mod, gda_mod, _ = _er1()
+        x = np.asarray(x, np.float64)
         cfg = cfg_mod.GDAConfig(cov_mode=cov, pca_dim=pca, whiten=whiten)
-        return GDA(gda_mod.GaussianDensityModel(cfg).fit(np.asarray(x, np.float64), np.asarray(labels)))
+        return GDA(gda_mod.GaussianDensityModel(cfg).fit(x, np.asarray(labels)), x)
 
     @staticmethod
     def relative_mahalanobis(train_x, labels, query_x, pca: int | None = None) -> np.ndarray:
-        return _er1()[2].relative_mahalanobis(train_x, labels, query_x, pca_dim=pca)
+        return Helpers.gda(train_x, labels, pca=pca).relative_mahalanobis_sq(query_x)
 
     @staticmethod
     def mahalanobis_pp(train_x, labels, query_x, pca: int | None = None) -> np.ndarray:
-        return _er1()[2].mahalanobis_pp(train_x, labels, query_x, pca_dim=pca)
+        """Mahalanobis++: l2-normalize, then tied GDA distance."""
+        return Helpers.gda(Helpers.l2(train_x), labels, pca=pca).min_mahalanobis_sq(Helpers.l2(query_x))
+
+    @staticmethod
+    def partial(train_x, labels, top_k: int = 128) -> Partial:
+        return Partial(train_x, labels, top_k)
 
     @staticmethod
     def partial_mahalanobis(train_x, labels, query_x, top_k: int = 128) -> dict:
-        return _er1()[2].partial_mahalanobis(train_x, labels, query_x, top_k=top_k)   # {"top", "bottom"}
+        p = Partial(train_x, labels, top_k)
+        return {"top": p.top(query_x), "bottom": p.bottom(query_x)}
 
     @staticmethod
     def knn(train_x, query_x, k: int = 10, l2: bool = True) -> np.ndarray:

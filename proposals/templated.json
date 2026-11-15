@@ -1,0 +1,5351 @@
+{
+  "grid_size": 896,
+  "n_drawn": 300,
+  "proposals": [
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "004d96ef1bc0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "00b2504d8ea1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "034d3edc9548",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "03741f7aac6a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "03d8330022ce",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard"
+      ],
+      "sha": "03e0017097f5",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "043e1b0f71f9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "04530c5fc9ee",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "04f82b48ea64",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "05e7e6f94a0b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "066ef08bf027",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "069c46076529",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "06b23810b9f6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "06ee7847c960",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0700d95394b9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "091e14fcc2a4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "093dfa8555bb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0c6956d63b6a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0d0f8446254e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0d3989e6f86b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0de4f6a7f795",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "0e453517fee3",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "10260ed50c21",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1089f28210bf",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "12a244b8431a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "153eb1fdb234",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "160684be8500",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "169303734691",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard"
+      ],
+      "sha": "17a462ca68bd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1983163ead22",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1a48a769bcb9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1b2b0a49ab75",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1b4588a4d9a9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1b7432484afd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1bee931aba2d",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1c0921bdb02f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1c527796e347",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1c9a3aaba905",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1ce2e2885e00",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1d2795efec80",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1da24d5d8c40",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "1e7ce923a9e0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2098545b4a39",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "21232f2844e1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "21923e1f0564",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2478c658626b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "24ed04ed6e31",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "252b5dc78019",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2606460b7bbf",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "27805459106e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "281a4cfc8225",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "28241ce83caf",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "298ba74d959d",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "299ded8fd566",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2a93f97fec8a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2af7b987eb7d",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2cc320488e4e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2ceb3625f221",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard"
+      ],
+      "sha": "2d5e3b3523bd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard_incumbent"
+      ],
+      "sha": "2de1c4943af0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2f7b4b5e3c84",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "2fcb8b501629",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3052a3cd14aa",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "30f06e8aaae2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "31954c303cd1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "31a6af6e66af",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "31e142833cc9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "321851bcd21e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "337edc590554",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "33e5fd19b74e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3414e43c6456",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "35d996d8c365",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3697a8025f76",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "36d5e4665efc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "37b9d5cdd1fe",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "383ab42fcc03",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "38a7fbaf7366",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "394f76fa94c1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "399020dff685",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3a5b03398686",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3c1164d3d06f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3cc769c9812a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3d0a60dcdce2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3ed1faa71f8f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3ed68c096dad",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "3ee04caa1e61",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "414ba6a32107",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "41c17ff8e785",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4411c13824eb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4542ae2ada38",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "457393fefabe",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4685c7d3a5db",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4814d2728bf9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "482e69dd13b6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4c03ecdde7f6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "4c04975a6ff7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5068f9979ffc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "50b7c77b70ad",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5210764e02bf",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "52b5ab76ac80",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "530b156706a6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "545c34e37cbb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "54cf936e15d7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "55f9e231b1ab",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5688cd2b81eb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "56b15af95340",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "57a361ac0d40",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "594218052c45",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "59c96ae8f575",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5ace8716a682",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5d757a239251",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5df653f36e81",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "5e37bf83b653",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "60a9c4f73e1b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6345f7bf5fb7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6391a27b89bc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "654bb2d47211",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "669917a42e65",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "674a94d31e4c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6854a099e5dd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "69e08f802d52",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6a573434b9ef",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6a96b24000ce",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6acc6c35276a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6bbc52d6a2a1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6be7e95f5190",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "logit_score": "vacuity"
+      },
+      "roles": [
+        "scorecard",
+        "scorecard_incumbent"
+      ],
+      "sha": "6cc76a18b82b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6d524539986b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6e331915bc01",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6e839f2e374e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "6edfc090dbda",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "70ee1b8cff15",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard",
+        "scorecard_incumbent"
+      ],
+      "sha": "71faf9e6269e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "753f1883ab98",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7592efe7bd49",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "764c3deacbd4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "77ac8351fc03",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7874099eabc2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7901528f8458",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "79ac34d9e1dc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7a270886f9e8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7b3656a22875",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7cf1c8cccd43",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7d00a5609a65",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7d39c1e45e0c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "7dbcf2879767",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "809c9589f4c9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "81d1938a3b34",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "82baf8e4e050",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8348de928373",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "855a501f7dd7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "86435b08a997",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "864e0539ffeb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8675ce7d900a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8748e92cabf5",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "886bbf6d3686",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "88c50c0726b0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "892c3d69c431",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "89b3023f51a9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "89be9ab3b84e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8a91fe911714",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8aab1324ca8f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8c4d452a6df8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8e5fed76eab3",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8f107f8f148e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8f7f152d75df",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "8fcf25758b53",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "90603001923c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9071828bd0f7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "91d5be34e249",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "92471aa95cc8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "92ac3daeebd4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "92dc522a3ba4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9374d09a5bf4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "960ecf915988",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "96abd5f76bc0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "96c0097df160",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9707efb12421",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9844a291f3ba",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9880bc7e61cc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "98a63229b15d",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "99d6ff0a3bc2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9a034d77eeef",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9a800e9935ac",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9a8d32eb4eb5",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9ab956bc65b0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9b3a3be14207",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9bf11836a4c7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9dcc32a719c2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9e0c672b3d0f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9e5a46e38620",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9f0916cd501c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "9f744eed40bd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a0416f594138",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a0b43be69f56",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a0e1c2b4b9e6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a1198ffd32e0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a1bddaaf4015",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a36c1e75c727",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a3b33f5f7845",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a4962be0f0c5",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a4e743ded102",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a5506ba377e1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard"
+      ],
+      "sha": "a57d9442bf80",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a5a5d32cadb8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a67d10ed8dc3",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a76b57b7c319",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a7a5f32c9765",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a8a5621b1475",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "a9cc179c972e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "aac714b88321",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "adef02aba04f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b4677dad0246",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b4c09eaf3292",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b581e6483fe0",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b5b435e7ca2e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b5c46e218dc1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b5cdee885e93",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b627ac939061",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b6794c1f6d79",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b71a0c25e65e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b81071498dd9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b8dc812837fb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "b9145458258c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ba020319fbfd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bb6aa7363788",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bbab1f9bc669",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bc1a274173ca",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "be96fbc66947",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bee6f2ced8bd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bf435c9ee2ab",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bfcf37d2ecf8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "bfcff9f6d03c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c0012cd7119b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c00f7446bca8",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c05a71778db7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "gda",
+        "whiten": false
+      },
+      "roles": [
+        "scorecard_incumbent"
+      ],
+      "sha": "c0fdb8397000",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c1280bb86957",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c1562b348540",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c17142c7da04",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c45d012e721f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c4f02b62a8fa",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c56189f65448",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c5b89736bcad",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c6269b783fc4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c6b4db5a79bd",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c809fb2f3c64",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c87f6c2a9f1b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c8b6ef3e0438",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c91a449abe59",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c97eab412243",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c997b1d8af47",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "c9a9296e6c88",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ca4e4afd74c5",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "cdc284328087",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "gda",
+        "whiten": true
+      },
+      "roles": [
+        "scorecard"
+      ],
+      "sha": "cddf9272a0a9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ce9e979ef59c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "cfc53b906979",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d1296e845574",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d13802b579e1",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d16e44f92743",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d24fa1b54cbb",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d3ea1522d094",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d4e2ce2c4b61",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d5715f67ba8e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d5bae47fdeff",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d6b844069b57",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "d974b421962b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "dbd0db1662bc",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "dc43e43bce25",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "dd6c278fd560",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "de4bffc2e7a9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "df8f78c1fed9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "dffeff43117e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e0345120ad39",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e054f5e9745e",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e065c2a8b03a",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 160,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e0bb9d9311fa",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 1,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e2b17ea84031",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e2d7853f1e87",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e3dd789ca78f",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e3e770eb78ae",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e3feebbef560",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e5871b05ebae",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 1,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e5a815be538b",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e6fc96c3f990",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e92d44d912e4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "e9bb504367de",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 80,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ea704b2f5dba",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ecc9706fac06",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 2,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ed7144b79373",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ed999a18c6d3",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ee30426cb998",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "feats",
+        "lam": null,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ee66f6fe130c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "ef7ec755b6f7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "eff074d584c2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 5,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f1153ef470d2",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 20,
+        "normalizer": "minmax",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f1ba408d21d6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 40,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f2fc339079b4",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 5,
+        "normalizer": "ecdf",
+        "pca": 128,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f54d445aff3c",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "partial",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f5836de0fda6",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 80,
+        "normalizer": "minmax",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f8235e2f2661",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "mul",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "mahalanobis_pp",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f8685d9e2a03",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 10,
+        "normalizer": "ecdf",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "f8cef011ef71",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "none",
+        "feature": "pooled",
+        "lam": null,
+        "normalizer": null,
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "fb14c54a93a7",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 20,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "fd9a1a80b7b9",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 10,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "relative",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "fe068f125d06",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "logit_score": "msp"
+      },
+      "roles": [
+        "scorecard_incumbent"
+      ],
+      "sha": "fe47292dc266",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "edl",
+        "coupling": "add_log",
+        "feature": "pooled",
+        "lam": 40,
+        "normalizer": "qsigmoid",
+        "pca": 128,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "fe5445c84700",
+      "stream": "templated"
+    },
+    {
+      "config": {
+        "arm": "ce",
+        "coupling": "add_log",
+        "feature": "feats",
+        "lam": 2,
+        "normalizer": "qsigmoid",
+        "pca": null,
+        "variant": "min_class",
+        "whiten": true
+      },
+      "roles": [
+        "draw"
+      ],
+      "sha": "fef9d7ff6bb4",
+      "stream": "templated"
+    }
+  ],
+  "scorecard": [
+    {
+      "candidate": "6cc76a18b82b",
+      "cells": "all",
+      "expected": [
+        "SCORE-MATCHED"
+      ],
+      "finding": "EDL vacuity's gain over CE MSP is a scoring-rule effect",
+      "incumbent": "fe47292dc266",
+      "n": 1
+    },
+    {
+      "candidate": "71faf9e6269e",
+      "cells": "all",
+      "expected": [
+        "INERT"
+      ],
+      "finding": "Whitening after PCA changes nothing",
+      "incumbent": "c0fdb8397000",
+      "n": 2
+    },
+    {
+      "candidate": "cddf9272a0a9",
+      "cells": "clinc150",
+      "expected": [
+        "NO EFFECT",
+        "MISCALIBRATES"
+      ],
+      "finding": "qsigmoid x mul on D_port hurts CLINC150 and raises ECE",
+      "incumbent": "6cc76a18b82b",
+      "n": 3
+    },
+    {
+      "candidate": "03e0017097f5",
+      "cells": "all",
+      "expected": [
+        "INERT"
+      ],
+      "finding": "DAEDL's multiplicative coupling tracks the density alone",
+      "incumbent": "71faf9e6269e",
+      "n": 4
+    },
+    {
+      "candidate": "17a462ca68bd",
+      "cells": "all",
+      "expected": [
+        "ACCEPT"
+      ],
+      "finding": "Dropping PCA improves the density",
+      "incumbent": "71faf9e6269e",
+      "n": 5
+    },
+    {
+      "candidate": "71faf9e6269e",
+      "cells": "banking77_oos",
+      "expected": [
+        "ACCEPT"
+      ],
+      "finding": "The bottleneck density beats vacuity on Banking77-OOS",
+      "incumbent": "6cc76a18b82b",
+      "n": 6
+    },
+    {
+      "candidate": "2d5e3b3523bd",
+      "cells": "banking77_oos",
+      "expected": [
+        "ACCEPT"
+      ],
+      "finding": "Additive coupling on D_full beats both inputs on Banking77-OOS",
+      "incumbent": "6cc76a18b82b",
+      "n": 7
+    },
+    {
+      "candidate": "a57d9442bf80",
+      "cells": "all",
+      "expected": [
+        "NO EFFECT"
+      ],
+      "finding": "Relative Mahalanobis on the encoder output hurts",
+      "incumbent": "2de1c4943af0",
+      "n": 8
+    }
+  ],
+  "seed": 0,
+  "stream": "templated"
+}

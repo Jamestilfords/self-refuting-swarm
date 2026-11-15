@@ -1,0 +1,47 @@
+[
+  {
+    "name": "energy@ce",
+    "sha": "b1e4ba2e46d5",
+    "stream": "baseline"
+  },
+  {
+    "name": "msp@ce",
+    "sha": "fe47292dc266",
+    "stream": "baseline"
+  },
+  {
+    "name": "energy@edl",
+    "sha": "39d3e8c0e810",
+    "stream": "baseline"
+  },
+  {
+    "name": "msp@edl",
+    "sha": "a5325abe3321",
+    "stream": "baseline"
+  },
+  {
+    "name": "vacuity@edl",
+    "sha": "6cc76a18b82b",
+    "stream": "baseline"
+  },
+  {
+    "name": "d_port@ce",
+    "sha": "3fee8950d4d1",
+    "stream": "baseline"
+  },
+  {
+    "name": "d_port@edl",
+    "sha": "71faf9e6269e",
+    "stream": "baseline"
+  },
+  {
+    "name": "d_full@ce",
+    "sha": "926c1ced9316",
+    "stream": "baseline"
+  },
+  {
+    "name": "d_full@edl",
+    "sha": "2de1c4943af0",
+    "stream": "baseline"
+  }
+]

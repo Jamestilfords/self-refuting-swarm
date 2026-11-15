@@ -1,25 +1,90 @@
 .DEFAULT_GOAL := help
 
-PIPELINE_TARGETS := setup train40 sanity smoke stream exp1 exp2 seal-hash unblind report reproduce testbed-b
+UV ?= uv
+PIPELINE_TARGETS := smoke exp2 unblind report reproduce testbed-b
 
-.PHONY: help $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan agents-bootstrap agents-plan agents-check agents-test stream $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
-	  'Skeptic: repository scaffold. Pipeline targets are not implemented yet.' \
+	  'Skeptic: E1-E3 validation and E4 store/freeze checks are implemented.' \
 	  '' \
-	  'setup      Modal app, secrets, and two volumes (E1)' \
-	  'train40    Forty fine-tunes and caches (E2)' \
-	  'sanity     Baseline AUROC against the paper (E2)' \
-	  'smoke      Four canaries, end to end (R1, L2, E3, E4)' \
-	  'stream     Templated and LLM proposal streams (L3, L5)' \
-	  'exp1       Three acceptance rules across matched orderings (E5)' \
+	  'bootstrap  Install locked Python dependencies and initialize pinned ER-1' \
+	  'setup      Provision Modal app and two volumes; validate named secrets and mounts (E1)' \
+	  'setup-check Verify an existing deployment without creating resources' \
+	  'test       Run local project tests (no Modal credentials needed)' \
+	  'train40    Launch forty E2 fine-tunes on Modal B300s' \
+	  'sanity     Audit 40 open caches and report validation AUROC (E2)' \
+	  'e3-plan    Preview four canary static checks locally (E3)' \
+	  'e3-canaries Run the four canaries on one CE validation cell (E3 CPU only)' \
+	  'smoke      Full canary verdicts and sealed guard (R1, L2, E3, E4; pending)' \
+	  'agents-bootstrap Install locked agent SDK dependencies and pinned ER-1' \
+	  'agents-plan Preview the Scout/Proposer workflow without API calls' \
+	  'agents-check Check local agent configuration (does not authenticate)' \
+	  'agents-test Run offline tests for the agent workflow' \
+	  'stream     Run bounded Exa/Proposer workflow in Modal CPU sandboxes (L5)' \
+	  'exp1       Replay registered settings supplied via REPLAY_ARGS (E5)' \
+	  'exp1-plan  Validate replay configuration without writing decisions' \
 	  'exp2       Closed loop with three arms (L6)' \
-	  'seal-hash  Freeze and hash decision logs (E4)' \
+	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
+	  'seal-check Verify a published decision freeze before test reads (E4)' \
 	  'unblind    Guard check and truth tables (R5, E4)' \
 	  'report     Figures, tables, and scorecard (R5)' \
 	  'reproduce  Replay the ledger to regenerate every table (E8)' \
 	  'testbed-b  Probe-deferral stretch testbed (R4, E6)'
+
+bootstrap:
+	$(UV) sync --frozen
+	git submodule update --init third_party/er1
+
+setup: bootstrap
+	$(UV) run --frozen python -m modal_jobs.setup
+
+setup-check:
+	$(UV) run --frozen python -m modal_jobs.setup --check-only
+
+test:
+	$(UV) run --frozen python -m pytest tests -q
+
+agents-bootstrap:
+	$(UV) sync --frozen --group agents
+	git submodule update --init third_party/er1
+
+agents-plan:
+	$(UV) run --frozen --group agents python -m skeptic.agents plan $(AGENT_ARGS)
+
+agents-check:
+	$(UV) run --frozen --group agents python -m skeptic.agents check $(AGENT_ARGS)
+
+agents-test:
+	$(UV) run --frozen --group agents python -m pytest tests/test_agents.py tests/test_agent_runtime.py -q
+
+stream:
+	$(UV) run --frozen --group agents python -m skeptic.agents run $(AGENT_ARGS)
+
+train40:
+	$(UV) run --frozen python -m modal_jobs.train40 run --all
+
+sanity:
+	$(UV) run --frozen python -m modal_jobs.sanity
+
+e3-plan:
+	$(UV) run --frozen python -m modal_jobs.sandbox plan --canaries
+
+e3-canaries:
+	$(UV) run --frozen python -m modal_jobs.sandbox run --canaries
+
+exp1-plan:
+	$(UV) run --frozen python -m skeptic.rules.replay plan $(REPLAY_ARGS)
+
+exp1:
+	$(UV) run --frozen python -m skeptic.rules.replay run $(REPLAY_ARGS)
+
+seal-hash:
+	$(UV) run --frozen python -m skeptic.store freeze
+
+seal-check:
+	$(UV) run --frozen python -m skeptic.store unseal-check
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

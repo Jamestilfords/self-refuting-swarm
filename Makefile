@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
 
 UV ?= uv
-PIPELINE_TARGETS := smoke stream exp1 exp2 seal-hash unblind report reproduce testbed-b
+PIPELINE_TARGETS := smoke stream exp1 exp2 unblind report reproduce testbed-b
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
-	  'Skeptic: E1, E2, and E3 validation execution are implemented.' \
+	  'Skeptic: E1-E3 validation and E4 store/freeze checks are implemented.' \
 	  '' \
 	  'bootstrap  Install locked Python dependencies and initialize pinned ER-1' \
 	  'setup      Provision Modal app and two volumes; validate named secrets and mounts (E1)' \
@@ -21,7 +21,8 @@ help:
 	  'stream     Templated and LLM proposal streams (L3, L5)' \
 	  'exp1       Three acceptance rules across matched orderings (E5)' \
 	  'exp2       Closed loop with three arms (L6)' \
-	  'seal-hash  Freeze and hash decision logs (E4)' \
+	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
+	  'seal-check Verify a published decision freeze before test reads (E4)' \
 	  'unblind    Guard check and truth tables (R5, E4)' \
 	  'report     Figures, tables, and scorecard (R5)' \
 	  'reproduce  Replay the ledger to regenerate every table (E8)' \
@@ -51,6 +52,12 @@ e3-plan:
 
 e3-canaries:
 	$(UV) run --frozen python -m modal_jobs.sandbox run --canaries
+
+seal-hash:
+	$(UV) run --frozen python -m skeptic.store freeze
+
+seal-check:
+	$(UV) run --frozen python -m skeptic.store unseal-check
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

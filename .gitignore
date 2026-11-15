@@ -8,6 +8,7 @@ __pycache__/
 *.npz
 .env.*
 !.env.example
+runs/agents/
 .pytest_cache/
 .cache/
 *.egg-info/

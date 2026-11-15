@@ -3,8 +3,7 @@
 score_validation  runs each proposal on validation for the five seeds of one cell. It reads only the
                   open store and writes per-item validation scores there.
 validation_calibration  validation ECE for gate G5. Runs no proposal code.
-score_test        the sealer. Runs the same files on test, writes scores into the sealed store, and
-                  returns a status only. It never returns a test-derived number.
+score_test        disabled: use the isolated E4 sealer after a published freeze.
 
 Layout written:
     <open>/scores/<group>/<sha>.npz     scores (5, n_val + n_oos_val) float32, n_in; pred, conf if probs
@@ -87,12 +86,9 @@ def open_ctx(run_dir):
 
 
 def sealed_run(run_dir) -> dict:
-    """Test context, validation labels and validation logits from a sealed run directory."""
-    c, p = np.load(Path(run_dir) / "cache.npz"), np.load(Path(run_dir) / "pooled.npz")
-    part = lambda s: {"logits": c[f"{s}__logits"], "feats": c[f"{s}__feats"], "pooled": p[f"{s}__pooled"]}
-    test, oos = part("test"), part("oos_test")
-    ctx = api.make_ctx({**part("train"), "labels": c["train__labels"]}, {k: np.concatenate([test[k], oos[k]]) for k in FIELDS})
-    return {"ctx": ctx, "n_test": len(test["logits"]), "val_labels": c["val__labels"], "val_logits": c["val__logits"]}
+    """Legacy test execution is disabled; use the guarded Modal sealer."""
+    from skeptic.store import GuardError
+    raise GuardError("Legacy test scorer is disabled; use modal_jobs.seal after a published freeze")
 
 
 def _seed_dirs(root, group: str, arm: str) -> list[Path]:
@@ -167,55 +163,47 @@ def score_validation(proposals_dir, shas, open_root, group: str) -> list[dict]:
 
 # ------------------------------------------------------------------ sealer (sealed store; status only)
 def score_test(proposals_dir, shas, open_root, sealed_root, group: str) -> list[dict]:
-    """Write test scores into the sealed store. Returns a status only."""
-    out_dir = Path(sealed_root) / "scores" / group
-    out_dir.mkdir(parents=True, exist_ok=True)
-    runs: dict[str, list] = {}
-    rows = []
-    for sha in shas:
-        row = {"sha": sha, "sealed": "ok"}
-        try:
-            p = api.load_proposal(Path(proposals_dir) / f"{sha}.py")
-            if p.arm not in runs:
-                runs[p.arm] = [sealed_run(d) for d in _seed_dirs(sealed_root, group, p.arm)]
-            target = out_dir / f"{sha}.npz"
-            if not target.exists():
-                per_seed = [_run(p, r["ctx"], full_checks=False) for r in runs[p.arm]]
-                _save(target, n_in=runs[p.arm][0]["n_test"], **_pack(per_seed))
-        except api.Malformed as e:
-            row.update(sealed=e.reason)
-        except Exception as e:
-            row.update(sealed="sealer_error", detail=f"{type(e).__name__}: {e}"[:200])
-        rows.append(row)
-    return rows
+    """Legacy test execution is disabled; use the guarded Modal sealer."""
+    from skeptic.store import GuardError
+    raise GuardError("Legacy test scorer is disabled; use modal_jobs.seal after a published freeze")
 
 
 
 # ------------------------------------------------------------------ calibration (runs no proposal code)
-def validation_calibration(open_root, sealed_root, group: str, items) -> list[dict]:
+def validation_calibration(open_root, sealed_root, group: str, items, *, source="legacy") -> list[dict]:
     """Validation ECE for gate G5. items: (sha, arm) pairs.
 
     This executes no proposal. It reads confidences already stored in the open store, and from the sealed
     store only the validation labels (one array of each cache file; test arrays are never opened).
     """
+    from skeptic.score_artifacts import load_scores
+    from skeptic.store import SealedStore
+    if group not in CELLS.values() or source not in {"legacy", "isolated"}:
+        raise ValueError("Unknown calibration group or score source")
+    cell = next(cell for cell, value in CELLS.items() if value == group)
+    store = SealedStore(sealed_root, Path.cwd())
     labels: dict[str, list] = {}
     plain: dict[str, list] = {}
     rows = []
     for sha, arm in items:
+        if arm not in {"ce", "edl"}:
+            raise ValueError("Unknown calibration arm")
         if arm not in labels:
             labels[arm], plain[arm] = [], []
             for k, sealed_dir in enumerate(_seed_dirs(sealed_root, group, arm)):
-                y = np.load(sealed_dir / "cache.npz")["val__labels"]
-                z = np.load(Path(open_root) / group / f"{arm}_seed{k}" / "cache.npz")["val__logits"].astype(np.float64)
+                y = store.read_array(f"{group}/{arm}_seed{k}", "val", "labels")
+                with np.load(Path(open_root) / group / f"{arm}_seed{k}" / "cache.npz", allow_pickle=False) as cache:
+                    z = cache["val__logits"].astype(np.float64)
                 labels[arm].append(y)
                 plain[arm].append(round(ece(softmax(z, axis=1).max(1), z.argmax(1) == y), 6))
         row = {"sha": sha, "val_ece": None, "val_ece_plain": plain[arm]}
-        path = Path(open_root) / "scores" / group / f"{sha}.npz"
-        if path.exists():
-            z = np.load(path)
-            if "conf" in z.files:
-                n = int(z["n_in"])
-                row["val_ece"] = [round(ece(z["conf"][k, :n], z["pred"][k, :n] == y), 6) for k, y in enumerate(labels[arm])]
+        artifact = load_scores(open_root, cell, sha, source=source)
+        if any(y.shape != (artifact.n_in,) for y in labels[arm]):
+            raise ValueError("Validation labels and scores are misaligned")
+        if artifact.conf is not None:
+            row["val_ece"] = [round(ece(artifact.conf[k, :artifact.n_in],
+                                       artifact.pred[k, :artifact.n_in] == y), 6)
+                              for k, y in enumerate(labels[arm])]
         rows.append(row)
     return rows
 

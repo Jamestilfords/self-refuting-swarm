@@ -5,10 +5,9 @@ and verify decision logs. It depends only on the existing NumPy dependency
 and Python's standard library. These commands do not start Modal jobs, score
 proposals, or create a Git commit.
 
-This change publishes the guard API and freeze tooling. The existing legacy
-scoring functions still need their separate isolation integration; they do
-not automatically become protected by importing this module. Proposal code
-must run in a separate Sandbox without a sealed-volume mount. A Python read
+The guard API and freeze tooling are used by the isolated Modal sealer. The
+legacy test-scoring entry points are disabled. Proposal code runs in a separate
+Sandbox without a sealed-volume mount. A Python read
 guard cannot restrict code that already has direct filesystem access.
 
 ## Required freeze inputs
@@ -91,3 +90,8 @@ cache symlinks are rejected, and NumPy pickle loading is disabled.
 A failed attempt to reverify the freeze revokes any previous permit.
 The permit is scoped to that store instance; it is a workflow check for
 trusted code, not a restriction on a Modal workspace administrator.
+
+## Modal integration
+
+The isolated sealer now consumes this guard. See [Modal sealer instructions](modal-sealer.md)
+for local tests, preview, prerequisites, and expected status-only results.

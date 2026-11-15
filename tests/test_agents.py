@@ -2,6 +2,8 @@
 import json
 import shutil
 import textwrap
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -9,8 +11,18 @@ import pytest
 
 from skeptic import api
 from skeptic.memory import LocalMemory, format_for_prompt
-from skeptic.streams.proposer import Proposer, extract_code, smoke_ctx
+from skeptic.streams.proposer import Proposer as IsolatedProposer, extract_code, smoke_ctx
 from skeptic.streams.scout import Scout, top_rejection
+
+
+def Proposer(memory, llm, ctx, *args, **kwargs):
+    """Only these authored test fixtures may execute locally; production injects Modal."""
+    def trusted_fixture_validator(text):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / f"{api.proposal_sha(text)}.py"
+            path.write_text(text)
+            return api.validate(api.load_proposal(path), ctx)["scores"]
+    return IsolatedProposer(memory, llm, ctx, *args, validator=trusted_fixture_validator, **kwargs)
 
 
 def proposal(body: str, *, source: str = "", memory_used=(), family: str = "other") -> str:
@@ -120,7 +132,7 @@ class FakeExa:
     def __init__(self):
         self.queries = []
 
-    def search_and_contents(self, query, num_results, text):
+    def search(self, query, num_results, contents):
         self.queries.append(query)
         return SimpleNamespace(results=[
             SimpleNamespace(url="https://example.org/knn", title="Deep nearest neighbours", published_date="2022-04-01",

@@ -9,7 +9,8 @@ This repository follows slide 22 of **Skeptic: Design Document and Agent
 Handoff** (November 14, 2026). E1 provisions separate Modal volumes, E2 runs
 training and audits the open caches, and E3 executes validation proposals in
 CPU Sandboxes with an append-only ledger. The validation critic and E4 sealed-store
-freeze checks are implemented; experiment replay and unblinding remain pending.
+freeze checks and matched decision replay are implemented. The registered run
+and unblinding still require their approved inputs and analysis.
 
 ## Getting started
 
@@ -209,15 +210,18 @@ Work owners are the repository's GitHub collaborators:
   and the Makefile/reproduction workflow.
 
 The proposal API, validation critic, E3 validation ledger, and E4 sealed-store
-freeze checks are implemented. Decision rules and complete scoring/unblinding
-integration remain separate work.
+freeze checks and matched R0/R1/R2 replay are implemented. Registered settings
+and complete scoring/unblinding integration remain separate work.
 
 ## Commands
 
 Run `make help` for the full command list from slide 22 and the associated work
 packages. `setup`, `setup-check`, `bootstrap`, `test`, `train40`, `sanity`,
-`e3-plan`, `e3-canaries`, `seal-hash`, and `seal-check` are implemented. `smoke`,
-`stream`, `exp1`, `exp2`, `unblind`,
+`e3-plan`, `e3-canaries`, `seal-hash`, `seal-check`, `exp1-plan`, and `exp1` are
+implemented. The bounded `stream` agent workflow and `agents-bootstrap`,
+`agents-plan`, `agents-check`, and `agents-test` are also available; see
+[the Exa/past.dev agent guide](docs/agents.md) for private `.env` setup, run limits,
+Modal isolation, output files and resume behavior. `smoke`, `exp2`, `unblind`,
 `report`, `reproduce`, and `testbed-b` remain reserved targets. Setup runs small
 CPU storage checks; it does not start training or read dataset/test scores.
 
@@ -255,12 +259,20 @@ E3's `ok` status means the proposal passed validation and produced a score;
 it is **not** a critic acceptance verdict. The full `make smoke` target awaits
 experiment-runner integration. See [Modal E3 details](modal_jobs/README.md#e3-proposal-validation).
 
+### Isolated validation stream
+
+See the [isolated scoring guide](docs/isolated-scoring.md) for local tests, a
+no-compute plan command, and the Modal scoring command with expected outputs.
+The legacy test-scoring route is disabled.
+
 ### E4 sealed store and freeze checks
 
 See the [sealed-store and freeze guide](docs/sealed-store.md) for the decision
 file contract, `seal-hash` and `seal-check` commands, publication verification,
 and trusted-job API. These tools do not start scoring or unblind a dataset.
-Existing scoring jobs need their separate isolation integration.
+The guarded Modal test scorer is available separately from validation. See
+[sealer setup, tests and expected results](docs/modal-sealer.md); a published
+experiment freeze is required before it reads test arrays.
 
 ## ER-1 dependency and credit
 
@@ -285,3 +297,10 @@ confirm the proposed defaults and record the preregistration commit before a
 main run. Keep sealed test arrays and scores outside git, the public ledger,
 shared memory, and agent inputs. E4 now supplies the guard and decision-hash
 checks; scoring integration and the approved unblinding analysis remain pending.
+
+### E5 decision replay
+
+See the [decision replay guide](docs/decision-replay.md) for setup, local tests,
+registered input configuration, and expected outputs. Existing calibrated
+ledgers and their matching per-item scores can be replayed without rerunning
+scoring. This does not automatically freeze or unblind the experiment.

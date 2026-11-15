@@ -1,6 +1,6 @@
 # Skeptic preregistration
 
-**Status: Registered.**
+**Status: Registered. Commit 5b0e6b223c60a3bab3ddfd058e12caa818330a7c, 2026-11-15 09:52:44 UTC.**
 
 Owner: [@mid9t](https://github.com/mid9t) (Ryu, R3).
 Sources: the Skeptic design document (slides 5–21 and 31, with speaker notes), the R1 and R2 implementation specs, and the ER-1 paper draft *Where Does the Evidence Come From? Auditing Density-Aware Evidential Learning for Out-of-Scope Intent Detection* (Oct 20, 2026), with ER-1 at commit `e877e9159d`.

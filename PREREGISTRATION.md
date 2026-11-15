@@ -7,10 +7,12 @@ Sources: the Skeptic design document (slides 5–21 and 31, with speaker notes),
 
 Once this file is committed, no hypothesis, threshold, gate, rule, truth definition or analysis in it changes. Anything added or changed afterwards is labelled **exploratory** in the README and in the pitch, and the original analysis is still reported. Record the commit hash of this file in the README.
 
-> **Still open before this file can be registered. Delete this box in the registration commit.**
+> **Before committing (delete this box in the commit).**
 > 1. Every value marked † is a design-document default carried in as-is. Values marked **[CONFIRM]** are choices this draft makes where the design document was silent, inconsistent, or contradicted by the ER-1 paper. Read each one.
-> 2. The timing statement in §6 records what the repository contained when this draft was written. The remaining **[FILL]** items are not known from the repository: cache provenance (§2.1), the Testbed B go/no-go (§2.2), and the LLM-stream count (§3.1).
-> 3. Change the status line to "Registered. Commit <hash>, <UTC time>." only in the commit that freezes this file.
+> 2. Fill every **[FILL]**. Most are in §3.0 (stream freeze hashes) and §6 (timing statement). This file is committed after validation scoring, so it must say exactly what ran before it.
+> 3. Compute and paste the hashes in §3.0: `sha256sum runs/ledger.jsonl`, plus the manifest of per-item score files downloaded from Modal.
+> 4. Commit and push this file **before** running the replay, before starting Experiment 2, and before any Testbed B held-out read.
+> 5. Change the status line to "Registered. Commit <hash>, <UTC time>."
 
 ---
 
@@ -88,7 +90,9 @@ Splits: train, val, test, oos_val, oos_test.
 
 ### 2.2 Testbed B (stretch, exploratory pilot): probe-deferral monitor
 
-**Status.** Go/no-go was due Sat 22:00. Outcome: **[FILL: GO / NO-GO, time, reason]**. If NO-GO, the rest of this subsection is void and Testbed B is not reported.
+**Status: run late, as an exploratory pilot.** The design document's go/no-go (Sat 22:00) was not met: no Llama activations or Llama Guard scores were cached by then. Under that rule Testbed B would have been dropped. It is instead run overnight Sat 14 – Sun 15 Nov, starting after this commit, and this is recorded as a deviation (§7). All Testbed B results are exploratory, whatever their outcome.
+
+Caching activations, fitting the probe and the band, and running the exchange test use train and tune only, and may start after this commit. No held-out shift (B, C, A1) is read until `prereg/freeze_b.json` is committed and pushed. If any gated model or dataset download fails, Testbed B is dropped and that is reported.
 
 **Monitored model and second stage:**
 - `meta-llama/Meta-Llama-3-8B-Instruct`. Residual stream at the last prompt token, `hidden_states[L]` for L ∈ {8, 12, 16, 20, 24}, stored as float16.
@@ -130,6 +134,24 @@ A signal is dropped if it cannot beat token count, or if its rank correlation wi
 
 ## 3. Proposal streams and acceptance rules
 
+### 3.0 Stream freeze
+
+Proposals were generated and scored on validation **before** this file was committed (see §6). The stream is therefore frozen here by content hash, and Experiment 1 replays exactly this stream.
+
+| Item | Value |
+|---|---|
+| Proposals in the ledger | 500 |
+| Ledger rows (proposal × cell) | 2,000, of which 1,996 have status ok. Non-ok rows: **[FILL: 4 rows, sha, cell, status]** |
+| Composition | 310 templated files + 181 LLM proposals + 4 canaries = 495. **[FILL: reconcile with 500, the 5 remaining files and their stream tag]** |
+| Templated count | 310 files. The plan was 300 (seed 0) + 8 scorecard configurations = 308. **[FILL: the 2 extra files and why]** |
+| Validation scores | 5 seeds per ok row; per-item score arrays on the Modal open volume |
+| Test scores | Not run at commit time (`not_run` on every row) |
+| G5 applicability | 1,176 ok rows return probabilities and carry their own validation ECE; 820 do not, so G5 does not apply to them. Plain-model ECE is present on every ok row |
+| `sha256(runs/ledger.jsonl)` | **[FILL]** |
+| Score-file manifest | `runs/score_manifest.sha256`: one line per per-item score file, `sha256  path`, sorted by path. Its own sha256: **[FILL]** |
+
+**No proposals are added to Experiment 1 after this commit.** The 181 LLM proposals meet the Saturday gate (≥ 100 distinct) but fall short of the planned 200–400. Results are reported for the templated and LLM streams separately and pooled, with the LLM stream's size stated. **[CONFIRM: or name a hard cutoff time and count for further LLM proposals, which must also be scored and hashed before replay.]**
+
 ### 3.1 Streams
 
 **Templated** (code, no LLM). The grid of ER-1 mutations:
@@ -143,7 +165,7 @@ A signal is dropped if it cannot beat token count, or if its rank correlation wi
 
 The grid is enumerated in a fixed order, shuffled with `default_rng(0)`, and the first †**300** are taken. The eight scorecard configurations (§4.6) are appended if the draw missed them.
 
-**LLM** (Proposer plus Scout). 200–400 proposals, with a Scout card (one Exa search) every †10 proposals. The Proposer is never shown a test number. **Distinct** means Spearman < 0.999 to every earlier proposal's validation scores in the same cell; duplicates are marked and kept out of the count. If fewer than 100 distinct LLM proposals exist by Sat 23:00, Experiment 1 runs on the templated stream plus whatever the LLM stream holds. Actual count at that time: **[FILL]**.
+**LLM** (Proposer plus Scout). 200–400 proposals, with a Scout card (one Exa search) every †10 proposals. The Proposer is never shown a test number. **Distinct** means Spearman < 0.999 to every earlier proposal's validation scores in the same cell; duplicates are marked and kept out of the count. If fewer than 100 distinct LLM proposals exist by Sat 23:00, Experiment 1 runs on the templated stream plus whatever the LLM stream holds. Actual count: 181 LLM proposals in the frozen ledger (§3.0); the Sat 23:00 gate was met.
 
 **Canaries** (excluded from every statistic and every ordering):
 
@@ -153,6 +175,8 @@ The grid is enumerated in a fixed order, shuffled with `default_rng(0)`, and the
 | CE MSP under a new name | SCORE-MATCHED |
 | Gaussian noise | NO EFFECT |
 | A function that reads `oos_test` | BUG (the guard raises) |
+
+**Registered baselines are not candidates in Experiment 1.** A proposal whose score *is* a registered baseline (by registered name) is removed from the candidate list before replay, as the replay code does. The scorecard (§4.6) is exempt: its pairs use registered scores as candidates by design.
 
 **Proposal validity.** A proposal is malformed if it has the wrong length, NaN, constant output, an import outside numpy/scipy/sklearn, file or network access, more than †60 s per seed, or fails the †item-wise check. The item-wise check scores a random 10% of the eval items alone and requires the same values to 1e-6. Malformed, timed-out and guard rows never enter orderings.
 
@@ -177,7 +201,7 @@ Results are reported for the templated and LLM streams separately and pooled.
 - If |φ_guard − φ_open| > T̂ + η, return φ_guard + Lap(σ) and redraw T̂; otherwise return φ_open.
 - Accept if the returned value is > 0.
 - †No budget cap. The generator is seeded by (cell, ordering index).
-- **[CONFIRM]** The algorithm was to be checked against Dwork et al. (2015) before registration. Result: not checked. `skeptic/rules/thresholdout.py` is still a scaffold, so there is no implementation to compare with the paper.
+- **[CONFIRM]** The algorithm was to be checked against the paper before this commit; result: **[FILL]**.
 
 **R2, critic.** Gates in fixed order; the first failing gate gives the verdict, and a proposal that passes all of them is ACCEPT. n = number of seeds, and the **seed majority** is ⌈n/2⌉ (†3 of 5).
 
@@ -202,7 +226,7 @@ EDL vacuity is a registered score that `PARENTS` may name, but it is not a G2 ba
 - α_t = γ_t·W₀ + (α − W₀)·γ_{t−τ₁} + α·Σ_{j≥2} γ_{t−τ_j}, where τ_j is the j-th rejection and missing terms are 0. Reject iff p_t ≤ α_t.
 - One state per (rule variant, cell, ordering). Every proposal that reaches G3 consumes one step, including Δ ≤ 0 with p = 1. Proposals that fail G1 or G2 consume none.
 - Reference values: α₁ = 0.002675838546; after a rejection at t = 1, α₂ = 0.003257748835.
-- **[CONFIRM]** The formula and constant were to be checked against Ramdas et al. (2017) before registration. Result: the implementation matches the golden values in this section to 1e-12 (`tests/critic/test_lord.py`). The paper was not re-read for this draft, so this is a check of the formula as written here.
+- **[CONFIRM]** The formula and constant were to be checked against the paper before this commit; result: **[FILL]**.
 
 **Leave-one-gate-out variants:** R2 without G1, G2, G3, G5 and G6, one at a time. Removing G3 means "accept if Δ > 0", with no LORD++ step and no G4. Removing any other gate skips its step. If G2 is removed, the comparator is the incumbent.
 
@@ -305,7 +329,7 @@ No intervals are claimed.
 | Item | Registered value |
 |---|---|
 | Templated proposals | †300, `default_rng(0)`, plus the 8 scorecard configurations |
-| LLM stream gate | ≥ 100 distinct by Sat 23:00; otherwise proceed and report the streams separately |
+| LLM stream | 181 proposals, frozen in §3.0; Sat 23:00 gate (≥ 100 distinct) met |
 | Scout cadence | †one Exa search per 10 proposals, ≤ 3 cards |
 | Analyst cadence | †one lesson per 25 proposals, citing proposal hashes |
 | Sandbox limit | †60 s per seed per cell; no network; open volume read-only |
@@ -315,7 +339,7 @@ No intervals are claimed.
 | Truth bootstrap | B = 5,000, seed 0 |
 | Hypothesis bootstrap | 2,000 replicates, seed 0 |
 | Fine-tune fallback | †laptop MPS caches if the 40 CUDA caches are late; disclosed |
-| Testbed B go/no-go | Sat 22:00; dropped if activations and Llama Guard scores are not cached |
+| Testbed B go/no-go | Sat 22:00 deadline missed; run late as an exploratory pilot (§2.2, §7) |
 | Testbed B held-out sizes | †4,000 / 4,000 / 2,000 |
 | Testbed B kNN, layers | †k = 10; †layers 12, 16, 20 |
 | Memory | Never contains a test number; a local JSON fallback behind the same interface |
@@ -325,13 +349,21 @@ No intervals are claimed.
 
 ## 6. Freeze and unblinding procedure
 
-**Timing statement.** This draft was written into the repository on Sun 15 Nov 2026, 08:45 UTC, after the planned Sat 19:00 PT. It is not the registration commit. At that time, from the repository contents:
-- Experiment 1 decision files existed: none. `runs/decisions/` contains only `.gitkeep`.
-- Experiment 2 runs had started: no.
-- Any Testbed B held-out shift had been read: no such read is recorded in the repository.
-- Any test number other than the logged baseline sanity read had been seen: no `runs/guard.log` and no sealed scores are in the repository.
+**Timing statement.** This file was committed at **[FILL: UTC time]**, after the planned Sat 19:00 PT. State at commit time:
 
-Anything that started before this commit and depends on a setting above is listed in §7.
+| Step | State |
+|---|---|
+| Proposal generation | Done: 500 proposals (§3.0) |
+| Validation scoring | Done: 1,996 ok rows, 5 seeds each |
+| Experiment 1 decisions | **None.** `runs/decisions/` is empty; the replay refuses to run while this file is a draft |
+| Experiment 2 (closed loop) | **Not started.** It starts only after this commit, because its proposer reacts to verdicts |
+| Test scores | **Not computed** for any proposal (`not_run`) |
+| Baseline sanity read on test (§2.1) | **[FILL: done at <time>, logged in runs/guard.log / not done]** |
+| Testbed B | Not started; no held-out shift read |
+
+**Validation data seen before registration.** The thresholds, gates and truth definitions marked † come from the design document, written before the ledger existed. The changes marked [CONFIRM] were drafted from the ER-1 paper and the R1/R2 specs, without access to the ledger's validation numbers. Ryu's own exposure: **[FILL: "I did not inspect validation AUROCs of individual proposals before this commit" / or describe what was seen]**. No threshold in this file was chosen by looking at the ledger.
+
+Anything that ran before this commit and depends on a setting above is listed in §7.
 
 **Decision-log hash.** When Experiment 1 decisions exist for every rule, variant, ordering and cell, `make seal-hash` computes:
 
@@ -372,7 +404,11 @@ It writes the hex digest to `runs/DECISIONS.sha256`. The ledger is in git alread
 | 4 | Recall numerator "true improvements accepted" | Accepted ∩ CE-energy truth set | Keeps recall ≤ 1 |
 | 5 | ER-1 `paired_bootstrap` | Bit-identical vectorised version | Compute window; equivalence tested |
 | 6 | Single p-values for H2 and H3 not specified | §1 | Needed for Holm |
+| 7 | Pre-registration committed Sat 19:00, before the stream is built | Committed Sun ~01:00, after proposal generation and validation scoring, before any decision or test read; stream frozen by hash (§3.0) | Schedule slip. The replay design keeps decisions after registration |
+| 8 | 200–400 LLM proposals by Sun morning | 181, frozen | Schedule; reported with the stream breakdown |
+| 9 | Drop Testbed B if not cached by Sat 22:00 | Run late as an exploratory pilot (§2.2) | Time became available; labelled exploratory |
+| 10 | 300 + 8 templated proposals | 310 files (§3.0) | **[FILL]** |
 
 **Later deviations:** append one line per change, with date, time, what changed and why. Every analysis outside this plan is labelled exploratory.
 
-- none recorded in the repository.
+- **[FILL or "none"]**

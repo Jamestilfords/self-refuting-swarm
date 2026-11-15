@@ -1,5 +1,6 @@
 """Exercise the full CLI on synthetic caches, all four cells, and real critic gates."""
 from dataclasses import asdict
+import hashlib
 import json
 from pathlib import Path
 import numpy as np
@@ -11,6 +12,15 @@ from skeptic.rules.replay import main
 from skeptic.score_artifacts import CELLS, auroc
 from skeptic.store import GuardError, write_decision_hash
 from tests.fixtures.critic.synth import make_cell, strong
+
+
+def write_score_manifest(root):
+    files = sorted((root / "open/scores_isolated").glob("*/*.npz"))
+    lines = [f"{hashlib.sha256(path.read_bytes()).hexdigest()}  runs/scores_isolated/{path.parent.name}/{path.name}\n"
+             for path in files]
+    manifest = root / "runs/score_manifest.sha256"
+    manifest.parent.mkdir(exist_ok=True)
+    manifest.write_text("".join(lines))
 
 
 @pytest.fixture
@@ -34,7 +44,8 @@ def experiment(tmp_path):
         rows.append({"sha": guard, "cell": cell, "arm": "ce", "status": "io", "stream": "llm", "val": None})
     config = {"orderings": 2, "ordering_seed": 8, "initial": {c: names["energy_ce"] for c in CELLS},
               "r1_threshold": .01, "r1_split_seed": 7,
-              "r1_noise": {c: [[[0., 0.], [0., 0.]]] * 2 for c in CELLS},
+              "r1_noise": {"distribution": "laplace", "sigma": .0025, "seed": 0,
+                           "algorithm": "numpy-pcg64-seedsequence-v1"},
               "ignore_parents": ["03e0017097f5", "2d5e3b3523bd", "cddf9272a0a9"],
               "critic": asdict(CriticConfig(bootstrap_B=40))}
     (tmp_path / "config.json").write_text(json.dumps(config))
@@ -54,20 +65,17 @@ def test_plan_run_and_freeze_are_separate(experiment, capsys):
     with pytest.raises(GuardError, match="Preregistration"):
         main(["run", *args])
     (root / "PREREGISTRATION.md").write_text("Status: FROZEN\nSynthetic test fixture only.\n")
-    manifest = root / "runs" / "score_manifest.sha256"
-    manifest.parent.mkdir()
-    manifest.write_text("pending  scores/placeholder.npz\n")
+    write_score_manifest(root)
     assert main(["run", *args]) == 0
     paths = list((root / "runs/decisions").glob("R*/ord_*.jsonl"))
     assert len(paths) == 6
     before = {p: p.read_bytes() for p in paths}
-    assert all(len(p.read_text().splitlines()) == 8 for p in paths)
+    assert all(len(p.read_text().splitlines()) == 4 for p in paths)
     # A registered baseline tagged "templated" in the source ledger is still excluded.
-    assert all(json.loads(line)["sha"] in {"a" * 12, "b" * 12}
+    assert all(json.loads(line)["sha"] == "a" * 12
                for p in paths for line in p.read_text().splitlines())
     r2 = [json.loads(line) for p in paths if p.parent.name == "R2" for line in p.read_text().splitlines()]
-    assert {r["verdict"] for r in r2} == {"UNDERPOWERED", "BUG"}
-    assert all(r["gates"] == {"lock": "fail"} for r in r2 if r["verdict"] == "BUG")
+    assert {r["verdict"] for r in r2} == {"UNDERPOWERED"}
     manifest = json.loads((root / "runs/decision_manifest.json").read_text())
     assert manifest["replay"]["source"] == "isolated" and len(manifest["replay"]["score_sha256"]) == 40
     assert main(["run", *args]) == 0
@@ -86,11 +94,14 @@ def test_configuration_and_score_mismatch_fail_before_writing(experiment):
     with pytest.raises(ValueError, match="Every critic setting"):
         main(["plan", *args])
     config["critic"]["fdr_alpha"] = .1
+    config["r1_noise"]["sigma"] = 0
+    config_path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match="R1 needs a registered finite Laplace"):
+        main(["plan", *args])
+    config["r1_noise"]["sigma"] = .0025
     config_path.write_text(json.dumps(config))
     (root / "PREREGISTRATION.md").write_text("Status: FROZEN\n")
-    manifest = root / "runs" / "score_manifest.sha256"
-    manifest.parent.mkdir()
-    manifest.write_text("pending  scores/placeholder.npz\n")
+    write_score_manifest(root)
     ledger = root / "ledger.jsonl"
     rows = [json.loads(line) for line in ledger.read_text().splitlines()]
     rows[0]["val"]["auroc"] = [0.] * 5
@@ -98,3 +109,32 @@ def test_configuration_and_score_mismatch_fail_before_writing(experiment):
     with pytest.raises(ValueError, match="AUROC and score artifact differ"):
         main(["run", *args])
     assert not (root / "runs" / "decisions").exists()
+
+
+def test_registered_config_plans_200_orderings(capsys):
+    root = Path(__file__).resolve().parents[1]
+    args = ["--config", str(root / "runs/replay-config.json"),
+            "--ledger", str(root / "runs/ledger.jsonl"),
+            "--baselines", str(root / "proposals/baselines.json"),
+            "--open-root", str(root / "runs"), "--source", "legacy", "--output", str(root)]
+    assert main(["plan", *args]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    assert summary["orderings"] == 200 and summary["decision_files"] == 600
+    assert all(count == 487 for count in summary["proposals_per_cell"].values())
+
+
+def test_changed_score_file_cannot_pass_registered_manifest(experiment):
+    root, args = experiment
+    (root / "PREREGISTRATION.md").write_text("Status: FROZEN\n")
+    write_score_manifest(root)
+    path = next((root / "open/scores_isolated").glob("*/*.npz"))
+    with np.load(path) as cache:
+        values = cache["scores"]
+        n_in = int(cache["n_in"])
+        scorer = str(cache["scorer"])
+        proposal_sha = str(cache["proposal_sha"])
+    np.savez_compressed(path, scores=values, n_in=n_in, scorer=scorer,
+                        proposal_sha=proposal_sha, runtime_s=1.0)
+    with pytest.raises(ValueError, match="Score artifact differs from registered manifest"):
+        main(["run", *args])
+    assert not (root / "runs/decisions").exists()

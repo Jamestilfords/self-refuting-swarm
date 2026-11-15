@@ -1,6 +1,5 @@
 """Canonical ledger validation and matched proposal orderings."""
 from __future__ import annotations
-import hashlib
 import json
 import re
 from pathlib import Path
@@ -60,15 +59,13 @@ def load_ledger(path: str | Path) -> dict[tuple[str, str], dict]:
 
 def matched_orderings(rows: dict[tuple[str, str], dict], cell: str,
                       count: int, seed: int) -> list[tuple[str, ...]]:
-    """Stable hash ordering; no Python or NumPy RNG-version dependence."""
+    """Registered NumPy permutations of scored proposals, seeded per cell."""
     if cell not in CELLS or type(count) is not int or count <= 0 or type(seed) is not int or seed < 0:
         raise ValueError("Cell, ordering count and seed must be registered")
     shas = sorted(sha for (sha, row_cell), row in rows.items()
-                  if row_cell == cell and row["stream"] in PROPOSAL_STREAMS)
+                  if row_cell == cell and row["stream"] in PROPOSAL_STREAMS
+                  and row["status"] == "ok")
     if not shas:
         raise ValueError("No proposals for cell")
-    result = []
-    for ordering in range(count):
-        prefix = f"{seed}:{cell}:{ordering}:".encode()
-        result.append(tuple(sorted(shas, key=lambda sha: hashlib.sha256(prefix + sha.encode()).digest())))
-    return result
+    rng = np.random.default_rng(seed)
+    return [tuple(rng.permutation(shas)) for _ in range(count)]

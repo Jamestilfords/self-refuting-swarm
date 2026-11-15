@@ -6,6 +6,7 @@ from skeptic.critic import er1
 from skeptic.critic.cache import StatsCache, stats_key
 from skeptic.critic.config import CriticConfig
 from skeptic.critic.types import ScoreSet
+from typing import Callable
 
 
 def benefit_stats(
@@ -14,6 +15,7 @@ def benefit_stats(
     config: CriticConfig,
     cell: str,
     cache: StatsCache | None,
+    bootstrap_fn: Callable | None = None,
 ) -> dict:
     seed_deltas = candidate.seed_aurocs() - comparator.seed_aurocs()
     delta = float(seed_deltas.mean())
@@ -32,7 +34,7 @@ def benefit_stats(
     key = stats_key(candidate, comparator, cell, config.bootstrap_B, config.bootstrap_seed)
     hit = None if cache is None else cache.get(key)
     if hit is None:
-        bootstrap = er1.paired_bootstrap(
+        bootstrap = (bootstrap_fn or er1.paired_bootstrap)(
             list(candidate.val_id),
             list(candidate.val_oos),
             list(comparator.val_id),

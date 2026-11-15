@@ -28,8 +28,13 @@ def ensure_er1_path() -> None:
 def critic_factory(cells, config):
     """Reuse loaded ScoreSets; give each cell/ordering its own LORD++ state."""
     ensure_er1_path()
+    from skeptic.critic.cache import MemoryStatsCache
     from skeptic.critic.lord import LordPlusPlus
     from skeptic.critic.verdict import verdict
+    from skeptic.fastboot import paired_bootstrap
+
+    stats_cache = MemoryStatsCache()
+    gate_cache = {}
 
     def make(cell, ordering, initial_sha):
         loaded = cells[cell]
@@ -40,7 +45,8 @@ def critic_factory(cells, config):
         def decide(row, incumbent_sha, fdr_state, position):
             return verdict(drop_ignored_parents(loaded.candidates[row["sha"]]),
                            loaded.candidates[incumbent_sha],
-                           loaded.baselines, fdr_state, cell, config=config)
+                           loaded.baselines, fdr_state, cell, config=config, cache=stats_cache,
+                           bootstrap_fn=paired_bootstrap, gate_cache=gate_cache)
 
         return Critic(initial_sha, state, decide)
     return make

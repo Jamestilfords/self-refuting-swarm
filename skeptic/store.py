@@ -178,9 +178,10 @@ def _check_registration(repo: Path) -> None:
     if not registration.is_file() or registration.is_symlink():
         raise GuardError("Preregistration is missing")
     registration_text = registration.read_text(encoding="utf-8")
-    if not re.search(r"(?mi)^\*{0,2}Status:\s*FROZEN\b", registration_text) \
-            or "TODO:" in registration_text:
-        raise GuardError("Preregistration is still a draft or lacks FROZEN status")
+    frozen = re.search(r"(?mi)^\*{0,2}Status:\s*FROZEN\b", registration_text)
+    registered = re.search(r"(?mi)^\*{0,2}Status:\s*Registered\.\s+Commit\s+[0-9a-f]{40},", registration_text)
+    if (not frozen and not registered) or "TODO:" in registration_text or "[FILL]" in registration_text:
+        raise GuardError("Preregistration is still a draft or lacks registered status")
 
 
 def write_decision_hash(repo_root: str | Path) -> str:

@@ -57,12 +57,19 @@ def test_freeze_is_deterministic_create_only_and_detects_byte_changes(decisions)
         store.verify_decision_hash(decisions)
 
 
-@pytest.mark.parametrize("registration", ["Status: DRAFT\n", "Status: FROZEN\nTODO: approve\n"])
+@pytest.mark.parametrize("registration", ["Status: DRAFT\n", "Status: FROZEN\nTODO: approve\n",
+                                           "Status: Registered\n"])
 def test_draft_registration_prevents_freeze(decisions, registration):
     (decisions / "PREREGISTRATION.md").write_text(registration)
     with pytest.raises(store.GuardError, match="draft"):
         store.write_decision_hash(decisions)
     assert not (decisions / store.HASH_RELATIVE).exists()
+
+
+def test_registered_status_with_commit_is_accepted(tmp_path):
+    (tmp_path / "PREREGISTRATION.md").write_text(
+        "**Status: Registered. Commit " + "a" * 40 + ", 2026-11-15 09:52:44 UTC.**\n")
+    store._check_registration(tmp_path)
 
 
 @pytest.mark.parametrize("damage", [

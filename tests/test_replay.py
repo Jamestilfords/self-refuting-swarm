@@ -4,12 +4,24 @@ from pathlib import Path
 import numpy as np
 import pytest
 from skeptic import store
+from skeptic.score_artifacts import auroc
 from skeptic.rules.common import CELLS, ScoreArtifact, load_ledger, matched_orderings
 from skeptic.rules.critic import Critic
 from skeptic.rules.engine import combine_cells, replay_cell, write_decision_logs
 from skeptic.rules.ratchet import Ratchet
-from skeptic.rules.thresholdout import Thresholdout, stratified_split
+from skeptic.rules.thresholdout import Thresholdout, stratified_split, split_aurocs, laplace_noise
 BASE, GOOD, BAD = "000000000000", "111111111111", "222222222222"
+
+
+class ZeroNoise:
+    def threshold(self):
+        return 0.0
+
+    def query(self):
+        return 0.0
+
+    def answer(self):
+        return 0.0
 
 class FakeDecision:
     def __init__(self, row):
@@ -80,7 +92,7 @@ def test_r0_r1_r2_replay_decisions_and_gate_enforcement():
     second = stratified_split(4, 8, 7)
     assert np.array_equal(first.open_in, second.open_in)
     r1 = Thresholdout.from_baseline(BASE, _artifact("base"), threshold=.01,
-                                    split_seed=7, noise=lambda _position: (0., 0.))
+                                    split_seed=7, noise=ZeroNoise())
     accepted = r1.step(good, _artifact("good"), 0)
     assert accepted["verdict"] == "ACCEPT" and not accepted["used_guard"]
     rejected = r1.step(bad, _artifact("bad"), 1)
@@ -98,7 +110,8 @@ def test_r0_r1_r2_replay_decisions_and_gate_enforcement():
     with pytest.raises(ValueError, match="every applicable"):
         broken.step(good, 0)
 
-def test_replay_uses_same_order_for_every_rule_and_cell(tmp_path):
+@pytest.mark.parametrize("ordering_count", [2, 200])
+def test_replay_uses_same_order_for_every_rule_and_cell(tmp_path, ordering_count):
     rows = {(row["sha"], cell): row for cell in CELLS
             for row in (_row(BASE, "baseline", .5, cell),
                         _row(GOOD, "templated", .6, cell),
@@ -111,14 +124,16 @@ def test_replay_uses_same_order_for_every_rule_and_cell(tmp_path):
         return Critic(initial, {"t": 0}, verdict)
 
     loader = lambda _cell, sha: _artifact("base" if sha == BASE else "good" if sha == GOOD else "bad")
-    replays = [replay_cell(rows, cell, initial_sha=BASE, ordering_count=2, ordering_seed=8,
+    replays = [replay_cell(rows, cell, initial_sha=BASE, ordering_count=ordering_count, ordering_seed=8,
                            score_loader=loader, r1_threshold=.01, r1_split_seed=7,
-                           noise_factory=lambda _cell, _ordering: lambda _position: (0., 0.),
+                           noise_factory=lambda _cell, _ordering: ZeroNoise(),
                            critic_factory=critic_factory) for cell in CELLS]
     logs = combine_cells(*replays)
-    assert len(logs) == 6 and all(len(items) == 8 for items in logs.values())
-    write_decision_logs(tmp_path, logs, ordering_count=2)
+    assert len(logs) == 3 * ordering_count and all(len(items) == 8 for items in logs.values())
+    write_decision_logs(tmp_path, iter(logs.items()) if ordering_count == 200 else logs,
+                        ordering_count=ordering_count)
     assert len(store.decision_digest(tmp_path)) == 64
+    assert len(list((tmp_path / "runs/decisions").glob("R*/ord_*.jsonl"))) == 3 * ordering_count
     assert matched_orderings(rows, "clinc150/bert", 2, 8) == matched_orderings(rows, "clinc150/bert", 2, 8)
     with pytest.raises(ValueError, match="R0, R1 and R2"):
         write_decision_logs(tmp_path / "partial", {("R0", 0): []}, ordering_count=1)
@@ -127,3 +142,75 @@ def test_canonical_ledger_loader_accepts_existing_format():
     path = Path(__file__).resolve().parents[1] / "runs/ledger.jsonl"
     rows = load_ledger(path)
     assert len(rows) > 1000 and (GOOD, "clinc150/bert") not in rows
+
+
+def test_orderings_follow_seeded_numpy_permutations_and_exclude_failed_rows():
+    rows = {(sha, "clinc150/bert"): _row(sha, "llm", .6)
+            for sha in (GOOD, BAD, "333333333333")}
+    rows[(BAD, "clinc150/bert")]["status"] = "io"
+    expected_rng = np.random.default_rng(0)
+    expected = [tuple(expected_rng.permutation(sorted((GOOD, "333333333333"))))
+                for _ in range(2)]
+    assert matched_orderings(rows, "clinc150/bert", 2, 0) == expected
+
+
+def test_threshold_noise_persists_until_guard_answer():
+    class TracedNoise:
+        def __init__(self):
+            self.events = []
+            self.queries = iter((1., -1., 1.))
+
+        def threshold(self):
+            self.events.append("threshold")
+            return 0.0
+
+        def query(self):
+            self.events.append("query")
+            return next(self.queries)
+
+        def answer(self):
+            self.events.append("answer")
+            return 0.0
+
+    noise = TracedNoise()
+    r1 = Thresholdout.from_baseline(BASE, _artifact("base"), threshold=.01,
+                                    split_seed=7, noise=noise)
+    row = _row(GOOD, "llm", .6)
+    assert not r1.step(row, _artifact("good"), 0)["used_guard"]
+    assert r1.step(row, _artifact("good"), 1)["used_guard"]
+    assert not r1.step(row, _artifact("good"), 2)["used_guard"]
+    assert noise.events == ["threshold", "query", "query", "answer", "threshold", "query"]
+
+
+def test_laplace_stream_is_deterministic_per_cell_and_ordering():
+    def draws(cell, ordering):
+        noise = laplace_noise(cell, ordering, sigma=.0025, seed=0)
+        return noise.threshold(), noise.query(), noise.answer()
+    assert draws("clinc150/bert", 7) == draws("clinc150/bert", 7)
+    assert draws("clinc150/bert", 7) != draws("clinc150/bert", 8)
+    assert draws("clinc150/bert", 7) != draws("clinc150/roberta", 7)
+
+
+def test_cached_aurocs_match_direct_replay():
+    cell = "clinc150/bert"
+    rows = {(row["sha"], cell): row for row in
+            (_row(BASE, "baseline", .5, cell), _row(GOOD, "llm", .6, cell))}
+    artifacts = {BASE: _artifact("base"), GOOD: _artifact("good")}
+    split = stratified_split(4, 8, 7)
+    full = {sha: [auroc(seed[:artifact.n_in], seed[artifact.n_in:])
+                  for seed in artifact.scores]
+            for sha, artifact in artifacts.items()}
+    halves = {sha: split_aurocs(artifact, split) for sha, artifact in artifacts.items()}
+    kwargs = {"initial_sha": BASE, "ordering_count": 2, "ordering_seed": 8,
+              "score_loader": lambda _cell, sha: artifacts[sha],
+              "r1_threshold": .01, "r1_split_seed": 7,
+              "noise_factory": lambda c, order: laplace_noise(c, order, sigma=.0025, seed=0)}
+    direct = replay_cell(rows, cell, **kwargs)
+    cached = replay_cell(rows, cell, **kwargs, validated_aurocs=full, r1_split_scores=halves)
+    assert direct == cached
+
+
+def test_incomplete_streamed_logs_never_create_output(tmp_path):
+    with pytest.raises(ValueError, match="R0, R1 and R2"):
+        write_decision_logs(tmp_path, iter(list(_logs().items())[:2]), ordering_count=1)
+    assert not (tmp_path / "runs").exists()

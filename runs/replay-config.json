@@ -1,0 +1,39 @@
+{
+  "orderings": 200,
+  "ordering_seed": 0,
+  "initial": {
+    "banking77_oos/bert": "b1e4ba2e46d5",
+    "banking77_oos/roberta": "b1e4ba2e46d5",
+    "clinc150/bert": "b1e4ba2e46d5",
+    "clinc150/roberta": "b1e4ba2e46d5"
+  },
+  "r1_threshold": 0.01,
+  "r1_split_seed": 0,
+  "r1_noise": {
+    "distribution": "laplace",
+    "sigma": 0.0025,
+    "seed": 0,
+    "algorithm": "numpy-pcg64-seedsequence-v1"
+  },
+  "ignore_parents": [
+    "03e0017097f5",
+    "2d5e3b3523bd",
+    "cddf9272a0a9"
+  ],
+  "critic": {
+    "g1_flip_thresh": 0.001,
+    "g2_rho_thresh": 0.999,
+    "g2_weak_incumbent_check": true,
+    "bootstrap_B": 2000,
+    "bootstrap_seed": 0,
+    "fdr_alpha": 0.1,
+    "fdr_w0": 0.05,
+    "g4_band": 0.001,
+    "mdd_power": 0.8,
+    "g5_ece_tol": 0.01,
+    "g5_bins": 15,
+    "g6_angles": 720,
+    "g6_tol": 0.0001,
+    "seed_majority": "ceil_half"
+  }
+}

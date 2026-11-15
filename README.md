@@ -318,9 +318,10 @@ A finite test set misses some real gains. In the low-power synthetic check (`del
 
 ## Research state
 
-`PREREGISTRATION.md` is a filled draft, not a frozen registration. @mid9t must
-resolve the remaining `[FILL]` items and commit it before a main run, then
-record that commit hash here. The critic's `g2_mode="scorecard"` is the
+`PREREGISTRATION.md` is registered; its status line records commit
+`5b0e6b223c60a3bab3ddfd058e12caa818330a7c`. The 500-proposal ledger and
+the score-file manifest are committed. The matching per-item score files must
+be downloaded before the main replay. The critic's `g2_mode="scorecard"` is the
 scorecard rule in §4.6; the proposal stream stays on `g2_mode="stream"`.
 Keep sealed test arrays and scores outside git, the public ledger, shared
 memory, and agent inputs. E4 supplies the guard and decision-hash checks;
@@ -329,6 +330,6 @@ scoring integration and the approved unblinding analysis remain pending.
 ### E5 decision replay
 
 See the [decision replay guide](docs/decision-replay.md) for setup, local tests,
-registered input configuration, and expected outputs. Existing calibrated
+the 200-ordering configuration, and expected outputs. Existing calibrated
 ledgers and their matching per-item scores can be replayed without rerunning
 scoring. This does not automatically freeze or unblind the experiment.

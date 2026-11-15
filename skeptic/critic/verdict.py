@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 from skeptic.critic.config import DEFAULT_CONFIG, CriticConfig
 from skeptic.critic.g1 import gate_g1
 from skeptic.critic.g2 import gate_g2
@@ -11,6 +13,7 @@ from skeptic.critic.g5 import gate_g5
 from skeptic.critic.g6 import gate_g6
 from skeptic.critic.lord import LordPlusPlus
 from skeptic.critic.types import BaselineSet, Decision, ScoreSet, Verdict
+from skeptic.critic.types import GateResult
 from skeptic.critic.cache import StatsCache
 
 _SKIPPABLE = frozenset({"G1", "G2", "G3", "G5", "G6"})
@@ -27,6 +30,8 @@ def verdict(
     skip: frozenset[str] = frozenset(),
     exclude_baselines: frozenset[str] = frozenset(),
     cache: StatsCache | None = None,
+    bootstrap_fn: Callable | None = None,
+    gate_cache: dict[tuple, GateResult] | None = None,
     g2_mode: str = "stream",
 ) -> Decision:
     if g2_mode not in {"stream", "scorecard"}:
@@ -55,7 +60,12 @@ def verdict(
     if "G1" in skip:
         gates["G1"] = "skipped"
     else:
-        g1 = gate_g1(candidate, incumbent, config)
+        g1_key = ("G1", cell, candidate.name, incumbent.name, config.digest())
+        g1 = None if gate_cache is None else gate_cache.get(g1_key)
+        if g1 is None:
+            g1 = gate_g1(candidate, incumbent, config)
+            if gate_cache is not None:
+                gate_cache[g1_key] = g1
         gates["G1"] = g1.outcome
         detail["G1"] = g1.detail
         if g1.outcome == "fail":
@@ -68,7 +78,13 @@ def verdict(
         gates["G2"] = "skipped"
         comparator = incumbent
     else:
-        g2 = gate_g2(candidate, incumbent, baselines, config, exclude_baselines, g2_mode)
+        g2_key = ("G2", cell, candidate.name, incumbent.name, config.digest(),
+                  tuple(sorted(exclude_baselines)), g2_mode)
+        g2 = None if gate_cache is None else gate_cache.get(g2_key)
+        if g2 is None:
+            g2 = gate_g2(candidate, incumbent, baselines, config, exclude_baselines, g2_mode)
+            if gate_cache is not None:
+                gate_cache[g2_key] = g2
         gates["G2"] = g2.outcome
         detail["G2"] = g2.detail
         comparator = _lookup_comparator(g2.detail["comparator"], incumbent, baselines)
@@ -89,7 +105,7 @@ def verdict(
                 gates, Verdict.NO_EFFECT, None, detail, config,
             )
     else:
-        stats = benefit_stats(candidate, comparator, config, cell, cache)
+        stats = benefit_stats(candidate, comparator, config, cell, cache, bootstrap_fn)
         delta = stats["delta"]
         if delta <= 0.0:
             alpha_t = fdr_state.level()

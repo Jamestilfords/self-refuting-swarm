@@ -166,3 +166,9 @@ workspace. It uses CPU and does not start B300 training.
 SDK references: [Apps](https://modal.com/docs/guide/apps),
 [Volumes](https://modal.com/docs/guide/volumes), and
 [Secrets](https://modal.com/docs/guide/secrets).
+
+## Isolated validation stream
+
+See [run and test instructions](../docs/isolated-scoring.md). The batch stream
+uses disposable sandboxes and keeps the separate trusted G5 calibration pass.
+The former `score_stream --seal` route is disabled.

@@ -9,6 +9,7 @@ st = pytest.importorskip("streamlit", reason="Install the optional dashboard gro
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
 import dashboard.data as data  # noqa: E402
+import dashboard.evidence as evidence  # noqa: E402
 
 APP = Path(__file__).resolve().parents[1] / "dashboard/app.py"
 
@@ -90,8 +91,10 @@ def test_play_pause_speed_and_arm_switch():
 
 def test_memory_navigation_to_replay_and_provenance():
     at = app("Memory study")
-    assert len(at.metric) == 3
-    assert len(at.dataframe[0].value) == 9
+    assert len(at.metric) == 6
+    assert [m.value for m in at.metric[-3:]] == ["81", "97", "68"]
+    assert len(at.dataframe[0].value) == 6  # Direct memory usage across the six Arm B runs.
+    assert len(at.dataframe[1].value) == 9  # Three arms × three seeds for the selected cell.
     at.selectbox(key="memory_cell").set_value("clinc150/bert").run()
     at.selectbox(key="memory_run").set_value("clinc150_bert/C2").run()
     next(b for b in at.button if b.label == "Open this recording").click().run()
@@ -156,3 +159,98 @@ def test_local_server_defaults():
     assert config["server"]["address"] == "127.0.0.1"
     assert config["server"]["enableStaticServing"] is False
     assert config["browser"]["gatherUsageStats"] is False
+
+
+def test_james_trace_shows_ancestry_code_and_validation():
+    at = app("Research trace")
+    assert at.selectbox(key="trace_run_id").value == "banking77_bert/B0"
+    assert at.selectbox(key="trace_slot").value == 60
+    assert "658fabc872e5" in rendered_html(at)
+    assert "SCORE-MATCHED" in rendered_html(at)
+    assert at.metric[-1].value == "+0.0024"
+    assert at.code and "def score(ctx)" in at.code[0].value
+    assert any("hash matches" in s.value for s in at.success)
+    assert "Lesson found through earlier proposal references" in rendered_html(at)
+    assert any("m_0104 → m_0079 → m_0060 → m_0059" in c.value for c in at.caption)
+    assert any("indirect link does not establish" in i.value for i in at.info)
+    assert at.get("download_button")
+    next(b for b in at.button if b.label == "Inspect this slot in playback").click().run()
+    assert at.radio(key="page").value == "Proposal replay"
+    assert at.selectbox(key="run_id").value == "banking77_bert/B0"
+    assert at.slider(key="cursor").value == 60
+    assert not at.exception
+
+
+def test_trace_follows_direct_lesson_to_later_proposal():
+    at = app("Research trace")
+    at.selectbox(key="trace_run_id").set_value("clinc150_bert/B0").run()
+    at.selectbox(key="trace_slot").set_value(4).run()
+    assert at.selectbox(key="trace_followup").value == 29
+    at.button(key="open_followup").click().run()
+    assert at.selectbox(key="trace_slot").value == 29
+    assert "Directly declared lesson: m_0058" in rendered_html(at)
+    assert not at.exception
+
+
+def test_trace_filters_handle_runs_without_complete_chains():
+    at = app("Research trace")
+    at.selectbox(key="trace_run_id").set_value("banking77_bert/A0").run()
+    at.checkbox(key="complete_only").check().run()
+    assert any("no complete source-to-lesson-to-follow-up" in i.value for i in at.info)
+    at.checkbox(key="complete_only").uncheck().run()
+    at.selectbox(key="trace_slot").set_value(13).run()
+    assert any("Recorded reason: duplicate" in c.value for c in at.caption)
+    assert not at.exception
+
+
+def test_health_exposes_missing_logs_and_failure_navigation():
+    at = app("Run health")
+    assert [m.value for m in at.metric] == ["18 / 18", "1440", "167", "0 / 600"]
+    assert any("Detailed Experiment 1 replay logs" in w.value for w in at.warning)
+    assert any("not verified" in i.value for i in at.info)
+    at.button(key="inspect_failure").click().run()
+    assert at.radio(key="page").value == "Research trace"
+    assert at.selectbox(key="trace_slot").value == 13
+    assert any("Recorded reason" in c.value for c in at.caption)
+    assert not at.exception
+
+
+def test_health_works_even_when_the_overview_snapshot_is_missing(monkeypatch):
+    def unavailable():
+        raise FileNotFoundError("private path")
+
+    monkeypatch.setattr(data, "snapshot", unavailable)
+    at = app("Run health")
+    assert at.metric[0].value == "18 / 18"
+    assert not at.error and not at.exception
+
+
+def test_missing_trace_is_visible_without_private_error_details(monkeypatch):
+    def unavailable(_run):
+        raise FileNotFoundError("private path")
+
+    monkeypatch.setattr(evidence, "trace_run", unavailable)
+    at = app("Research trace")
+    assert any("decision log is missing or invalid" in e.value for e in at.error)
+    assert "private path" not in at.error[0].value
+    assert not at.exception
+
+
+def test_curated_notes_are_editorial_and_refreshable(monkeypatch):
+    def notes():
+        return {"status": "Provided", "prepared_by": "Research team",
+                "research": {"question": "Curated question", "observed_result": "Curated observation", "limitation": "Curated limitation"},
+                "featured_trace": {"run_id": "clinc150_bert/B0", "proposal_sha": "db08a69d6d63"},
+                "sponsors": {"past.dev": {"status": "Recent check", "evidence": "Two named recall checks"}}}
+
+    monkeypatch.setattr(evidence, "demo_notes", notes)
+    at = app()
+    assert "Curated question" in rendered_html(at)
+    assert at.metric[0].value == "487"
+    at.button(key="overview_trace").click().run()
+    assert at.selectbox(key="trace_run_id").value == "clinc150_bert/B0"
+    assert at.selectbox(key="trace_slot").value == 4
+    at.radio(key="page").set_value("Guard & provenance").run()
+    assert "Two named recall checks" in rendered_html(at)
+    assert any("later past.dev recall check does not prove" in c.value for c in at.caption)
+    assert not at.exception

@@ -64,7 +64,7 @@ def test_non_web_sources_and_unscored_rows(tmp_path, source):
     assert row["critic"]["gates"] == {}
 
 
-@pytest.mark.parametrize("run_id", ["../../.env", "/sealed", "clinc150_bert/B0/../../secret", "clinc150_bert/B9", "%2e%2e/.env"])
+@pytest.mark.parametrize("run_id", ["../../.env", "/sealed", "clinc150_bert/B0/../../secret", "clinc150_bert/D0", "%2e%2e/.env"])
 def test_run_path_is_not_user_selectable(run_id):
     with pytest.raises(ValueError, match="Unknown run"):
         recorded_run(run_id)

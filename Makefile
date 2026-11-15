@@ -68,7 +68,7 @@ dashboard:
 	$(UV) run --frozen --only-group dashboard streamlit run dashboard/app.py $(DASHBOARD_ARGS)
 
 dashboard-test:
-	$(UV) run --frozen --only-group dashboard --only-group dev python -m pytest tests/test_dashboard.py tests/test_dashboard_app.py -q
+	$(UV) run --frozen --only-group dashboard --only-group dev python -m pytest tests/test_dashboard.py tests/test_dashboard_evidence.py tests/test_dashboard_app.py -q
 
 train40:
 	$(UV) run --frozen python -m modal_jobs.train40 run --all

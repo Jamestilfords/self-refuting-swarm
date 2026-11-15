@@ -40,7 +40,26 @@ uv run --frozen --only-group dashboard streamlit run dashboard/app.py
 usage telemetry, and keeps static file serving off. Share the browser window
 for the demo; this is a local application, not a public hosted service.
 
-## A three-minute demo
+## A two-minute research demo
+
+1. **0:00–0:15 — Overview:** state the research question and show the three-rule
+   comparison. Keep the validation-only limitation visible.
+2. **0:15–1:10 — Research trace:** open `banking77_bert/B0`, slot 60. Follow its
+   source query and method, rationale, hash-matched code and `SCORE-MATCHED`
+   verdict. Expand the memory reference paths and cited earlier verdicts. The
+   source and lesson links here are indirect; do not describe them as direct reads.
+3. **1:10–1:35 — Memory study:** show 81 proposals citing source cards, 97 total
+   source citations, and 68 proposals citing lessons across the six Arm B runs.
+   Show the saturation limitation alongside these usage counts.
+4. **1:35–2:00 — Run health:** show the 18 runs and 1,440 slots, the 167 unscored
+   slots and their reasons, and the missing detailed replay/freeze artifacts.
+   End with the research limitations and reproducible run commands.
+
+For a direct lesson-to-follow-up example, use Research trace → `clinc150_bert/B0`
+→ slot 4 → `m_0058` → slot 29. The trace view also offers a validation-only JSON
+export for offline review. See [the evidence handoff](EVIDENCE_CONTRACT.md).
+
+## Explore all six views
 
 1. **Overview:** compare R0 ratchet, R1 Thresholdout, and R2 critic across four
    dataset/backbone cells. Bars show mean acceptances and lines show minimum–
@@ -57,10 +76,20 @@ for the demo; this is a local application, not a public hosted service.
    rejections whose `(family, verdict)` pair appeared among earlier rejections
    in the same run. Cards average the three runs equally. H5 is descriptive;
    the measure saturates and does not establish a shared-memory benefit.
-4. **Guard & provenance:** show canary expectations alongside observed
+4. **Research trace:** inspect Exa source cards, original rationale and code,
+   actual gate outcomes, cited earlier verdicts, and direct/indirect memory
+   ancestry. Use the complete-trace filter or follow a linked later proposal.
+   Source files are hashed and displayed as text, never executed.
+5. **Run health:** compare registered counts with the current local files,
+   inspect unscored reasons and recorded budgets, and export a local health
+   report. Additional local run directories are labeled separately. This view
+   remains available if the overview summary is missing.
+6. **Guard & provenance:** show canary expectations alongside observed
    scoring-ledger statuses and source files. The leak canary has `io` in four
    cells; `BUG` is its expected critic verdict, not a verdict established by
    those ledger rows. `ok` means scoring succeeded, not critic acceptance.
+   Provider evidence from James’s bundle is attributed to that source; a recent
+   past.dev recall check does not establish historical experiment retrieval.
 
 ## Expected results and limits
 
@@ -93,6 +122,14 @@ The data adapter reads only:
 - `runs/exp2/summary.json` — recorded run totals and descriptive H5 metrics.
 - `runs/exp2/{banking77,clinc150}_bert/{A,B,C}{0,1,2}/decisions.jsonl` — a
   selected recording; an allowlist projects only its validation fields.
+- Each discovered validation run’s `memory.jsonl`, `proposals/llm.json`,
+  `proposals/<sha>.py`, and `budget.json` — projected trace and usage fields.
+- Optional `tables/evidence_bundle.json` — James’s editorial notes and featured
+  proposal selector. The adapter follows the [published format](EVIDENCE_CONTRACT.md).
+- File metadata for `tables/pastdev_check.json`, `runs/decision_manifest.json`,
+  `runs/DECISIONS.sha256`, `runs/guard.log`, `runs/score_manifest.sha256`, run
+  state files, and the 600 expected detailed replay logs. Presence is not
+  integrity verification; raw recall and guard payloads are not displayed.
 - `runs/ledger.jsonl`, `proposals/baselines.json`, `proposals/canaries.json` —
   candidate counts and scoring statuses. Raw ledger rows are never displayed.
 
@@ -108,15 +145,16 @@ scoring, or unblinding controls. The dashboard is intended for trusted local use
 make dashboard-test
 ```
 
-Expected result for this version: **24 tests pass**.
+Expected result: all dashboard data, evidence and UI tests pass.
 
 This uses only the `dashboard` and `dev` groups. Data tests check the published
 numbers, all 18 recordings, field projection, missing and partial files, and
 path/symlink rejection. Streamlit AppTest exercises navigation, cell selection,
 playback state, scrubbing, filtering, searching, missing intervals, unscored
-slots, Arm A, memory study, provenance, and missing-input messages.
+slots, Arm A, memory study, provenance, research ancestry, portable evidence,
+run-health checks, bundle integration, and missing-input messages.
 
-For visual verification, open the app, visit all four views, resize the window,
+For visual verification, open the app, visit all six views, resize the window,
 and follow the demo above. The UI tests exercise Streamlit widgets and state;
 they do not replace a rendered-browser layout inspection.
 

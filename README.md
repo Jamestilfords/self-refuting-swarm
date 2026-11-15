@@ -38,11 +38,13 @@ Open [http://localhost:8501](http://localhost:8501). The command installs the lo
 Streamlit dashboard dependencies automatically; `make bootstrap` is not needed
 for the dashboard. Stop the server with **Ctrl-C**.
 
-Use the sidebar to explore **Overview**, **Proposal replay**, **Memory study**,
-and **Guard & provenance**. The overview shows 487 candidates per cell, 200
+Use the sidebar to explore **Overview**, **Research trace**, **Proposal replay**,
+**Memory study**, **Run health**, and **Guard & provenance**. The overview shows 487 candidates per cell, 200
 orderings, four evaluation cells, and 18 recorded closed-loop runs. In Proposal
 replay, press **Play recording**, scrub the timeline, or filter proposals to
-inspect their scores, intervals, and critic gates.
+inspect their scores, intervals, and critic gates. Research trace connects the
+Exa sources, original code, verdicts and direct/indirect memory references. Run
+health shows missing artifacts, failure reasons and recorded token budgets.
 
 Local inputs refresh every 10 seconds. Playback uses saved decisions and starts
 no agents or paid jobs. The app displays validation data only; test-side FDP and
@@ -51,7 +53,7 @@ recall remain unavailable.
 To test the dashboard or choose another port:
 
 ```sh
-make dashboard-test  # Expected: 24 tests pass.
+make dashboard-test  # Expected: all dashboard tests pass.
 make dashboard DASHBOARD_ARGS='--server.port 8502'
 ```
 
@@ -59,7 +61,7 @@ For the second command, open [http://localhost:8502](http://localhost:8502).
 If `make dashboard` reports "No rule to make target", confirm you are in the
 repository root on the latest `main`. If the port is already in use, stop the
 other local server or choose another port as above. See the
-[dashboard demo guide](dashboard/README.md) for a three-minute walkthrough,
+[dashboard demo guide](dashboard/README.md) for a two-minute research walkthrough,
 expected verdicts, data sources, and limitations.
 
 ## Getting started with training and experiments

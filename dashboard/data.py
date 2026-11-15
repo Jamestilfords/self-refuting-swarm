@@ -11,10 +11,34 @@ from urllib.parse import urlsplit
 
 CELLS = ("banking77_oos/bert", "banking77_oos/roberta", "clinc150/bert", "clinc150/roberta")
 ROOT = Path(__file__).resolve().parents[1]
-RUN_ID = re.compile(r"(?:banking77|clinc150)_bert/[ABC][0-2]\Z")
+RUN_ID = re.compile(r"(?:banking77|clinc150)_bert/[ABC](?:0|[1-9][0-9]{0,3})\Z")
+
+
+def public_text(value, limit=8000):
+    """Render bounded text, masking common credentials if they occur in a log."""
+    if not isinstance(value, str):
+        return ""
+    value = re.sub(r"\b(?:past_sk_|sk-|ak-)[A-Za-z0-9_-]{12,}", "[redacted credential]", value)
+    value = re.sub(r"(?i)(bearer\s+)[A-Za-z0-9._-]+", r"\1[redacted]", value)
+    value = re.sub(r"(?i)((?:api[_ -]?key|token[_ -]?secret|authorization)\s*[:=]\s*)[^\s,;]+", r"\1[redacted]", value)
+    return value[:limit]
+
+
+def web_url(value):
+    if not isinstance(value, str):
+        return ""
+    try:
+        parsed = urlsplit(value)
+        if parsed.scheme in ("https", "http") and parsed.hostname and not parsed.username and not parsed.password:
+            return value if public_text(value) == value else ""
+    except ValueError:
+        pass
+    return ""
 
 
 def read_local(root: Path, relative: str) -> Path:
+    if Path(relative).is_absolute() or ".." in Path(relative).parts:
+        raise ValueError("Dashboard inputs must stay inside the repository")
     path = root / relative
     if path.is_symlink() or any(p.is_symlink() for p in path.parents if p != root.parent):
         raise ValueError("Dashboard inputs cannot be symlinks")
@@ -29,7 +53,10 @@ def json_rows(path: Path) -> list[dict]:
         if not line.strip():
             continue
         try:
-            rows.append(json.loads(line))
+            row = json.loads(line)
+            if not isinstance(row, dict):
+                raise ValueError("JSONL records must be objects")
+            rows.append(row)
         except json.JSONDecodeError:
             # An active writer may not have finished the last JSONL record.
             if i != len(lines) - 1 or content.endswith("\n"):
@@ -126,15 +153,17 @@ def recorded_run(run_id: str, root: Path = ROOT) -> dict:
     public = []
     for row in rows:
         keys = ("idx", "sha", "family", "verdict", "accepted", "status", "summary", "val_auroc", "delta_inc",
-                "incumbent", "score_arm", "cell", "rule")
+                "incumbent", "score_arm", "cell", "rule", "reason")
         item = {key: row.get(key) for key in keys}
-        source = row.get("source") or ""
-        parsed = urlsplit(source)
-        item["source"] = source if parsed.scheme in ("https", "http") and parsed.netloc else ""
+        for key in ("summary", "reason"):
+            item[key] = public_text(item[key])
+        item["source"] = web_url(row.get("source"))
         critic = row.get("critic") or {}
         item["critic"] = {key: critic.get(key) for key in ("alpha_t", "ci", "comparator", "delta_val", "mdd", "p")}
         item["critic"]["gates"] = {key: value for key, value in (critic.get("gates") or {}).items()
                                    if key in ("G1", "G2", "G3", "G4", "G5", "G6", "lock")}
         item["memory_count"] = len(row.get("memory_used") or [])
+        item["memory_used"] = [mid for mid in (row.get("memory_used") or [])
+                               if isinstance(mid, str) and re.fullmatch(r"m_[0-9]+", mid)]
         public.append(item)
     return {"id": run_id, "recorded": True, "rows": public}

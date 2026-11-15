@@ -1,0 +1,1606 @@
+{
+  "model": "gpt-5.6-terra",
+  "proposals": [
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "synthetic",
+      "family": "fusion",
+      "idx": 0,
+      "memory_id": "m_0003",
+      "memory_used": [
+        "m_0001",
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b212972b3c28",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "synthetic",
+      "family": "other",
+      "idx": 1,
+      "memory_id": "m_0004",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "cb4bb2c586db",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "synthetic",
+      "family": "knn",
+      "idx": 2,
+      "memory_id": "m_0005",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "eae9ed712e48",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 3,
+      "memory_id": "m_0006",
+      "memory_used": [
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d4bf5a05f8ef",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 4,
+      "memory_id": "m_0007",
+      "memory_used": [
+        "m_0002"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "03a3ad69d689",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 5,
+      "memory_id": "m_0008",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "76f4121c7221",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 6,
+      "memory_id": "m_0009",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "c55a22b150c7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 7,
+      "memory_id": "m_0010",
+      "memory_used": [
+        "m_0001",
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "bb5b678b2886",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 8,
+      "memory_id": "m_0011",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "400758f47dd6",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 9,
+      "memory_id": "m_0012",
+      "memory_used": [
+        "m_0010"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7cd343a7cd13",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 10,
+      "memory_id": "m_0013",
+      "memory_used": [
+        "m_0002",
+        "m_0007"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ca235603a26b",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 11,
+      "memory_id": "m_0014",
+      "memory_used": [
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9e7238344c71",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 13,
+      "memory_id": "m_0015",
+      "memory_used": [
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5ec3c23d5c6c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 14,
+      "memory_id": "m_0016",
+      "memory_used": [
+        "m_0007"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "bc1aa90c35e1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 15,
+      "memory_id": "m_0017",
+      "memory_used": [
+        "m_0006",
+        "m_0007"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8379972dffdb",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 16,
+      "memory_id": "m_0018",
+      "memory_used": [
+        "m_0001"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "38ea10356857",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 17,
+      "memory_id": "m_0019",
+      "memory_used": [
+        "m_0008"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "cae0522a1b54",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 18,
+      "memory_id": "m_0020",
+      "memory_used": [
+        "m_0009"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b320fc7f7a3a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 19,
+      "memory_id": "m_0021",
+      "memory_used": [
+        "m_0001",
+        "m_0010"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b7fa55e77ecc",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 20,
+      "memory_id": "m_0025",
+      "memory_used": [
+        "m_0011"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d2a75879e35f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 21,
+      "memory_id": "m_0026",
+      "memory_used": [
+        "m_0012",
+        "m_0021"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ca80518c1a4a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 22,
+      "memory_id": "m_0027",
+      "memory_used": [
+        "m_0013"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "00c480b8a7fa",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 23,
+      "memory_id": "m_0028",
+      "memory_used": [
+        "m_0014",
+        "m_0007"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1d993b09ec06",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 25,
+      "memory_id": "m_0029",
+      "memory_used": [
+        "m_0004",
+        "m_0015"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9b241efc3e0f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 26,
+      "memory_id": "m_0030",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "fdaef67704ca",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 27,
+      "memory_id": "m_0031",
+      "memory_used": [
+        "m_0017"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "987b96b6245d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 28,
+      "memory_id": "m_0032",
+      "memory_used": [
+        "m_0001",
+        "m_0016"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "45a9a0aa7e13",
+      "source": "https://github.com/kimjeyoung/Mahalanobis-BERT",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 29,
+      "memory_id": "m_0033",
+      "memory_used": [
+        "m_0019",
+        "m_0008"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "4e43ecb250cb",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 30,
+      "memory_id": "m_0036",
+      "memory_used": [
+        "m_0020"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "fd67754b52ef",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 31,
+      "memory_id": "m_0037",
+      "memory_used": [
+        "m_0019",
+        "m_0036"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "9243e0efe695",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 32,
+      "memory_id": "m_0038",
+      "memory_used": [
+        "m_0025",
+        "m_0011"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e31faf32a77c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 33,
+      "memory_id": "m_0039",
+      "memory_used": [
+        "m_0034",
+        "m_0022"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "cf63145a03fc",
+      "source": "https://openaccess.thecvf.com/content/CVPR2022/html/Wang_ViM_Out-of-Distribution_With_Virtual-Logit_Matching_CVPR_2022_paper.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 34,
+      "memory_id": "m_0040",
+      "memory_used": [
+        "m_0002",
+        "m_0013",
+        "m_0027"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5a2f89bd5939",
+      "source": "https://cdn.amazon.science/64/48/4d1e599c4472859e27a9f7647786/few-shot-out-of-domain-intent-detection-with-covariance-corrected-mahalanobis-distance.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 35,
+      "memory_id": "m_0041",
+      "memory_used": [
+        "m_0014",
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ea0ed3f8a523",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 37,
+      "memory_id": "m_0042",
+      "memory_used": [
+        "m_0004",
+        "m_0027",
+        "m_0034"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "26bc88995c65",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 38,
+      "memory_id": "m_0043",
+      "memory_used": [
+        "m_0030",
+        "m_0016"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "de807f97e18b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 39,
+      "memory_id": "m_0044",
+      "memory_used": [
+        "m_0006",
+        "m_0017"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "3e87fcf6b823",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 40,
+      "memory_id": "m_0047",
+      "memory_used": [
+        "m_0032",
+        "m_0018"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "3863f891382a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 41,
+      "memory_id": "m_0048",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "4af01aa271aa",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 43,
+      "memory_id": "m_0049",
+      "memory_used": [
+        "m_0037",
+        "m_0047"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "0c7337160f96",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 44,
+      "memory_id": "m_0050",
+      "memory_used": [
+        "m_0038"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5382eb704ac2",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 45,
+      "memory_id": "m_0051",
+      "memory_used": [
+        "m_0012",
+        "m_0026",
+        "m_0021"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b7c4f13aa000",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 46,
+      "memory_id": "m_0052",
+      "memory_used": [
+        "m_0013"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "f12c224e62f4",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 47,
+      "memory_id": "m_0053",
+      "memory_used": [
+        "m_0014",
+        "m_0041",
+        "m_0043"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5d07d045a10c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 49,
+      "memory_id": "m_0054",
+      "memory_used": [
+        "m_0045",
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "ec2fe28ca59c",
+      "source": "https://deel-ai.github.io/oodeel/latest/notebooks/tensorflow/demo_vim_tf/",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 50,
+      "memory_id": "m_0058",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "21080a2e9a9b",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 51,
+      "memory_id": "m_0059",
+      "memory_used": [
+        "m_0044",
+        "m_0006",
+        "m_0017"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "39785b6b5f8f",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 52,
+      "memory_id": "m_0060",
+      "memory_used": [
+        "m_0047"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "221119c307a8",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 53,
+      "memory_id": "m_0061",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "6dc9b2c105ca",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 54,
+      "memory_id": "m_0062",
+      "memory_used": [
+        "m_0009",
+        "m_0020"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1bda1f18e55a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 55,
+      "memory_id": "m_0063",
+      "memory_used": [
+        "m_0003",
+        "m_0055"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e71f4afb5b45",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 56,
+      "memory_id": "m_0064",
+      "memory_used": [
+        "m_0050",
+        "m_0025"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "c0cd171637b7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 57,
+      "memory_id": "m_0065",
+      "memory_used": [
+        "m_0047",
+        "m_0051"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8e4fab08d4a9",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 58,
+      "memory_id": "m_0066",
+      "memory_used": [
+        "m_0013"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "167a38e5bca9",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 59,
+      "memory_id": "m_0067",
+      "memory_used": [
+        "m_0014",
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "5b6c4f210bb7",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 60,
+      "memory_id": "m_0069",
+      "memory_used": [
+        "m_0003"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "e15551b1ce81",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 61,
+      "memory_id": "m_0070",
+      "memory_used": [
+        "m_0004",
+        "m_0015",
+        "m_0067"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "aa45b0ae3167",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 62,
+      "memory_id": "m_0071",
+      "memory_used": [
+        "m_0055",
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "74243179b3b9",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 63,
+      "memory_id": "m_0072",
+      "memory_used": [
+        "m_0006",
+        "m_0017",
+        "m_0059"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "6d9f48afc041",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 64,
+      "memory_id": "m_0073",
+      "memory_used": [
+        "m_0032",
+        "m_0060"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "330430b9c8f0",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 65,
+      "memory_id": "m_0074",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "bfeed2d2fd56",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 66,
+      "memory_id": "m_0075",
+      "memory_used": [
+        "m_0009",
+        "m_0020"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8c1707d30211",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 67,
+      "memory_id": "m_0076",
+      "memory_used": [
+        "m_0021",
+        "m_0037",
+        "m_0066"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "acfecadb6d5c",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 68,
+      "memory_id": "m_0077",
+      "memory_used": [
+        "m_0011"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "18aa9178de8e",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 69,
+      "memory_id": "m_0078",
+      "memory_used": [
+        "m_0065",
+        "m_0069"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "4ea221b1d9f1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 70,
+      "memory_id": "m_0082",
+      "memory_used": [
+        "m_0013",
+        "m_0027"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d6954834f6bf",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 71,
+      "memory_id": "m_0083",
+      "memory_used": [
+        "m_0014"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "8f8383b7fb43",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 0,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 72,
+      "memory_id": "m_0084",
+      "memory_used": [
+        "m_0069"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b9af19dee6f5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 73,
+      "memory_id": "m_0085",
+      "memory_used": [
+        "m_0004",
+        "m_0067"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "49c62754d68d",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 74,
+      "memory_id": "m_0086",
+      "memory_used": [
+        "m_0055"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "29a1254de5fc",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 75,
+      "memory_id": "m_0087",
+      "memory_used": [
+        "m_0017"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "d87e11c70721",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 77,
+      "memory_id": "m_0088",
+      "memory_used": [
+        "m_0008"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "7aaaeed1f0fe",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 79,
+      "memory_id": "m_0089",
+      "memory_used": [
+        "m_0081",
+        "m_0088"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "73d26a70933d",
+      "source": "https://github.com/mueller-mp/maha-norm",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 80,
+      "memory_id": "m_0092",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "625de40e4f72",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 81,
+      "memory_id": "m_0093",
+      "memory_used": [
+        "m_0079"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "257f8a67881f",
+      "source": "https://proceedings.mlr.press/v267/muller25a.html",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 82,
+      "memory_id": "m_0094",
+      "memory_used": [
+        "m_0013",
+        "m_0066"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "63b213db6d24",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 83,
+      "memory_id": "m_0095",
+      "memory_used": [
+        "m_0014",
+        "m_0067"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "4f2bf98a2ac5",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 85,
+      "memory_id": "m_0096",
+      "memory_used": [
+        "m_0004",
+        "m_0015"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b459404070af",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 86,
+      "memory_id": "m_0097",
+      "memory_used": [
+        "m_0055",
+        "m_0086"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1dc8fda88b1f",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 87,
+      "memory_id": "m_0098",
+      "memory_used": [
+        "m_0087"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b656e376ddd3",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 88,
+      "memory_id": "m_0099",
+      "memory_used": [
+        "m_0032",
+        "m_0047",
+        "m_0081"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b1efa2488483",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 89,
+      "memory_id": "m_0100",
+      "memory_used": [
+        "m_0033",
+        "m_0088"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "06c40fa98255",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 90,
+      "memory_id": "m_0102",
+      "memory_used": [
+        "m_0020",
+        "m_0075",
+        "m_0099"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "b7853e7039bb",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 7,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 91,
+      "memory_id": "m_0103",
+      "memory_used": [
+        "m_0088",
+        "m_0099",
+        "m_0100"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "a852ff90e009",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 8,
+      "arm": "edl",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 92,
+      "memory_id": "m_0104",
+      "memory_used": [
+        "m_0050",
+        "m_0092"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "fd32bcf22460",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 9,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "fusion",
+      "idx": 93,
+      "memory_id": "m_0105",
+      "memory_used": [
+        "m_0051",
+        "m_0093"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "583ebd82659a",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 10,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 94,
+      "memory_id": "m_0106",
+      "memory_used": [
+        "m_0094",
+        "m_0027"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "2c020674bc21",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 11,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 95,
+      "memory_id": "m_0107",
+      "memory_used": [
+        "m_0014",
+        "m_0095"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "0a29317b8e27",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 1,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 97,
+      "memory_id": "m_0108",
+      "memory_used": [
+        "m_0004"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "157e2b7570cd",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 2,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "knn",
+      "idx": 98,
+      "memory_id": "m_0109",
+      "memory_used": [
+        "m_0055",
+        "m_0043"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "974801774b01",
+      "source": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 3,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "other",
+      "idx": 99,
+      "memory_id": "m_0110",
+      "memory_used": [
+        "m_0101",
+        "m_0017"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "6c1def9878fc",
+      "source": "https://papers.neurips.cc/paper_files/paper/2022/file/70fa5df8e3300dc30bf19bee44a56155-Paper-Conference.pdf",
+      "stream": "llm"
+    },
+    {
+      "angle": 4,
+      "arm": "ce",
+      "attempts": 1,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 100,
+      "memory_id": "m_0112",
+      "memory_used": [
+        "m_0099",
+        "m_0018",
+        "m_0032"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "1668de4514c1",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 5,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "logit",
+      "idx": 101,
+      "memory_id": "m_0113",
+      "memory_used": [],
+      "model": "gpt-5.6-terra",
+      "sha": "2e1a2786ef14",
+      "source": "",
+      "stream": "llm"
+    },
+    {
+      "angle": 6,
+      "arm": "ce",
+      "attempts": 2,
+      "checked_on": "validation",
+      "family": "density",
+      "idx": 102,
+      "memory_id": "m_0114",
+      "memory_used": [
+        "m_0036",
+        "m_0075",
+        "m_0099"
+      ],
+      "model": "gpt-5.6-terra",
+      "sha": "eed0b3b4f9ed",
+      "source": "",
+      "stream": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "detail": "Spearman 0.9999 with b212972b3c28: this ranks items the same way",
+      "idx": 12,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with 03a3ad69d689: this ranks items the same way",
+      "idx": 24,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9990 with b212972b3c28: this ranks items the same way",
+      "idx": 36,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 0.9998 with c55a22b150c7: this ranks items the same way",
+      "idx": 42,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "Spearman 1.0000 with b212972b3c28: this ranks items the same way",
+      "idx": 48,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "NameError: name 'ev_pred' is not defined",
+      "idx": 76,
+      "reason": "runtime_error"
+    },
+    {
+      "detail": "Spearman 0.9995 with 8c1707d30211: this ranks items the same way",
+      "idx": 78,
+      "reason": "duplicate"
+    },
+    {
+      "detail": "SOURCE must be the url of a source card in memory, or empty",
+      "idx": 84,
+      "reason": "source"
+    },
+    {
+      "detail": "Spearman 1.0000 with b212972b3c28: this ranks items the same way",
+      "idx": 96,
+      "reason": "duplicate"
+    }
+  ],
+  "stream": "llm",
+  "usage": {
+    "calls": 120,
+    "input_tokens": 342838,
+    "output_tokens": 145919
+  }
+}

@@ -44,7 +44,8 @@ def unpack_input(data: bytes) -> api.Ctx:
     return api.make_ctx(train, eval_data)
 
 
-def unpack_output(data: bytes, n: int, k: int, *, require_variation: bool = True) -> tuple[np.ndarray, float]:
+def unpack_output(data: bytes, n: int, k: int, *, require_variation: bool = True,
+                  include_probs: bool = False):
     """Validate untrusted worker output again in the trusted wrapper."""
     limit = 8 * n * (k + 1) + 4096
     if len(data) > limit:
@@ -75,6 +76,8 @@ def unpack_output(data: bytes, n: int, k: int, *, require_variation: bool = True
         raise api.Malformed("probs")
     if runtime.shape != () or not math.isfinite(float(runtime)) or not 0 <= float(runtime) <= api.MAX_SECONDS:
         raise api.Malformed("runtime_error")
+    if include_probs:
+        return scores, (None if probs.shape == (0,) else probs), float(runtime)
     return scores, float(runtime)
 
 

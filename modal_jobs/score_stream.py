@@ -1,151 +1,233 @@
-"""E3 scoring: run every proposal on validation and measure validation calibration.
+"""Isolated per-item validation scorer for E5 replay.
 
-    python -m modal_jobs.score_stream plan
-    python -m modal_jobs.score_stream run --streams canary,baseline     # smoke: a handful of proposals
-    python -m modal_jobs.score_stream run                               # everything; reruns skip finished work
-
-Three functions with different access:
-  score_val_batch   runs proposal code; mounts only the open volume.
-  calibrate_cell    runs no proposal code; reads validation labels from the sealed volume (read-only) for gate G5.
-  score_test_batch  the sealer; runs proposal code with the sealed volume mounted. Off unless --seal is given.
-                    Do not use it for the registered run until proposals execute in the isolated sandbox.
-The ledger (one row per proposal and cell, slide 9) is written locally to runs/ledger.jsonl.
+The trusted function mounts only /open. Proposal code runs in fresh Sandboxes
+with no mounted volume, network, or secret. New artifacts go to
+/open/scores_isolated, leaving the earlier score files untouched.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import tempfile
 from pathlib import Path
+from uuid import uuid4
 
 import modal
+import numpy as np
 
-from modal_jobs.app import app, open_volume, sealed_volume, settings
+from modal_jobs.app import open_volume, sealed_volume, settings
 from modal_jobs.config import OPEN_MOUNT, SEALED_MOUNT
+from modal_jobs.sandbox import (MAX_SOURCE_BYTES, _score_in_sandbox,
+                                prepare_cell, runner_image, sandbox_image)
+from modal_jobs.train40 import RunSpec
+from skeptic import api, runner
+from skeptic.score_artifacts import CELLS, ScoreArtifact, auroc
 
 REPO = Path(__file__).resolve().parents[1]
-ER1_SOURCE = REPO / "third_party" / "er1" / "src"
+stream_app = modal.App(f"{settings.app_name}-stream")
 
 
 def _snapshot(src: Path) -> Path:
-    """Freeze proposals/ into a temp folder, so a Proposer that is still writing cannot change files mid-upload.
-
-    The plan, the container image and the ledger all use this one frozen copy.
-    """
     dst = Path(tempfile.mkdtemp(prefix="skeptic_proposals_"))
-    for f in sorted(src.iterdir()):
-        if f.suffix in (".py", ".json"):
-            shutil.copy2(f, dst / f.name)
+    for path in sorted(src.iterdir()):
+        if path.suffix in (".py", ".json"):
+            shutil.copy2(path, dst / path.name)
     return dst
 
 
 PROPOSALS = _snapshot(REPO / "proposals") if (REPO / "proposals").is_dir() else REPO / "proposals"
-SCORE_OPTIONS = {"cpu": 8, "memory": 16 * 1024, "timeout": 60 * 60, "max_containers": 60}
-
-score_image = (
-    modal.Image.debian_slim(python_version="3.12")
-    .pip_install("numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1")
-    .env({**settings.container_env(), "SKEPTIC_ER1_SRC": "/opt/er1/src"})
-)
-if ER1_SOURCE.is_dir():       # baked in when launching locally; remote imports already have these paths
-    score_image = score_image.add_local_dir(ER1_SOURCE, "/opt/er1/src", copy=True)
-if PROPOSALS.is_dir():
-    score_image = score_image.add_local_dir(PROPOSALS, "/opt/proposals", copy=True)
-score_image = score_image.add_local_python_source("skeptic", "modal_jobs")
 
 
-@app.function(image=score_image, volumes={OPEN_MOUNT: open_volume}, **SCORE_OPTIONS)
-def score_val_batch(task: dict) -> dict:
-    """Validation only. The sealed volume is not mounted here."""
-    from skeptic import runner
-    open_volume.reload()
-    rows = runner.score_validation("/opt/proposals", task["shas"], OPEN_MOUNT, task["group"])
-    open_volume.commit()
-    return {"cell": task["cell"], "rows": rows}
+@stream_app.function(image=sandbox_image, cpu=0.25, memory=128, timeout=30,
+                     block_network=True, restrict_modal_access=True)
+def sandbox_image_ready() -> None:
+    """Register the worker image before scoring calls start."""
 
 
-@app.function(image=score_image, cpu=2, memory=4 * 1024, timeout=30 * 60,
-              volumes={OPEN_MOUNT: open_volume.with_mount_options(read_only=True),
-                       SEALED_MOUNT: sealed_volume.with_mount_options(read_only=True)})
+@stream_app.function(image=runner_image, cpu=2, memory=4096, timeout=1800,
+                     volumes={OPEN_MOUNT: open_volume.with_mount_options(read_only=True),
+                              SEALED_MOUNT: sealed_volume.with_mount_options(read_only=True)})
 def calibrate_cell(task: dict) -> dict:
-    """Validation calibration for G5. No proposal code runs here, and both volumes are read-only."""
-    from skeptic import runner
-    rows = runner.validation_calibration(OPEN_MOUNT, SEALED_MOUNT, task["group"], task["items"])
-    return {"cell": task["cell"], "rows": rows}
-
-
-@app.function(image=score_image, volumes={OPEN_MOUNT: open_volume, SEALED_MOUNT: sealed_volume}, **SCORE_OPTIONS)
-def score_test_batch(task: dict) -> dict:
-    """The sealer: test scores go into the sealed volume; only statuses come back."""
-    from skeptic import runner
+    """Compute G5 from stored scores and validation labels; execute no proposal."""
     open_volume.reload()
     sealed_volume.reload()
-    rows = runner.score_test("/opt/proposals", task["shas"], OPEN_MOUNT, SEALED_MOUNT, task["group"])
-    sealed_volume.commit()
+    rows = runner.validation_calibration(OPEN_MOUNT, SEALED_MOUNT, task["group"],
+                                         task["items"], source="isolated")
     return {"cell": task["cell"], "rows": rows}
 
 
-def _collect(fn, tasks, label: str) -> dict:
-    out, done, failed = {}, 0, 0
-    for result in fn.map(tasks, order_outputs=False, return_exceptions=True):
+def _metrics(scores: np.ndarray, n_in: int) -> dict:
+    return {"auroc": [round(auroc(seed[:n_in], seed[n_in:]), 6) for seed in scores],
+            "fpr95": [round(runner.fpr95(seed[:n_in], seed[n_in:]), 6) for seed in scores]}
+
+
+def _existing(path: Path, sha: str) -> tuple[np.ndarray, int, float, bool] | None:
+    if not path.exists():
+        return None
+    if path.is_symlink() or not path.is_file():
+        raise RuntimeError("Existing isolated score path is unsafe")
+    with np.load(path, allow_pickle=False) as cache:
+        keys = set(cache.files)
+        base = {"scores", "n_in", "runtime_s", "scorer", "proposal_sha"}
+        if keys not in (base, base | {"pred", "conf"}) \
+                or str(cache["scorer"]) != "isolated-e3-v1" \
+                or str(cache["proposal_sha"]) != sha:
+            raise RuntimeError("Existing isolated score provenance is invalid")
+        n_in, runtime = np.asarray(cache["n_in"]), np.asarray(cache["runtime_s"])
+        if n_in.shape != () or not np.issubdtype(n_in.dtype, np.integer) \
+                or runtime.shape != () or not np.isfinite(runtime) or runtime < 0:
+            raise RuntimeError("Existing isolated score metadata is invalid")
+        artifact = ScoreArtifact(cache["scores"], int(n_in),
+                                 cache["pred"] if "pred" in keys else None,
+                                 cache["conf"] if "conf" in keys else None)
+        return artifact.scores, artifact.n_in, float(cache["runtime_s"]), artifact.pred is not None
+
+
+@stream_app.function(image=runner_image, volumes={OPEN_MOUNT: open_volume},
+                     cpu=2, memory=8192, timeout=900, max_containers=4)
+def score_one(task: dict, worker_image_id: str) -> dict:
+    """Write a five-seed artifact and return only validation summary fields."""
+    cell, sha, text, arm = (task[key] for key in ("cell", "sha", "text", "arm"))
+    if cell not in CELLS or len(text.encode("utf-8")) > MAX_SOURCE_BYTES or api.proposal_sha(text) != sha:
+        raise ValueError("Invalid cell or proposal source")
+    row = {"sha": sha, "status": "ok", "family": None, "arm": arm,
+           "parents": [], "source": "", "memory_used": [],
+           "runtime_s": None, "val": None, "has_probs": False}
+    try:
+        header = api.static_check(text)
+        if header["ARM"] != arm:
+            raise api.Malformed("arm_mismatch")
+        row.update(family=header["FAMILY"], parents=header["PARENTS"],
+                   source=header["SOURCE"], memory_used=header["MEMORY_USED"])
+        dataset, backbone = cell.split("/")
+        if dataset == "banking77_oos":
+            dataset = "banking77"
+        group = CELLS[cell]
+        open_volume.reload()
+        target = Path(OPEN_MOUNT) / "scores_isolated" / group / f"{sha}.npz"
+        existing = _existing(target, sha)
+        if existing is not None:
+            scores, n_in, runtime, has_probs = existing
+            row.update(val=_metrics(scores, n_in), runtime_s=runtime, has_probs=has_probs)
+            return {"cell": cell, "rows": [row]}
+
+        owner = modal.App.lookup(settings.app_name, environment_name=settings.environment)
+        image = modal.Image.from_id(worker_image_id)
+        all_scores, all_pred, all_conf, runtimes = [], [], [], []
+        n_in = n_total = has_probs = None
+        for seed in range(5):
+            spec = RunSpec(dataset, backbone, arm, seed)
+            full, subset, membership, subset_idx, k, permutation = prepare_cell(
+                Path(OPEN_MOUNT), spec, return_permutation=True)
+            if n_in is None:
+                n_in, n_total = int((~membership).sum()), len(membership)
+            elif n_in != int((~membership).sum()) or n_total != len(membership):
+                raise RuntimeError("Validation items differ across seeds")
+            scores, probs, runtime = _score_in_sandbox(owner, image, text, sha, full,
+                                                        n_total, k, return_probs=True)
+            subset_scores, subset_probs, _ = _score_in_sandbox(
+                owner, image, text, sha, subset, len(subset_idx), k,
+                subset=True, return_probs=True)
+            if not np.allclose(subset_scores, scores[subset_idx], rtol=1e-6, atol=1e-8):
+                raise api.Malformed("subset_dependent")
+            if (probs is None) != (subset_probs is None) or (probs is not None and
+                    not np.allclose(subset_probs, probs[subset_idx], rtol=1e-6, atol=1e-8)):
+                raise api.Malformed("subset_dependent")
+            if has_probs is None:
+                has_probs = probs is not None
+            elif has_probs != (probs is not None):
+                raise api.Malformed("probs", "Probability output changed across seeds")
+            original = np.empty_like(scores)
+            original[permutation] = scores
+            all_scores.append(original.astype(np.float32))
+            if probs is not None:
+                original_probs = np.empty_like(probs)
+                original_probs[permutation] = probs
+                all_pred.append(original_probs.argmax(1).astype(np.int16))
+                all_conf.append(original_probs.max(1).astype(np.float32))
+            runtimes.append(runtime)
+
+        packed = {"scores": np.stack(all_scores), "n_in": n_in,
+                  "runtime_s": max(runtimes), "scorer": "isolated-e3-v1", "proposal_sha": sha}
+        if has_probs:
+            packed.update(pred=np.stack(all_pred), conf=np.stack(all_conf))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        stage = target.with_name(f".{sha}.{uuid4().hex}.tmp.npz")
+        try:
+            np.savez_compressed(stage, **packed)
+            if target.exists():
+                raise RuntimeError("Isolated score appeared during scoring; refusing overwrite")
+            os.link(stage, target)
+        finally:
+            stage.unlink(missing_ok=True)
+        open_volume.commit()
+        row.update(val=_metrics(packed["scores"], n_in), runtime_s=max(runtimes),
+                   has_probs=bool(has_probs))
+    except api.Malformed as exc:
+        row.update(status=exc.reason, detail=exc.detail[:200])
+    except Exception as exc:
+        row.update(status="runner_error", detail=f"{type(exc).__name__}: {exc}"[:200])
+    return {"cell": cell, "rows": [row]}
+
+
+def _collect(tasks: list[dict], worker_image_id: str) -> dict:
+    rows = {}
+    failures = 0
+    for result in score_one.map(tasks, [worker_image_id] * len(tasks),
+                                order_outputs=False, return_exceptions=True):
         if isinstance(result, BaseException):
-            failed += 1
-            print(f"[{label}] a batch failed: {type(result).__name__}: {str(result)[:200]}", flush=True)
+            failures += 1
+            print(f"[validation] batch failed: {type(result).__name__}: {str(result)[:200]}", flush=True)
             continue
-        done += 1
-        for row in result["rows"]:
-            out[(row["sha"], result["cell"])] = row
-        if done % 10 == 0 or done + failed == len(tasks):
-            print(f"[{label}] {done + failed}/{len(tasks)} batches", flush=True)
-    return out
+        row = result["rows"][0]
+        rows[(row["sha"], result["cell"])] = row
+    print(f"[validation] {len(rows)} complete; {failures} infrastructure failures", flush=True)
+    return rows
 
 
 def main(argv: list[str] | None = None) -> int:
-    from skeptic import runner
-
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("command", choices=("plan", "run"))
     parser.add_argument("--streams", default=None, help="comma-separated: canary,baseline,templated,llm")
     parser.add_argument("--limit", type=int, default=None, help="score only the first N proposals")
-    parser.add_argument("--seal", action="store_true", help="also run the sealer (proposal code with /sealed mounted)")
-    parser.add_argument("--skip-test", action="store_true", help="accepted for old commands; the sealer is off by default")
+    parser.add_argument("--skip-test", action="store_true", help="accepted for old scripts; E4 always scores test separately")
     args = parser.parse_args(argv)
-
+    if args.limit is not None and args.limit <= 0:
+        parser.error("--limit must be positive")
     found = runner.discover(PROPOSALS, set(args.streams.split(",")) if args.streams else None)
     tasks = runner.build_tasks(found, args.limit)
-    n = len({s for t in tasks for s in t["shas"]})
-    print(f"{n} proposals x {len(runner.CELLS)} cells = {n * len(runner.CELLS)} ledger rows, in {len(tasks)} batches")
+    jobs = [{"cell": task["cell"], "arm": task["arm"], "sha": sha,
+             "text": (PROPOSALS / f"{sha}.py").read_text(encoding="utf-8")}
+            for task in tasks for sha in task["shas"]]
+    if not jobs:
+        parser.error("No matching proposals")
+    print(f"{len(jobs)} proposal/cell jobs; isolated scores go to /open/scores_isolated")
     if args.command == "plan":
         return 0
-
     with modal.enable_output():
-        with app.run(environment_name=settings.environment):
-            val_rows = _collect(score_val_batch, tasks, "validation")
-            ok = lambda t: [s for s in t["shas"] if val_rows.get((s, t["cell"]), {}).get("status") == "ok"]
+        with stream_app.run(environment_name=settings.environment):
+            val_rows = _collect(jobs, sandbox_image.object_id)
             cal_tasks = [{"cell": cell, "group": group,
-                          "items": [(s, t["arm"]) for t in tasks if t["cell"] == cell for s in ok(t)]}
-                         for cell, group in runner.CELLS.items()]
-            cal_rows = _collect(calibrate_cell, [t for t in cal_tasks if t["items"]], "calibration")
-            test_rows = {}
-            if args.seal:
-                test_tasks = [{**t, "shas": ok(t)} for t in tasks if ok(t)]
-                test_rows = _collect(score_test_batch, test_tasks, "sealer")
-
-    ledger = runner.merge_ledger(found, tasks, val_rows, cal_rows, test_rows)
+                          "items": [(job["sha"], job["arm"]) for job in jobs
+                                    if job["cell"] == cell and
+                                    val_rows.get((job["sha"], cell), {}).get("status") == "ok"]}
+                         for cell, group in CELLS.items()]
+            cal_rows = {}
+            for result in calibrate_cell.map([task for task in cal_tasks if task["items"]]):
+                cal_rows.update({(row["sha"], result["cell"]): row for row in result["rows"]})
+            expected = {key for key, row in val_rows.items() if row["status"] == "ok"}
+            if set(cal_rows) != expected:
+                raise RuntimeError("Calibration results are incomplete; retry before using the ledger")
+    ledger = runner.merge_ledger(found, tasks, val_rows, cal_rows, {})
     partial = args.streams or args.limit
-    path = REPO / "runs" / ("ledger_partial.jsonl" if partial else "ledger.jsonl")
+    path = REPO / "runs" / ("ledger_isolated_partial.jsonl" if partial else "ledger_isolated.jsonl")
     runner.write_ledger(ledger, path)
     print(runner.summarize(ledger))
-    with_probs = [r for r in ledger if r["status"] == "ok" and r["has_probs"]]
-    print(f"calibration: {sum(r['val']['ece'] is not None for r in with_probs)} of {len(with_probs)} rows that return probs have a validation ECE")
     print(f"wrote {len(ledger)} rows to {path.relative_to(REPO)}")
-    for row in ledger:
-        if row["stream"] == "canary" and row["cell"] == "clinc150/bert":
-            auroc = row["val"]["auroc"] if row["val"] else None
-            print("canary", json.dumps({"sha": row["sha"], "status": row["status"],
-                                        "val_auroc_seed0": auroc[0] if auroc else None}))
-    return 0
+    return int(any(row["status"] in {"infra_error", "runner_error"} for row in ledger))
 
 
 if __name__ == "__main__":

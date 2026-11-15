@@ -84,7 +84,7 @@ def preflight(path: Path, spec: RunSpec, stream: str) -> tuple[str, dict]:
     return text, row
 
 
-def prepare_cell(root: Path, spec: RunSpec) -> tuple[bytes, bytes, np.ndarray, np.ndarray, int]:
+def prepare_cell(root: Path, spec: RunSpec, *, return_permutation: bool = False):
     """Reject polluted caches and hide ID/OOS membership from the proposal."""
     directory = root / spec.name
     manifest_path, cache_path = directory / "manifest.json", directory / "cache.npz"
@@ -131,7 +131,8 @@ def prepare_cell(root: Path, spec: RunSpec) -> tuple[bytes, bytes, np.ndarray, n
                                     size=max(2, math.ceil(api.SUBSET_FRAC * (n_id + n_oos))),
                                     replace=False))
     subset = {key: value[subset_idx] for key, value in eval_data.items()}
-    return pack_input(train, eval_data), pack_input(train, subset), membership, subset_idx, k
+    result = (pack_input(train, eval_data), pack_input(train, subset), membership, subset_idx, k)
+    return (*result, permutation) if return_permutation else result
 
 
 @e3_app.function(image=sandbox_image, cpu=0.25, memory=128, timeout=30,
@@ -150,7 +151,8 @@ def sandbox_options(owner: modal.App, image: modal.Image) -> dict:
 
 
 def _score_in_sandbox(owner: modal.App, image: modal.Image, text: str, sha: str, payload: bytes,
-                      n: int, k: int, *, subset: bool = False) -> tuple[np.ndarray, float]:
+                      n: int, k: int, *, subset: bool = False,
+                      return_probs: bool = False):
     sandbox = modal.Sandbox.create("sleep", str(SANDBOX_TIMEOUT - 5), **sandbox_options(owner, image))
     try:
         proposal_path = f"/tmp/{sha}.py"
@@ -177,7 +179,7 @@ def _score_in_sandbox(owner: modal.App, image: modal.Image, text: str, sha: str,
         if sandbox.filesystem.stat("/tmp/output.npz").size > 8 * n * (k + 1) + 4096:
             raise api.Malformed("sandbox_error")
         return unpack_output(sandbox.filesystem.read_bytes("/tmp/output.npz"), n, k,
-                             require_variation=not subset)
+                             require_variation=not subset, include_probs=return_probs)
     finally:
         try:
             sandbox.terminate()

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from skeptic import api, runner
+from skeptic.store import GuardError
 from skeptic.streams import baselines, canaries
 from skeptic.streams.common import render, write
 
@@ -89,19 +90,14 @@ def test_resume_reuses_stored_scores(stores, props):
     assert again["val"] == first["val"] and "wall_s" not in again
 
 
-def test_sealer_writes_test_scores_and_returns_no_test_numbers(stores, props):
+def test_legacy_sealer_is_disabled_before_reading_test(stores, props):
     open_root, sealed_root = stores
     d, shas = props
     good = [shas["energy@ce"], shas["coupling"], shas["msp@edl"]]
     runner.score_validation(d, good, open_root, GROUP)
-    rows = {r["sha"]: r for r in runner.score_test(d, good, open_root, sealed_root, GROUP)}
-    z = np.load(sealed_root / "scores" / GROUP / f"{shas['energy@ce']}.npz")
-    assert z["scores"].shape == (5, 160) and int(z["n_in"]) == 120
-    assert not (open_root / "scores" / GROUP / "sealed").exists()
-    for r in rows.values():
-        assert r == {"sha": r["sha"], "sealed": "ok"}
-    text = json.dumps(list(rows.values()))
-    assert "auroc" not in text and "scores" not in text
+    with pytest.raises(GuardError, match="Legacy test scorer is disabled"):
+        runner.score_test(d, good, open_root, sealed_root, GROUP)
+    assert not (sealed_root / "scores").exists()
 
 
 def test_calibration_runs_no_proposal_and_reads_only_validation_labels(stores, props, tmp_path):
@@ -146,13 +142,12 @@ def test_plan_and_ledger_merge(stores, props, tmp_path):
     good = lambda t: [s for s in t["shas"] if val[(s, t["cell"])]["status"] == "ok"]
     cal = {(r["sha"], t["cell"]): r for t in mine
            for r in runner.validation_calibration(open_root, sealed_root, GROUP, [(s, t["arm"]) for s in good(t)])}
-    test = {(r["sha"], t["cell"]): r for t in mine for r in runner.score_test(d, good(t), open_root, sealed_root, GROUP)}
-    ledger = runner.merge_ledger(found, tasks, val, cal, test)
+    ledger = runner.merge_ledger(found, tasks, val, cal, {})
     unsealed = runner.merge_ledger(found, tasks, val, cal, {})
     assert next(r for r in unsealed if r["sha"] == shas["energy@ce"] and r["cell"] == "clinc150/bert")["sealed"] == "not_run"
     assert len(ledger) == len(found) * 4
     row = next(r for r in ledger if r["sha"] == shas["energy@ce"] and r["cell"] == "clinc150/bert")
-    assert row["status"] == "ok" and row["sealed"] == "ok" and row["stream"] == "baseline"
+    assert row["status"] == "ok" and row["sealed"] == "not_run" and row["stream"] == "baseline"
     assert set(row["val"]) == {"auroc", "fpr95", "ece", "ece_plain"} and len(row["val"]["ece_plain"]) == 5
     leak = next(r for r in ledger if r["sha"] == shas["test_leak"] and r["cell"] == "clinc150/bert")
     assert leak["status"] == "io" and leak["sealed"] == "skipped" and leak["val"] is None

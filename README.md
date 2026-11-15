@@ -255,6 +255,12 @@ E3's `ok` status means the proposal passed validation and produced a score;
 it is **not** a critic acceptance verdict. The full `make smoke` target awaits
 experiment-runner integration. See [Modal E3 details](modal_jobs/README.md#e3-proposal-validation).
 
+### Isolated validation stream
+
+See the [isolated scoring guide](docs/isolated-scoring.md) for local tests, a
+no-compute plan command, and the Modal scoring command with expected outputs.
+The legacy test-scoring route is disabled.
+
 ### E4 sealed store and freeze checks
 
 See the [sealed-store and freeze guide](docs/sealed-store.md) for the decision

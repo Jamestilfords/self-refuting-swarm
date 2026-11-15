@@ -81,10 +81,12 @@ use `--open-root runs --source legacy` and point `--ledger` at the new ledger.
 For isolated artifacts, select `--source isolated` instead. This preserves the
 same `load_cell(cell)` -> `verdict(...)` data contract.
 
-At the base commit for this PR, the tracked `runs/ledger.jsonl` is an older
-423-proposal ledger with empty calibration. It is not the teammate's new
-500-proposal calibrated artifact. The real replay needs that new ledger,
-matching baseline manifest and scores; the CLI refuses missing calibration.
+The tracked `runs/ledger.jsonl` now contains the teammate's 500-proposal run
+(2,000 rows across four cells). All 1,996 successful rows have plain-model ECE;
+all 1,176 successful rows that return probabilities have candidate ECE. The
+per-item score files still need to be downloaded from the matching Modal run;
+the ledger alone is insufficient for paired bootstrap. The CLI refuses missing
+calibration or scores that disagree with the ledger.
 
 `make bootstrap` installs torch. The replay CLI adds `third_party/er1/src`
 automatically. For a standalone use of the existing critic-input CLI, retain

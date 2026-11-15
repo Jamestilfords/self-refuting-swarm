@@ -12,6 +12,9 @@ import hashlib
 import json
 import re
 import subprocess
+import tempfile
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,6 +26,7 @@ MANIFEST_RELATIVE = Path("runs/decision_manifest.json")
 REGISTRATION_RELATIVE = Path("PREREGISTRATION.md")
 PUBLISHED_REPO = "Jamestilfords/self-refuting-swarm"
 _HEX64 = re.compile(r"[0-9a-f]{64}\Z")
+_HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 _SHA12 = re.compile(r"[0-9a-f]{12}\Z")
 _SPLITS = frozenset({"train", "val", "oos_val", "test", "oos_test"})
 _FIELDS = frozenset({"logits", "feats", "pooled", "labels"})
@@ -76,6 +80,7 @@ def _manifest_paths(repo: Path) -> tuple[set[str], dict[str, set[str]]]:
             or manifest.get("cells") != cells
             or type(manifest.get("orderings")) is not int or manifest["orderings"] <= 0
             or not isinstance(paths, list) or not paths
+            or len(paths) != 3 * manifest["orderings"]
             or any(not isinstance(p, str) or not re.fullmatch(
                 r"runs/decisions/R[012]/ord_[0-9]{3,}\.jsonl", p) for p in paths)
             or len(paths) != len(set(paths))
@@ -259,6 +264,75 @@ def verify_published_freeze(repo_root: str | Path) -> UnsealPermit:
     return UnsealPermit(digest, head)
 
 
+def verify_remote_freeze(commit: str, digest: str) -> UnsealPermit:
+    """Recompute the published freeze from pinned GitHub files in a Modal job."""
+    if not isinstance(commit, str) or not isinstance(digest, str) \
+            or not _HEX40.fullmatch(commit) or not _HEX64.fullmatch(digest):
+        raise GuardError("Invalid published freeze identity")
+    try:
+        branch = json.loads(_download(
+            f"https://api.github.com/repos/{PUBLISHED_REPO}/git/ref/heads/main", 131072))
+        if not isinstance(branch, dict) or not isinstance(branch.get("object"), dict) \
+                or branch["object"].get("sha") != commit:
+            raise GuardError("Remote main does not match the freeze commit")
+        prefix = f"https://raw.githubusercontent.com/{PUBLISHED_REPO}/{commit}/"
+        with tempfile.TemporaryDirectory(prefix="skeptic_freeze_") as temp:
+            repo = Path(temp)
+            for relative, limit in ((HASH_RELATIVE, 128), (MANIFEST_RELATIVE, 16 * 1024 * 1024),
+                                    (REGISTRATION_RELATIVE, 131072)):
+                path = repo / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(_download(prefix + relative.as_posix(), limit))
+            expected, _ = _manifest_paths(repo)
+            total = 0
+            for relative in sorted(expected):
+                data = _download(prefix + relative, 16 * 1024 * 1024)
+                total += len(data)
+                if total > 1024 * 1024 * 1024:
+                    raise GuardError("Published decision set exceeds the download limit")
+                path = repo / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+            if verify_decision_hash(repo) != digest:
+                raise GuardError("Published decision hash does not match the requested freeze")
+    except (ValueError, UnicodeError, OSError) as exc:
+        raise GuardError("Could not verify published freeze from GitHub") from exc
+    return UnsealPermit(digest, commit)
+
+
+def _download(url: str, limit: int) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": "self-refuting-swarm-sealer"})
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            data = response.read(limit + 1)
+    except (urllib.error.URLError, OSError) as exc:
+        raise GuardError("Could not download the published freeze") from exc
+    if len(data) > limit:
+        raise GuardError("Published freeze file exceeds the download limit")
+    return data
+
+
+def verify_remote_proposal(commit: str, cell: str, sha: str) -> None:
+    """Allow test scoring only for code already named in the published decision set."""
+    if not isinstance(commit, str) or not _HEX40.fullmatch(commit) \
+            or not isinstance(sha, str) or not _SHA12.fullmatch(sha) \
+            or cell not in ("clinc150/bert", "clinc150/roberta",
+                            "banking77_oos/bert", "banking77_oos/roberta"):
+        raise GuardError("Invalid frozen proposal identity")
+    try:
+        raw = _download(
+            f"https://raw.githubusercontent.com/{PUBLISHED_REPO}/{commit}/{MANIFEST_RELATIVE.as_posix()}",
+            16 * 1024 * 1024)
+        manifest = json.loads(raw)
+    except (urllib.error.URLError, ValueError, UnicodeError, OSError) as exc:
+        raise GuardError("Could not verify frozen proposal set") from exc
+    proposals = manifest.get("proposals") if isinstance(manifest, dict) else None
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1 \
+            or not isinstance(proposals, dict) \
+            or not isinstance(proposals.get(cell), list) or sha not in proposals[cell]:
+        raise GuardError("Proposal is not in the published decision set")
+
+
 class SealedStore:
     """Read only named arrays; test splits require a verified freeze permit."""
 
@@ -272,6 +346,10 @@ class SealedStore:
         self._permit = verify_published_freeze(self._repo)
         return self._permit
 
+    def unseal_remote(self, commit: str, digest: str) -> UnsealPermit:
+        self._permit = None
+        self._permit = verify_remote_freeze(commit, digest)
+        return self._permit
 
     def guard_read(self, split: str) -> None:
         if split not in _SPLITS:

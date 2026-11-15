@@ -1,0 +1,36 @@
+"""Adapt the existing critic_inputs loader to independent E5 replay states."""
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+from skeptic.rules.critic import Critic
+
+
+def ensure_er1_path() -> None:
+    src = Path(os.environ.get("SKEPTIC_ER1_SRC") or
+               Path(__file__).resolve().parents[2] / "third_party/er1/src")
+    if not (src / "bert_daedl").is_dir():
+        raise RuntimeError("Pinned ER-1 source is missing; run make bootstrap")
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+
+
+def critic_factory(cells, config):
+    """Reuse loaded ScoreSets; give each cell/ordering its own LORD++ state."""
+    ensure_er1_path()
+    from skeptic.critic.lord import LordPlusPlus
+    from skeptic.critic.verdict import verdict
+
+    def make(cell, ordering, initial_sha):
+        loaded = cells[cell]
+        if loaded.cell != cell or initial_sha not in loaded.candidates:
+            raise ValueError("Critic inputs do not contain the replay incumbent")
+        state = LordPlusPlus(alpha=config.fdr_alpha, w0=config.fdr_w0)
+
+        def decide(row, incumbent_sha, fdr_state, position):
+            return verdict(loaded.candidates[row["sha"]], loaded.candidates[incumbent_sha],
+                           loaded.baselines, fdr_state, cell, config=config)
+
+        return Critic(initial_sha, state, decide)
+    return make

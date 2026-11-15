@@ -1,7 +1,7 @@
 """Offline contract tests: providers and Modal are replaced, never contacted."""
 import json
 import os
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -161,6 +161,18 @@ def test_isolated_validation_uses_fresh_full_repeat_and_subset(monkeypatch):
         return np.arange(n) + counter, None, 0.1
     with pytest.raises(api.Malformed, match="nondeterministic"):
         validate_isolated(source, ctx, nondeterministic)
+
+
+def test_modal_validator_registers_worker_before_entering_context(monkeypatch):
+    """Modal rejects @app.function defined inside modal_validator at runtime."""
+    import modal_jobs.agent_validation as validation
+
+    assert "image_ready" in validation.agent_app._local_state.functions
+    assert validation.image_ready._raw_f_.__qualname__ == "image_ready"
+    monkeypatch.setattr(validation.agent_app, "run", lambda **_: nullcontext())
+    monkeypatch.setattr(validation.modal, "enable_output", nullcontext)
+    with validation.modal_validator(smoke_ctx()) as validate:
+        assert callable(validate)
 
 
 def test_environment_never_overrides_shell_or_interpolates(tmp_path, monkeypatch):

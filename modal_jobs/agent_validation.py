@@ -10,9 +10,22 @@ import secrets
 from contextlib import contextmanager
 
 import numpy as np
+import modal
 
+from modal_jobs.config import Settings
+from modal_jobs.sandbox import _score_in_sandbox, sandbox_image
 from skeptic import api
 from skeptic.sandbox import pack_input
+
+
+settings = Settings.from_env()
+agent_app = modal.App(f"{settings.app_name}-agents")
+
+
+@agent_app.function(image=sandbox_image, cpu=0.25, memory=128, timeout=30,
+                    block_network=True, restrict_modal_access=True)
+def image_ready():
+    """Register the sandbox image before the agent app starts."""
 
 
 def validate_isolated(text: str, ctx: api.Ctx, score) -> np.ndarray:
@@ -47,21 +60,9 @@ def validate_isolated(text: str, ctx: api.Ctx, score) -> np.ndarray:
 
 @contextmanager
 def modal_validator(ctx: api.Ctx):
-    # Import after the CLI has loaded local configuration. Reuse E3's reviewed
-    # sandbox settings; register only the worker image on this separate app.
-    import modal
-    from modal_jobs.config import Settings
-    from modal_jobs.sandbox import _score_in_sandbox, sandbox_image
-
-    settings = Settings.from_env()
-    app = modal.App(f"{settings.app_name}-agents")
-
-    @app.function(image=sandbox_image, cpu=0.25, memory=128, timeout=30,
-                  block_network=True, restrict_modal_access=True)
-    def image_ready():
-        pass
-
-    with modal.enable_output(), app.run(environment_name=settings.environment):
+    # The CLI loads .env before importing this module. Modal functions must be
+    # registered at module scope; a nested @app.function fails before app.run.
+    with modal.enable_output(), agent_app.run(environment_name=settings.environment):
         def score(text, sha, payload, n, k, **kwargs):
-            return _score_in_sandbox(app, sandbox_image, text, sha, payload, n, k, **kwargs)
+            return _score_in_sandbox(agent_app, sandbox_image, text, sha, payload, n, k, **kwargs)
         yield lambda text: validate_isolated(text, ctx, score)

@@ -1,0 +1,554 @@
+{
+  "schema_version": 1,
+  "scope": "validation only; the sealed test set was never read",
+  "generated_by": "python -m skeptic.analysis.evidence_bundle export",
+  "explanations": {
+    "research_question": "An automated research loop that keeps whatever scores higher on validation will always find something to keep. Are those kept changes real improvements, or noise from trying many things?",
+    "observed_result": "On the same 487 AI-written and templated proposals, replayed in 200 random orders per cell, the keep-if-better ratchet accepted 5.4 to 6.6 proposals per ordering (ordering alone gives about 6.8), Thresholdout accepted 29 to 66, and the statistical critic accepted none. In the live closed loop (1,440 proposals) ratchet runs kept 25 proposals and critic runs kept 0.",
+    "limitation": "All numbers are from validation data. The sealed test set was never opened, so false-discovery rate, recall and hypotheses H1 to H4 are not computed, and we cannot say the ratchet's accepted proposals are false. The critic may also be too strict: zero acceptances leave no eligible paired comparison. Agents used each other's output, but the memory measure (H5) showed no benefit."
+  },
+  "example": {
+    "run": "runs/exp2/banking77_bert/B0",
+    "cell": "banking77_oos/bert",
+    "arm": "B",
+    "steps": [
+      "scout: Exa search -> source card",
+      "critic: verdicts on earlier proposals",
+      "analyst: lesson",
+      "proposer: this proposal, citing the source card and the lesson",
+      "modal: validation scores, 5 seeds",
+      "critic: verdict"
+    ],
+    "sources": [
+      {
+        "id": "m_0130",
+        "written_by": "scout",
+        "query": "relative Mahalanobis distance and Mahalanobis++ feature normalization (avoid changes that are score-matched)",
+        "title": "A Simple Fix to Mahalanobis Distance for Improving Near-OOD Detection",
+        "url": "https://arxiv.org/abs/2106.09022",
+        "date": "2021-06-16T20:43:56.000Z",
+        "method": "Fit class means and a pooled covariance on in-distribution feature vectors; score a sample feature \\(z\\) by \\(\\mathrm{RMD}(z)=\\min_c (z-\\mu_c)^T\\Sigma^{-1}(z-\\mu_c)-(z-\\mu)^T\\Sigma_{\\rm all}^{-1}(z-\\mu)\\), where \\((\\mu,\\Sigma_{\\rm all})\\) are the global feature mean/covariance. Larger RMD indicates more likely OOD (the classifier logits are not required).",
+        "target_failure": "SCORE-MATCHED"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "m_0115",
+        "written_by": "analyst",
+        "after_judged_proposals": 50,
+        "text": "Fusion and kNN proposals repeatedly reproduce the incumbent ranking rather than adding signal (c97212fc5303, bcd6486b108b, c5e041dfb62f); density variants likewise split between score-matching and negative gains (f389f4d782ea, 0abf80933f5d). Avoid more monotone blends or neighborhood/density reparameterizations. An untried direction is an explicitly class-conditional, uncertainty-aware score using predictive disagreement or augmentation stability.",
+        "built_from_verdicts_on": [
+          {
+            "sha": "0abf80933f5d",
+            "slot": 27,
+            "family": "density",
+            "verdict": "NO EFFECT",
+            "failure_reason": "validation AUROC -0.0114 against the incumbent; -0.0338 against the comparator d_port_ce; stopped at gate G3",
+            "source_url": "",
+            "rationale": "Trailing within-class covariance directions encode tight in-scope constraints, but their natural scale varies by classifier-assigned intent. Class-conditional robust calibration of trailing-direction residuals highlights violations relative to the predicted intent rather than reproducing a global residual ranking."
+          },
+          {
+            "sha": "bcd6486b108b",
+            "slot": 32,
+            "family": "knn",
+            "verdict": "SCORE-MATCHED",
+            "failure_reason": "validation AUROC +0.0063 against the incumbent; stopped at gate G2",
+            "source_url": "",
+            "rationale": "The normalized Dirichlet concentration profile describes how evidence is distributed across intents, independently of total evidence or vacuity. A query whose predicted-intent profile is angularly unlike profiles seen for that intent is likely out-of-scope."
+          },
+          {
+            "sha": "c5e041dfb62f",
+            "slot": 50,
+            "family": "knn",
+            "verdict": "SCORE-MATCHED",
+            "failure_reason": "validation AUROC +0.0130 against the incumbent; stopped at gate G2",
+            "source_url": "https://proceedings.mlr.press/v162/sun22d/sun22d.pdf",
+            "rationale": "OOS queries should be distant from training examples across both bottleneck and encoder representations. Averaging near- and broader-neighborhood radii reduces sensitivity to a single anomalously close neighbor while retaining local support information."
+          },
+          {
+            "sha": "c97212fc5303",
+            "slot": 31,
+            "family": "fusion",
+            "verdict": "SCORE-MATCHED",
+            "failure_reason": "validation AUROC +0.0083 against the incumbent; stopped at gate G2",
+            "source_url": "https://ar5iv.labs.arxiv.org/html/2305.16966",
+            "rationale": "Classifier energy and full encoder-space Mahalanobis distance capture complementary uncertainty signals. Mapping each score to its train-fitted empirical percentile puts both on a shared robust scale before combining their upper-tail evidence."
+          },
+          {
+            "sha": "f389f4d782ea",
+            "slot": 34,
+            "family": "density",
+            "verdict": "SCORE-MATCHED",
+            "failure_reason": "validation AUROC +0.0178 against the incumbent; stopped at gate G2",
+            "source_url": "",
+            "rationale": "A shrunk diagonal covariance gives each intent its own stable and unstable feature dimensions without the noise of a full per-class covariance. Class-calibrated surprise under the classifier's predicted intent exposes representation-logit disagreement and atypical within-intent variation."
+          }
+        ]
+      }
+    ],
+    "proposal": {
+      "sha": "969fe13dd999",
+      "slot": 60,
+      "family": "fusion",
+      "score_arm": "ce",
+      "rationale": "Near-OOS inputs can be unsupported by the predicted intent in bottleneck space, while far-OOS domain shifts can be unsupported in encoder space. Class-conditional train-calibrated density tails make the two distances comparable before their train-fitted additive fusion.",
+      "source_url": "https://arxiv.org/abs/2106.09022",
+      "memory_used": [
+        {
+          "id": "m_0115",
+          "kind": "lesson",
+          "written_by": "analyst"
+        },
+        {
+          "id": "m_0130",
+          "kind": "source",
+          "written_by": "scout"
+        }
+      ],
+      "file": "runs/exp2/banking77_bert/B0/proposals/969fe13dd999.py",
+      "memory_id": "m_0134"
+    },
+    "validation": {
+      "validation_auroc_seed_mean": 0.895375,
+      "gain_over_incumbent": 0.001937,
+      "incumbent": "energy_ce",
+      "rule": "critic",
+      "comparator": "d_port_ce",
+      "gain_over_comparator": null,
+      "ci95": null,
+      "p": null,
+      "lord_level": null,
+      "gates": {
+        "G1": "pass",
+        "G2": "fail"
+      },
+      "failed_gate": "G2",
+      "verdict": "SCORE-MATCHED",
+      "accepted": false,
+      "failure_reason": "validation AUROC +0.0019 against the incumbent; stopped at gate G2"
+    },
+    "later_proposals_citing_it_or_the_lesson": []
+  },
+  "memory_arm_counts": [
+    {
+      "run": "runs/exp2/banking77_bert/B0",
+      "source_cards_by_scout": 16,
+      "lessons_by_analyst": 3,
+      "verdicts_by_critic": 76,
+      "proposals_by_proposer": 76,
+      "judged_proposals": 76,
+      "judged_citing_a_source_card": 17,
+      "judged_citing_a_lesson": 8,
+      "judged_citing_a_verdict": 3
+    },
+    {
+      "run": "runs/exp2/banking77_bert/B1",
+      "source_cards_by_scout": 16,
+      "lessons_by_analyst": 2,
+      "verdicts_by_critic": 73,
+      "proposals_by_proposer": 73,
+      "judged_proposals": 73,
+      "judged_citing_a_source_card": 11,
+      "judged_citing_a_lesson": 10,
+      "judged_citing_a_verdict": 1
+    },
+    {
+      "run": "runs/exp2/banking77_bert/B2",
+      "source_cards_by_scout": 17,
+      "lessons_by_analyst": 2,
+      "verdicts_by_critic": 73,
+      "proposals_by_proposer": 73,
+      "judged_proposals": 73,
+      "judged_citing_a_source_card": 14,
+      "judged_citing_a_lesson": 9,
+      "judged_citing_a_verdict": 1
+    },
+    {
+      "run": "runs/exp2/clinc150_bert/B0",
+      "source_cards_by_scout": 18,
+      "lessons_by_analyst": 2,
+      "verdicts_by_critic": 72,
+      "proposals_by_proposer": 72,
+      "judged_proposals": 72,
+      "judged_citing_a_source_card": 13,
+      "judged_citing_a_lesson": 15,
+      "judged_citing_a_verdict": 3
+    },
+    {
+      "run": "runs/exp2/clinc150_bert/B1",
+      "source_cards_by_scout": 18,
+      "lessons_by_analyst": 2,
+      "verdicts_by_critic": 72,
+      "proposals_by_proposer": 72,
+      "judged_proposals": 72,
+      "judged_citing_a_source_card": 12,
+      "judged_citing_a_lesson": 9,
+      "judged_citing_a_verdict": 0
+    },
+    {
+      "run": "runs/exp2/clinc150_bert/B2",
+      "source_cards_by_scout": 18,
+      "lessons_by_analyst": 2,
+      "verdicts_by_critic": 68,
+      "proposals_by_proposer": 68,
+      "judged_proposals": 68,
+      "judged_citing_a_source_card": 14,
+      "judged_citing_a_lesson": 17,
+      "judged_citing_a_verdict": 1
+    }
+  ],
+  "experiment_2_runs": [
+    {
+      "accepted": 4,
+      "arm": "A",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": 0.921397,
+      "judged": 71,
+      "not_scored": 9,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/A0",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 67,
+        "KEPT": 4
+      },
+      "wasted": 62,
+      "wasted_change": 0.1936,
+      "wasted_first_half": 0.7778,
+      "wasted_second_half": 0.9714
+    },
+    {
+      "accepted": 6,
+      "arm": "A",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": 0.92175,
+      "judged": 74,
+      "not_scored": 6,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/A1",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 68,
+        "KEPT": 6
+      },
+      "wasted": 63,
+      "wasted_change": 0.2821,
+      "wasted_first_half": 0.7179,
+      "wasted_second_half": 1.0
+    },
+    {
+      "accepted": 9,
+      "arm": "A",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": 0.922657,
+      "judged": 74,
+      "not_scored": 6,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/A2",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 65,
+        "KEPT": 9
+      },
+      "wasted": 60,
+      "wasted_change": 0.2602,
+      "wasted_first_half": 0.6842,
+      "wasted_second_half": 0.9444
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 76,
+      "not_scored": 4,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/B0",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 28,
+        "SCORE-MATCHED": 47,
+        "UNDERPOWERED": 1
+      },
+      "wasted": 65,
+      "wasted_change": 0.1316,
+      "wasted_first_half": 0.7895,
+      "wasted_second_half": 0.9211
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 73,
+      "not_scored": 7,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/B1",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 33,
+        "SCORE-MATCHED": 39,
+        "UNDERPOWERED": 1
+      },
+      "wasted": 62,
+      "wasted_change": 0.2346,
+      "wasted_first_half": 0.7368,
+      "wasted_second_half": 0.9714
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 73,
+      "not_scored": 7,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/B2",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 29,
+        "SCORE-MATCHED": 38,
+        "UNDERPOWERED": 6
+      },
+      "wasted": 61,
+      "wasted_change": 0.2609,
+      "wasted_first_half": 0.7105,
+      "wasted_second_half": 0.9714
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 65,
+      "not_scored": 15,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/C0",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 23,
+        "SCORE-MATCHED": 41,
+        "UNDERPOWERED": 1
+      },
+      "wasted": 54,
+      "wasted_change": 0.2002,
+      "wasted_first_half": 0.7353,
+      "wasted_second_half": 0.9355
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 69,
+      "not_scored": 11,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/C1",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 25,
+        "SCORE-MATCHED": 43,
+        "UNDERPOWERED": 1
+      },
+      "wasted": 58,
+      "wasted_change": 0.2475,
+      "wasted_first_half": 0.7222,
+      "wasted_second_half": 0.9697
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "banking77_oos/bert",
+      "final_val_auroc": null,
+      "judged": 71,
+      "not_scored": 9,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/banking77_bert/C2",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 26,
+        "SCORE-MATCHED": 41,
+        "UNDERPOWERED": 4
+      },
+      "wasted": 60,
+      "wasted_change": 0.2409,
+      "wasted_first_half": 0.7297,
+      "wasted_second_half": 0.9706
+    },
+    {
+      "accepted": 1,
+      "arm": "A",
+      "cell": "clinc150/bert",
+      "final_val_auroc": 0.982471,
+      "judged": 68,
+      "not_scored": 12,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/A0",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 67,
+        "KEPT": 1
+      },
+      "wasted": 62,
+      "wasted_change": 0.1622,
+      "wasted_first_half": 0.8378,
+      "wasted_second_half": 1.0
+    },
+    {
+      "accepted": 2,
+      "arm": "A",
+      "cell": "clinc150/bert",
+      "final_val_auroc": 0.983897,
+      "judged": 74,
+      "not_scored": 6,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/A1",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 72,
+        "KEPT": 2
+      },
+      "wasted": 67,
+      "wasted_change": 0.1301,
+      "wasted_first_half": 0.8421,
+      "wasted_second_half": 0.9722
+    },
+    {
+      "accepted": 3,
+      "arm": "A",
+      "cell": "clinc150/bert",
+      "final_val_auroc": 0.982701,
+      "judged": 70,
+      "not_scored": 10,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/A2",
+      "slots": 80,
+      "verdicts": {
+        "DISCARDED": 67,
+        "KEPT": 3
+      },
+      "wasted": 62,
+      "wasted_change": 0.2162,
+      "wasted_first_half": 0.7838,
+      "wasted_second_half": 1.0
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 72,
+      "not_scored": 8,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/B0",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 55,
+        "SCORE-MATCHED": 12,
+        "UNDERPOWERED": 5
+      },
+      "wasted": 60,
+      "wasted_change": 0.2687,
+      "wasted_first_half": 0.7027,
+      "wasted_second_half": 0.9714
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 72,
+      "not_scored": 8,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/B1",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 56,
+        "SCORE-MATCHED": 11,
+        "UNDERPOWERED": 5
+      },
+      "wasted": 62,
+      "wasted_change": 0.1517,
+      "wasted_first_half": 0.7895,
+      "wasted_second_half": 0.9412
+    },
+    {
+      "accepted": 0,
+      "arm": "B",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 68,
+      "not_scored": 12,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/B2",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 57,
+        "SCORE-MATCHED": 7,
+        "UNDERPOWERED": 4
+      },
+      "wasted": 58,
+      "wasted_change": 0.2778,
+      "wasted_first_half": 0.7222,
+      "wasted_second_half": 1.0
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 64,
+      "not_scored": 16,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/C0",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 52,
+        "SCORE-MATCHED": 9,
+        "UNDERPOWERED": 3
+      },
+      "wasted": 55,
+      "wasted_change": 0.1941,
+      "wasted_first_half": 0.7714,
+      "wasted_second_half": 0.9655
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 72,
+      "not_scored": 8,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/C1",
+      "slots": 80,
+      "verdicts": {
+        "INERT": 1,
+        "NO EFFECT": 58,
+        "SCORE-MATCHED": 7,
+        "UNDERPOWERED": 6
+      },
+      "wasted": 63,
+      "wasted_change": 0.2368,
+      "wasted_first_half": 0.7632,
+      "wasted_second_half": 1.0
+    },
+    {
+      "accepted": 0,
+      "arm": "C",
+      "cell": "clinc150/bert",
+      "final_val_auroc": null,
+      "judged": 67,
+      "not_scored": 13,
+      "run": "/home/james_rog/projects/self-refuting-swarm/runs/exp2/clinc150_bert/C2",
+      "slots": 80,
+      "verdicts": {
+        "NO EFFECT": 53,
+        "SCORE-MATCHED": 9,
+        "UNDERPOWERED": 5
+      },
+      "wasted": 59,
+      "wasted_change": 0.2105,
+      "wasted_first_half": 0.7895,
+      "wasted_second_half": 1.0
+    }
+  ],
+  "three_rule_results": "tables/validation_summary.md",
+  "sponsor_evidence": {
+    "exa": {
+      "status": "verified from repository artifacts",
+      "evidence": "103 source cards written by the Scout in the six memory-arm runs, each with the Exa query, title, URL, date and extracted method (runs/exp2/*/B*/memory.jsonl, kind 'source'); later proposals cite them (81 judged proposals). The call is in skeptic/streams/scout.py and runs inside the loop every 10 proposals."
+    },
+    "modal": {
+      "status": "available; part of it is outside the repository",
+      "evidence": "runs/ledger.jsonl: 1,996 scored proposal-cell rows x 5 seeds (modal_jobs/score_stream_legacy.py); runs/exp2: 1,440 proposal slots scored through modal_jobs/exp2.py; 40 fine-tunes on B300 GPUs (modal_jobs/train40.py), whose caches are in the Modal volumes skeptic-open and skeptic-sealed. Job logs and timings are in the Modal dashboard, not in the repository. The registered scores came from a batch container with a static validator; the isolated sandbox path was smoke-tested only."
+    },
+    "pastdev": {
+      "status": "writes and Proposer reads happened during proposal generation; not verifiable from repository artifacts",
+      "evidence": "Proposal generation on Sat 14 Nov used skeptic.memory.PastDevMemory: Scout and Proposer entries were ingested and the Proposer recalled them before each proposal (terminal counters: 313 entries ingested, 310 recalls, 0 errors; these counters were not saved to a file). In Experiment 2 the Proposer read the run's local memory file, not past.dev. A remote read by a second agent was not part of any experiment. tables/pastdev_check.json, if present, is a read-only check made afterwards."
+    }
+  }
+}

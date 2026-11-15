@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 
 UV ?= uv
-PIPELINE_TARGETS := smoke stream exp1 exp2 unblind report reproduce testbed-b
+PIPELINE_TARGETS := smoke stream exp2 unblind report reproduce testbed-b
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
@@ -19,7 +19,8 @@ help:
 	  'e3-canaries Run the four canaries on one CE validation cell (E3 CPU only)' \
 	  'smoke      Full canary verdicts and sealed guard (R1, L2, E3, E4; pending)' \
 	  'stream     Templated and LLM proposal streams (L3, L5)' \
-	  'exp1       Three acceptance rules across matched orderings (E5)' \
+	  'exp1       Replay registered settings supplied via REPLAY_ARGS (E5)' \
+	  'exp1-plan  Validate replay configuration without writing decisions' \
 	  'exp2       Closed loop with three arms (L6)' \
 	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
 	  'seal-check Verify a published decision freeze before test reads (E4)' \
@@ -52,6 +53,12 @@ e3-plan:
 
 e3-canaries:
 	$(UV) run --frozen python -m modal_jobs.sandbox run --canaries
+
+exp1-plan:
+	$(UV) run --frozen python -m skeptic.rules.replay plan $(REPLAY_ARGS)
+
+exp1:
+	$(UV) run --frozen python -m skeptic.rules.replay run $(REPLAY_ARGS)
 
 seal-hash:
 	$(UV) run --frozen python -m skeptic.store freeze

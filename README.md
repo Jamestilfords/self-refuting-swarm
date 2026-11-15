@@ -8,8 +8,8 @@ to probe deferral on a safety monitor.
 This repository follows slide 22 of **Skeptic: Design Document and Agent
 Handoff** (November 14, 2026). E1 provisions separate Modal volumes, E2 runs
 training and audits the open caches, and E3 executes validation proposals in
-CPU Sandboxes with an append-only ledger. Critic verdicts and unblinding remain
-pending.
+CPU Sandboxes with an append-only ledger. The validation critic and E4 sealed-store
+freeze checks are implemented; experiment replay and unblinding remain pending.
 
 ## Getting started
 
@@ -208,14 +208,16 @@ Work owners are the repository's GitHub collaborators:
   `skeptic/store.py`, `skeptic/ledger.py`, `skeptic/rules/`, `dashboard/`,
   and the Makefile/reproduction workflow.
 
-The proposal API and E3 validation ledger are implemented. The critic gates,
-decision rules, sealed-test guard, and verdict function are still placeholders.
+The proposal API, validation critic, E3 validation ledger, and E4 sealed-store
+freeze checks are implemented. Decision rules and complete scoring/unblinding
+integration remain separate work.
 
 ## Commands
 
 Run `make help` for the full command list from slide 22 and the associated work
 packages. `setup`, `setup-check`, `bootstrap`, `test`, `train40`, `sanity`,
-`e3-plan`, and `e3-canaries` are implemented. `smoke`, `stream`, `exp1`, `exp2`, `seal-hash`, `unblind`,
+`e3-plan`, `e3-canaries`, `seal-hash`, and `seal-check` are implemented. `smoke`,
+`stream`, `exp1`, `exp2`, `unblind`,
 `report`, `reproduce`, and `testbed-b` remain reserved targets. Setup runs small
 CPU storage checks; it does not start training or read dataset/test scores.
 
@@ -251,7 +253,14 @@ checks a hidden 10% subset. The CLI prints the same public summary.
 
 E3's `ok` status means the proposal passed validation and produced a score;
 it is **not** a critic acceptance verdict. The full `make smoke` target awaits
-the R1 critic gates and E4 sealed guard. See [Modal E3 details](modal_jobs/README.md#e3-proposal-validation).
+experiment-runner integration. See [Modal E3 details](modal_jobs/README.md#e3-proposal-validation).
+
+### E4 sealed store and freeze checks
+
+See the [sealed-store and freeze guide](docs/sealed-store.md) for the decision
+file contract, `seal-hash` and `seal-check` commands, publication verification,
+and trusted-job API. These tools do not start scoring or unblind a dataset.
+Existing scoring jobs need their separate isolation integration.
 
 ## ER-1 dependency and credit
 
@@ -274,5 +283,5 @@ Activation-Monitoring repository has been added by this scaffold.
 `PREREGISTRATION.md` is a draft template, not a frozen registration. @mid9t must
 confirm the proposed defaults and record the preregistration commit before a
 main run. Keep sealed test arrays and scores outside git, the public ledger,
-shared memory, and agent inputs. E4 must implement and verify the guard and
-decision-hash checks before any unblinding workflow is enabled.
+shared memory, and agent inputs. E4 now supplies the guard and decision-hash
+checks; scoring integration and the approved unblinding analysis remain pending.

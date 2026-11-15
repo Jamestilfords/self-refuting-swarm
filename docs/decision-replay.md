@@ -6,6 +6,9 @@ an explicit threshold, and an externally supplied schedule of noise pairs.
 R2 reuses the merged `skeptic.critic_inputs` loader and critic, with fresh
 LORD++ state for each cell and ordering. Guard violations remain `BUG` without
 spending a LORD++ step. Other invalid proposals are recorded as rejected.
+Registered baseline identities are excluded using the baseline manifest even
+if discovery tagged a shared baseline file as a templated proposal. Canary
+rows are also excluded from the experiment stream.
 
 This is offline validation replay: no proposal code, test arrays, Modal calls,
 or training are involved. The PyTorch dependency is required by the critic's
@@ -84,6 +87,8 @@ same `load_cell(cell)` -> `verdict(...)` data contract.
 The tracked `runs/ledger.jsonl` now contains the teammate's 500-proposal run
 (2,000 rows across four cells). All 1,996 successful rows have plain-model ECE;
 all 1,176 successful rows that return probabilities have candidate ECE. The
+500 identities consist of 487 replay candidates, 9 registered baselines and
+4 canaries, after resolving the shared baseline identities. The
 per-item score files still need to be downloaded from the matching Modal run;
 the ledger alone is insufficient for paired bootstrap. The CLI refuses missing
 calibration or scores that disagree with the ledger.

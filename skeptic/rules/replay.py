@@ -24,6 +24,25 @@ def _hash(path):
     return digest.hexdigest()
 
 
+def replay_rows(ledger_path, baselines_path):
+    """Exclude named baseline identities even when discovery tagged them templated."""
+    rows = load_ledger(ledger_path)
+    manifest = json.loads(Path(baselines_path).read_text())
+    named = manifest.get("proposals") if isinstance(manifest, dict) else manifest
+    if not isinstance(named, list) or not named or any(
+        not isinstance(item, dict) or not isinstance(item.get("sha"), str) for item in named
+    ):
+        raise ValueError("Invalid baseline manifest")
+    baseline_shas = {item["sha"] for item in named}
+    for sha in baseline_shas:
+        for cell in CELLS:
+            row = rows.get((sha, cell))
+            if row is None or row.get("status") != "ok":
+                raise ValueError(f"Missing scored baseline: {cell}/{sha}")
+            rows[(sha, cell)] = {**row, "stream": "baseline"}
+    return rows
+
+
 def read_config(path, rows):
     from skeptic.critic.config import CriticConfig
     def invalid(value):
@@ -83,7 +102,7 @@ def main(argv=None):
     parser.add_argument("--baselines", type=Path, default=Path("proposals/baselines.json"))
     parser.add_argument("--output", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
-    rows = load_ledger(args.ledger)
+    rows = replay_rows(args.ledger, args.baselines)
     config, critic_config = read_config(args.config, rows)
     summary = {"rules": ["R0", "R1", "R2"], "orderings": config["orderings"],
                "decision_files": 3 * config["orderings"],

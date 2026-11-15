@@ -28,7 +28,7 @@ def experiment(tmp_path):
             np.savez_compressed(folder / f"{sha}.npz", scores=values, n_in=60,
                                 scorer="isolated-e3-v1", proposal_sha=sha)
             rows.append({"sha": sha, "cell": cell, "arm": scoreset.arm, "status": "ok",
-                         "stream": "templated" if name == "strong" else "baseline",
+                         "stream": "templated" if name in {"strong", "msp_ce"} else "baseline",
                          "val": {"auroc": [auroc(s[:60], s[60:]) for s in values],
                                  "ece": None, "ece_plain": [.02] * 5}})
         rows.append({"sha": guard, "cell": cell, "arm": "ce", "status": "io", "stream": "llm", "val": None})
@@ -58,6 +58,9 @@ def test_plan_run_and_freeze_are_separate(experiment, capsys):
     assert len(paths) == 6
     before = {p: p.read_bytes() for p in paths}
     assert all(len(p.read_text().splitlines()) == 8 for p in paths)
+    # A registered baseline tagged "templated" in the source ledger is still excluded.
+    assert all(json.loads(line)["sha"] in {"a" * 12, "b" * 12}
+               for p in paths for line in p.read_text().splitlines())
     r2 = [json.loads(line) for p in paths if p.parent.name == "R2" for line in p.read_text().splitlines()]
     assert {r["verdict"] for r in r2} == {"UNDERPOWERED", "BUG"}
     assert all(r["gates"] == {"lock": "fail"} for r in r2 if r["verdict"] == "BUG")

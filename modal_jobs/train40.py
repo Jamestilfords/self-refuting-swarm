@@ -110,8 +110,8 @@ prep_image = (
     modal.Image.debian_slim(python_version="3.12")
     .apt_install("git")
     .pip_install("huggingface_hub==0.36.0")
-    .add_local_python_source("modal_jobs")
     .env(settings.container_env())
+    .add_local_python_source("modal_jobs")
 )
 
 

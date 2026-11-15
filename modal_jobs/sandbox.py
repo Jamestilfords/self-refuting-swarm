@@ -38,15 +38,15 @@ runner_image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1")
     .env(settings.container_env())
-    .add_local_python_source("modal_jobs", "skeptic")
     .add_local_dir(ER1_BUNDLE, "/opt/er1/src", copy=True)
+    .add_local_python_source("modal_jobs", "skeptic", copy=True)
 )
 sandbox_image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1")
     .env({"SKEPTIC_ER1_SRC": "/opt/er1/src"})
-    .add_local_python_source("skeptic")
     .add_local_dir(ER1_BUNDLE, "/opt/er1/src", copy=True)
+    .add_local_python_source("skeptic", copy=True)
 )
 
 

@@ -267,7 +267,9 @@ The legacy test-scoring route is disabled.
 See the [sealed-store and freeze guide](docs/sealed-store.md) for the decision
 file contract, `seal-hash` and `seal-check` commands, publication verification,
 and trusted-job API. These tools do not start scoring or unblind a dataset.
-Existing scoring jobs need their separate isolation integration.
+The guarded Modal test scorer is available separately from validation. See
+[sealer setup, tests and expected results](docs/modal-sealer.md); a published
+experiment freeze is required before it reads test arrays.
 
 ## ER-1 dependency and credit
 

@@ -99,12 +99,30 @@ def test_sealer_writes_test_scores_and_returns_no_test_numbers(stores, props):
     assert z["scores"].shape == (5, 160) and int(z["n_in"]) == 120
     assert not (open_root / "scores" / GROUP / "sealed").exists()
     for r in rows.values():
-        assert r["sealed"] == "ok" and set(r) == {"sha", "sealed", "val_ece", "val_ece_plain"}
-        assert len(r["val_ece_plain"]) == 5
-    assert rows[shas["energy@ce"]]["val_ece"] is None                    # scores only: G5 does not apply
-    assert len(rows[shas["coupling"]]["val_ece"]) == 5                   # probs returned: calibration measured
+        assert r == {"sha": r["sha"], "sealed": "ok"}
     text = json.dumps(list(rows.values()))
     assert "auroc" not in text and "scores" not in text
+
+
+def test_calibration_runs_no_proposal_and_reads_only_validation_labels(stores, props, tmp_path):
+    open_root, sealed_root = stores
+    d, shas = props
+    good = [shas["energy@ce"], shas["coupling"], shas["msp@edl"]]
+    runner.score_validation(d, good, open_root, GROUP)
+    labels_only = tmp_path / "sealed"                                    # a sealed store holding nothing but validation labels
+    for arm in ("ce", "edl"):
+        for seed in runner.SEEDS:
+            (labels_only / GROUP / f"{arm}_seed{seed}").mkdir(parents=True)
+            y = np.load(sealed_root / GROUP / f"{arm}_seed{seed}" / "cache.npz")["val__labels"]
+            np.savez_compressed(labels_only / GROUP / f"{arm}_seed{seed}" / "cache.npz", val__labels=y)
+    items = [(shas["energy@ce"], "ce"), (shas["coupling"], "edl"), (shas["msp@edl"], "edl")]
+    rows = {r["sha"]: r for r in runner.validation_calibration(open_root, labels_only, GROUP, items)}
+    assert rows[shas["energy@ce"]]["val_ece"] is None                    # scores only: G5 does not apply
+    assert len(rows[shas["coupling"]]["val_ece"]) == 5                   # probs returned: calibration measured
+    assert all(len(r["val_ece_plain"]) == 5 and 0 <= min(r["val_ece_plain"]) for r in rows.values())
+    z = np.load(sealed_root / GROUP / "edl_seed0" / "cache.npz")
+    o = np.load(open_root / "scores" / GROUP / f"{shas['coupling']}.npz")
+    assert rows[shas["coupling"]]["val_ece"][0] == pytest.approx(runner.ece(o["conf"][0, :80], o["pred"][0, :80] == z["val__labels"]), abs=1e-6)
 
 
 def test_metrics():
@@ -126,8 +144,12 @@ def test_plan_and_ledger_merge(stores, props, tmp_path):
     mine = [t for t in tasks if t["group"] == GROUP]
     val = {(r["sha"], t["cell"]): r for t in mine for r in runner.score_validation(d, t["shas"], open_root, GROUP)}
     good = lambda t: [s for s in t["shas"] if val[(s, t["cell"])]["status"] == "ok"]
+    cal = {(r["sha"], t["cell"]): r for t in mine
+           for r in runner.validation_calibration(open_root, sealed_root, GROUP, [(s, t["arm"]) for s in good(t)])}
     test = {(r["sha"], t["cell"]): r for t in mine for r in runner.score_test(d, good(t), open_root, sealed_root, GROUP)}
-    ledger = runner.merge_ledger(found, tasks, val, test)
+    ledger = runner.merge_ledger(found, tasks, val, cal, test)
+    unsealed = runner.merge_ledger(found, tasks, val, cal, {})
+    assert next(r for r in unsealed if r["sha"] == shas["energy@ce"] and r["cell"] == "clinc150/bert")["sealed"] == "not_run"
     assert len(ledger) == len(found) * 4
     row = next(r for r in ledger if r["sha"] == shas["energy@ce"] and r["cell"] == "clinc150/bert")
     assert row["status"] == "ok" and row["sealed"] == "ok" and row["stream"] == "baseline"

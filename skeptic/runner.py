@@ -2,8 +2,9 @@
 
 score_validation  runs each proposal on validation for the five seeds of one cell. It reads only the
                   open store and writes per-item validation scores there.
+validation_calibration  validation ECE for gate G5. Runs no proposal code.
 score_test        the sealer. Runs the same files on test, writes scores into the sealed store, and
-                  returns a status plus validation calibration. It never returns a test-derived number.
+                  returns a status only. It never returns a test-derived number.
 
 Layout written:
     <open>/scores/<group>/<sha>.npz     scores (5, n_val + n_oos_val) float32, n_in; pred, conf if probs
@@ -106,6 +107,13 @@ def _pack(per_seed: list[dict]) -> dict:
     return out
 
 
+def _save(target: Path, **arrays) -> None:
+    """Write then rename, so an interrupted container never leaves a half-written score file behind."""
+    tmp = target.with_name(target.stem + ".part.npz")
+    np.savez_compressed(tmp, **arrays)
+    tmp.replace(target)
+
+
 def _val_metrics(scores: np.ndarray, n_in: int) -> dict:
     return {"auroc": [round(auroc(s[:n_in], s[n_in:]), 6) for s in scores],
             "fpr95": [round(fpr95(s[:n_in], s[n_in:]), 6) for s in scores]}
@@ -146,7 +154,7 @@ def score_validation(proposals_dir, shas, open_root, group: str) -> list[dict]:
                 n_in = caches[p.arm][0][1]
                 packed = _pack(per_seed)
                 runtime = round(max(r["runtime_s"] for r in per_seed), 3)
-                np.savez_compressed(target, n_in=n_in, runtime_s=runtime, **packed)
+                _save(target, n_in=n_in, runtime_s=runtime, **packed)
                 row.update(val=_val_metrics(packed["scores"], n_in), has_probs="conf" in packed, runtime_s=runtime,
                            wall_s=round(time.perf_counter() - t0, 1))
         except api.Malformed as e:
@@ -159,13 +167,13 @@ def score_validation(proposals_dir, shas, open_root, group: str) -> list[dict]:
 
 # ------------------------------------------------------------------ sealer (sealed store; status only)
 def score_test(proposals_dir, shas, open_root, sealed_root, group: str) -> list[dict]:
-    """Write test scores into the sealed store. Returns status and validation calibration only."""
+    """Write test scores into the sealed store. Returns a status only."""
     out_dir = Path(sealed_root) / "scores" / group
     out_dir.mkdir(parents=True, exist_ok=True)
     runs: dict[str, list] = {}
     rows = []
     for sha in shas:
-        row = {"sha": sha, "sealed": "ok", "val_ece": None, "val_ece_plain": None}
+        row = {"sha": sha, "sealed": "ok"}
         try:
             p = api.load_proposal(Path(proposals_dir) / f"{sha}.py")
             if p.arm not in runs:
@@ -173,15 +181,7 @@ def score_test(proposals_dir, shas, open_root, sealed_root, group: str) -> list[
             target = out_dir / f"{sha}.npz"
             if not target.exists():
                 per_seed = [_run(p, r["ctx"], full_checks=False) for r in runs[p.arm]]
-                np.savez_compressed(target, n_in=runs[p.arm][0]["n_test"], **_pack(per_seed))
-            # validation calibration: needs validation labels, which only the sealed store holds
-            row["val_ece_plain"] = [round(ece(softmax(r["val_logits"].astype(np.float64), axis=1).max(1),
-                                              r["val_logits"].argmax(1) == r["val_labels"]), 6) for r in runs[p.arm]]
-            val = np.load(Path(open_root) / "scores" / group / f"{sha}.npz")
-            if "conf" in val.files:
-                n = int(val["n_in"])
-                row["val_ece"] = [round(ece(val["conf"][k, :n], val["pred"][k, :n] == r["val_labels"]), 6)
-                                  for k, r in enumerate(runs[p.arm])]
+                _save(target, n_in=runs[p.arm][0]["n_test"], **_pack(per_seed))
         except api.Malformed as e:
             row.update(sealed=e.reason)
         except Exception as e:
@@ -189,6 +189,35 @@ def score_test(proposals_dir, shas, open_root, sealed_root, group: str) -> list[
         rows.append(row)
     return rows
 
+
+
+# ------------------------------------------------------------------ calibration (runs no proposal code)
+def validation_calibration(open_root, sealed_root, group: str, items) -> list[dict]:
+    """Validation ECE for gate G5. items: (sha, arm) pairs.
+
+    This executes no proposal. It reads confidences already stored in the open store, and from the sealed
+    store only the validation labels (one array of each cache file; test arrays are never opened).
+    """
+    labels: dict[str, list] = {}
+    plain: dict[str, list] = {}
+    rows = []
+    for sha, arm in items:
+        if arm not in labels:
+            labels[arm], plain[arm] = [], []
+            for k, sealed_dir in enumerate(_seed_dirs(sealed_root, group, arm)):
+                y = np.load(sealed_dir / "cache.npz")["val__labels"]
+                z = np.load(Path(open_root) / group / f"{arm}_seed{k}" / "cache.npz")["val__logits"].astype(np.float64)
+                labels[arm].append(y)
+                plain[arm].append(round(ece(softmax(z, axis=1).max(1), z.argmax(1) == y), 6))
+        row = {"sha": sha, "val_ece": None, "val_ece_plain": plain[arm]}
+        path = Path(open_root) / "scores" / group / f"{sha}.npz"
+        if path.exists():
+            z = np.load(path)
+            if "conf" in z.files:
+                n = int(z["n_in"])
+                row["val_ece"] = [round(ece(z["conf"][k, :n], z["pred"][k, :n] == y), 6) for k, y in enumerate(labels[arm])]
+        rows.append(row)
+    return rows
 
 # ------------------------------------------------------------------ planning and the ledger (run locally)
 BATCH = 6                                      # proposals per container call; one arm per batch
@@ -228,21 +257,22 @@ def build_tasks(found: dict, limit: int | None = None) -> list[dict]:
     return tasks
 
 
-def merge_ledger(found: dict, tasks: list[dict], val_rows: dict, test_rows: dict) -> list[dict]:
-    """One ledger row per proposal and cell (slide 9). val_rows/test_rows are keyed by (sha, cell)."""
+def merge_ledger(found: dict, tasks: list[dict], val_rows: dict, cal_rows: dict, test_rows: dict) -> list[dict]:
+    """One ledger row per proposal and cell (slide 9). The three inputs are keyed by (sha, cell)."""
     ledger = []
     for t in tasks:
         for sha in t["shas"]:
             key = (sha, t["cell"])
             v = val_rows.get(key) or {"sha": sha, "status": "infra_error", "val": None, "arm": t["arm"]}
-            s = test_rows.get(key, {})
+            s, c = test_rows.get(key, {}), cal_rows.get(key, {})
             val = dict(v["val"]) if v.get("val") else None
             if val is not None:
-                val["ece"], val["ece_plain"] = s.get("val_ece"), s.get("val_ece_plain")
+                val["ece"], val["ece_plain"] = c.get("val_ece"), c.get("val_ece_plain")
             ledger.append({"sha": sha, "stream": found[sha]["stream"], "family": v.get("family"), "arm": v.get("arm"),
                            "cell": t["cell"], "status": v["status"], "detail": v.get("detail"), "val": val,
                            "parents": v.get("parents", []), "source": v.get("source", ""),
                            "memory_used": v.get("memory_used", []), "runtime_s": v.get("runtime_s"),
+                           "has_probs": bool(v.get("has_probs")),
                            "sealed": s.get("sealed", "not_run" if v["status"] == "ok" else "skipped")})
     return sorted(ledger, key=lambda r: (r["sha"], r["cell"]))
 

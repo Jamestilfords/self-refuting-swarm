@@ -3,7 +3,7 @@
 UV ?= uv
 PIPELINE_TARGETS := smoke exp2 unblind report reproduce testbed-b
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan agents-bootstrap agents-plan agents-check agents-test stream $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
@@ -26,6 +26,8 @@ help:
 	  'exp1       Replay registered settings supplied via REPLAY_ARGS (E5)' \
 	  'exp1-plan  Validate replay configuration without writing decisions' \
 	  'exp2       Closed loop with three arms (L6)' \
+	  'dashboard  Serve the Streamlit validation demo at localhost:8501 (E7)' \
+	  'dashboard-test Test the dashboard data adapter and Streamlit controls' \
 	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
 	  'seal-check Verify a published decision freeze before test reads (E4)' \
 	  'unblind    Guard check and truth tables (R5, E4)' \
@@ -61,6 +63,12 @@ agents-test:
 
 stream:
 	$(UV) run --frozen --group agents python -m skeptic.agents run $(AGENT_ARGS)
+
+dashboard:
+	$(UV) run --frozen --only-group dashboard streamlit run dashboard/app.py $(DASHBOARD_ARGS)
+
+dashboard-test:
+	$(UV) run --frozen --only-group dashboard --only-group dev python -m pytest tests/test_dashboard.py tests/test_dashboard_app.py -q
 
 train40:
 	$(UV) run --frozen python -m modal_jobs.train40 run --all

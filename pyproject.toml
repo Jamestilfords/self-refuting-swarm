@@ -20,6 +20,10 @@ agents = [
     "openai>=2,<3",
     "python-dotenv>=1,<2",
 ]
+dashboard = [
+    "altair>=5,<7",
+    "streamlit>=1.45,<2",
+]
 dev = [
     "pytest>=8",
 ]

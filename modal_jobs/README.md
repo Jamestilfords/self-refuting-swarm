@@ -116,15 +116,52 @@ paper test comparisons wait for the later unblinding workflow.
 
 - Trusted training jobs may mount both volumes. They write full caches to
   `/sealed` and copy only `train`, `val`, and `oos_val` arrays to `/open`.
-- Experiment/proposal execution mounts only `/open`, preferably using
-  `open_volume.with_mount_options(read_only=True)`, and gets no provider or
-  Modal account credentials.
+- The trusted E3 wrapper mounts `/open` read-only. Each untrusted proposal
+  Sandbox receives only its prepared cell arrays and has no volume, network,
+  or secrets.
 - The trusted sealer mounts `/sealed`; it returns status, not test scores.
 
-E1 establishes resource separation and verifies the setup checks. E3 still
-needs its proposal sandbox and E4 still needs the read guard and committed
-decision-hash check. A Modal workspace administrator can access both volumes;
-separate volumes alone are not the complete sealed-exam enforcement.
+E1 establishes resource separation and verifies the setup checks. E3 enforces
+the proposal execution boundary, while E4 still needs the read guard and
+committed decision-hash check. A Modal workspace administrator can access both
+volumes; separate volumes alone are not the complete sealed-exam enforcement.
+
+### E3 proposal validation
+
+With the Modal profile for the workspace containing the open caches:
+
+```sh
+make e3-plan      # Local static preview; no Modal job.
+make e3-canaries  # Three valid proposals, each scored in two CPU Sandboxes.
+uv run --frozen python -m modal_jobs.sandbox run \
+  --proposal proposals/6cef58e34d00.py \
+  --dataset clinc150 --backbone bert --arm ce --seed 0 \
+  --stream canary
+```
+
+`plan` and `run` accept repeated `--proposal` flags. `--canaries` reads the
+checked-in canary manifest. `--dataset`, `--backbone`, `--arm`, and `--seed`
+select exactly one of the 40 E2 cells. A proposal's `ARM` must match the cell.
+`--ledger PATH` selects the local append-only JSONL file, defaulting to
+`runs/decisions/e3.jsonl`. Existing proposal/cell rows are reused, so a retry
+does not silently replace the first validation result.
+The Modal dashboard shows the trusted function in the temporary `skeptic-e3`
+app (or `<SKEPTIC_APP_NAME>-e3` with an override) and the child Sandboxes under
+the E1 `skeptic` app. The JSONL ledger stays on the launching machine.
+
+The trusted CPU function verifies the E2 recipe and exact open-cache keys.
+It randomly mixes in-scope and OOS validation arrays without exposing the
+membership mask or shuffle seed. It runs the full batch and a hidden 10%
+subset in separate Modal Sandboxes. The Sandboxes use gVisor, two CPUs, 8 GiB
+RAM, a 90-second lifetime, blocked network, and no mounted volume or secret.
+The function verifies score length, finiteness, probability rows, and subset
+consistency before computing validation AUROC. Only aggregate status, runtime,
+and validation AUROC enter the ledger; no test array or score is read.
+
+This is E3 execution status, not a critic verdict. The full four-canary
+`make smoke` needs the R1 verdict gates and the E4 sealed guard. Running E3
+requires the pinned ER-1 submodule and an existing E1 deployment in the same
+workspace. It uses CPU and does not start B300 training.
 
 SDK references: [Apps](https://modal.com/docs/guide/apps),
 [Volumes](https://modal.com/docs/guide/volumes), and

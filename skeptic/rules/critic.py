@@ -9,10 +9,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from skeptic.rules.common import accept_gates_ok
+
 VerdictFn = Callable[[dict, str, Any, int], Any]
 _VERDICTS = frozenset({"ACCEPT", "INERT", "SCORE-MATCHED", "NO EFFECT",
                        "UNDERPOWERED", "MISCALIBRATES", "BUG"})
-_ACCEPT_GATES = ("G1", "G2", "G3", "G5", "G6")
 
 
 @dataclass
@@ -20,11 +21,12 @@ class Critic:
     incumbent_sha: str
     state: Any
     verdict_fn: VerdictFn
+    rule: str = "R2"
 
     def step(self, row: dict, position: int) -> dict:
         before = self.incumbent_sha
         if row.get("status") not in ("ok", "io"):
-            return {"rule": "R2", "sha": row["sha"], "incumbent": before,
+            return {"rule": self.rule, "sha": row["sha"], "incumbent": before,
                     "comparator": None, "delta_val": None, "ci": None, "p": None,
                     "alpha_t": None, "mdd": None, "gates": {},
                     "verdict": "REJECT", "reason": row.get("status", "missing_status")}
@@ -38,10 +40,8 @@ class Critic:
                 or item.get("idx") != position or item.get("verdict") not in _VERDICTS \
                 or not isinstance(item.get("gates"), dict):
             raise ValueError("Ryu Decision violated the R2 contract")
-        if item["verdict"] == "ACCEPT" and any(
-            item["gates"].get(gate) != "pass" for gate in _ACCEPT_GATES
-        ):
+        if item["verdict"] == "ACCEPT" and not accept_gates_ok(self.rule, item["gates"]):
             raise ValueError("R2 cannot accept unless every applicable critic gate passes")
         if item["verdict"] == "ACCEPT":
             self.incumbent_sha = row["sha"]
-        return {"rule": "R2", **item}
+        return {"rule": self.rule, **item}

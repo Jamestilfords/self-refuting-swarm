@@ -5,7 +5,7 @@ import os
 import sys
 from dataclasses import replace
 from pathlib import Path
-from skeptic.rules.common import IGNORE_PARENT_NAMES
+from skeptic.rules.common import ABLATION_SKIP, IGNORE_PARENT_NAMES
 from skeptic.rules.critic import Critic
 
 
@@ -36,17 +36,20 @@ def critic_factory(cells, config):
     stats_cache = MemoryStatsCache()
     gate_cache = {}
 
-    def make(cell, ordering, initial_sha):
+    def make(cell, ordering, initial_sha, rule="R2"):
         loaded = cells[cell]
         if loaded.cell != cell or initial_sha not in loaded.candidates:
             raise ValueError("Critic inputs do not contain the replay incumbent")
+        if rule not in ABLATION_SKIP:
+            raise ValueError(f"Unknown critic rule: {rule}")
+        skip = ABLATION_SKIP[rule]
         state = LordPlusPlus(alpha=config.fdr_alpha, w0=config.fdr_w0)
 
         def decide(row, incumbent_sha, fdr_state, position):
             return verdict(drop_ignored_parents(loaded.candidates[row["sha"]]),
                            loaded.candidates[incumbent_sha],
                            loaded.baselines, fdr_state, cell, config=config, cache=stats_cache,
-                           bootstrap_fn=paired_bootstrap, gate_cache=gate_cache)
+                           bootstrap_fn=paired_bootstrap, gate_cache=gate_cache, skip=skip)
 
-        return Critic(initial_sha, state, decide)
+        return Critic(initial_sha, state, decide, rule=rule)
     return make

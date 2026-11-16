@@ -2,27 +2,27 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
-from skeptic.analysis.decisions import decisions_tree_sha256
 from skeptic.analysis.sources import GuardError, OpenSource, SealedSource
+from skeptic.store import UnsealPermit
 
 
-def _install_store(monkeypatch, runs):
+def _install_store(monkeypatch, runs, *, permit=None):
     import skeptic.store as store
 
-    def is_unsealed():
-        hash_path = runs / "DECISIONS.sha256"
+    def verify(repo):
+        hash_path = Path(repo) / "runs" / "DECISIONS.sha256"
+        if permit is not None and hash_path.is_file():
+            return permit
         if not hash_path.is_file():
-            raise GuardError("runs/DECISIONS.sha256 is missing")
-        recorded = hash_path.read_text(encoding="utf-8").strip().split()[0]
-        actual = decisions_tree_sha256(runs / "decisions")
-        if recorded != actual:
-            raise GuardError("runs/DECISIONS.sha256 does not match the decision log")
-        return True
+            raise store.GuardError("runs/DECISIONS.sha256 is missing")
+        raise store.GuardError("runs/DECISIONS.sha256 does not match the decision log")
 
-    monkeypatch.setattr(store, "is_unsealed", is_unsealed, raising=False)
+    monkeypatch.setattr(store, "verify_published_freeze", verify)
 
 
 def _write_scores(runs):
@@ -54,9 +54,8 @@ def test_sealed_source_refuses_a_wrong_hash(tmp_path, monkeypatch):
 def test_sealed_source_reads_after_a_matching_hash(tmp_path, monkeypatch):
     runs = tmp_path / "runs"
     _write_scores(runs)
-    digest = decisions_tree_sha256(runs / "decisions")
-    (runs / "DECISIONS.sha256").write_text(digest + "\n", encoding="utf-8")
-    _install_store(monkeypatch, runs)
+    (runs / "DECISIONS.sha256").write_text("a" * 64 + "\n", encoding="utf-8")
+    _install_store(monkeypatch, runs, permit=UnsealPermit("a" * 64, "b" * 40))
     source = SealedSource(runs / "sealed", {"clinc150/bert": 4})
     ident, oos = source.get("clinc150/bert", "energy_ce")
     assert ident[0].tolist() == [0, 1, 2, 3]

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import filecmp
+import inspect
 import shutil
 import tempfile
 from collections import defaultdict
@@ -15,7 +16,10 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Callable
 
-from skeptic.rules.common import CELLS, PROPOSAL_STREAMS, ScoreArtifact, matched_orderings
+from skeptic.rules.common import (
+    CELLS, FROZEN_RULES, PROPOSAL_STREAMS, ScoreArtifact, accept_gates_ok,
+    matched_orderings, reference_block,
+)
 from skeptic.score_artifacts import auroc
 from skeptic.rules.critic import Critic
 from skeptic.rules.ratchet import Ratchet
@@ -36,7 +40,7 @@ def replay_cell(rows: dict[tuple[str, str], dict], cell: str, *, initial_sha: st
                 r1_split_scores: Mapping[str, tuple] | None = None,
                 selected_orderings: Iterable[tuple[int, tuple[str, ...]]] | None = None
                 ) -> dict[tuple[str, int], list[dict]]:
-    """Replay the same scored proposal order for all three rules in one cell."""
+    """Replay the same scored proposal order for every frozen rule in one cell."""
     baseline = rows.get((initial_sha, cell))
     if baseline is None or baseline.get("stream") != "baseline" or baseline.get("status") != "ok":
         raise ValueError("Initial incumbent must be a scored baseline in this cell")
@@ -69,9 +73,15 @@ def replay_cell(rows: dict[tuple[str, str], dict], cell: str, *, initial_sha: st
                                         threshold=r1_threshold, split_seed=r1_split_seed,
                                         noise=noise_factory(cell, ordering), split_scores=r1_split_scores)
               if noise_factory is not None else None)
-        r2 = critic_factory(cell, ordering, initial_sha) if critic_factory is not None else None
-        if r2 is not None and not isinstance(r2, Critic):
-            raise ValueError("R2 factory must return a fresh Critic adapter")
+        critics = {}
+        if critic_factory is not None:
+            for rule in FROZEN_RULES:
+                if not rule.startswith("R2"):
+                    continue
+                critic = _new_critic(critic_factory, cell, ordering, initial_sha, rule)
+                if not isinstance(critic, Critic):
+                    raise ValueError("R2 factory must return a fresh Critic adapter")
+                critics[rule] = critic
         for position, sha in enumerate(shas):
             row = rows[(sha, cell)]
             if row["stream"] not in PROPOSAL_STREAMS:
@@ -81,9 +91,17 @@ def replay_cell(rows: dict[tuple[str, str], dict], cell: str, *, initial_sha: st
             if r1 is not None:
                 artifact = scores(sha) if row.get("status") == "ok" else None
                 out[("R1", ordering)].append({**prefix, **r1.step(row, artifact, position)})
-            if r2 is not None:
-                out[("R2", ordering)].append({**prefix, **r2.step(row, position)})
+            for rule, critic in critics.items():
+                out[(rule, ordering)].append({**prefix, **critic.step(row, position)})
     return dict(out)
+
+
+def _new_critic(factory, cell, ordering, initial, rule):
+    """Pass the rule name when the factory accepts it. Each call is a new state."""
+    code = getattr(factory, "__code__", None)
+    if code is not None and (code.co_argcount >= 4 or code.co_flags & inspect.CO_VARARGS):
+        return factory(cell, ordering, initial, rule)
+    return factory(cell, ordering, initial)
 
 
 def combine_cells(*cell_replays: dict[tuple[str, int], list[dict]]) -> dict[tuple[str, int], list[dict]]:
@@ -100,13 +118,13 @@ def write_decision_logs(repo_root: str | Path,
                         logs: Mapping[tuple[str, int], list[dict]] |
                               Iterable[tuple[tuple[str, int], list[dict]]],
                         *, ordering_count: int, metadata: dict | None = None) -> list[str]:
-    """Spool complete R0/R1/R2 logs to disk before any create-only output writes."""
+    """Spool complete logs for every frozen rule before any create-only output writes."""
     repo = Path(repo_root)
     if (repo / HASH_RELATIVE).exists():
         raise GuardError("Decision hash already exists; logs are frozen")
     if type(ordering_count) is not int or ordering_count <= 0:
         raise ValueError("Ordering count must be positive")
-    expected_keys = {(rule, ordering) for rule in ("R0", "R1", "R2")
+    expected_keys = {(rule, ordering) for rule in FROZEN_RULES
                      for ordering in range(ordering_count)}
     if isinstance(logs, Mapping) and set(logs) != expected_keys:
         raise ValueError("Decision logs must include R0, R1 and R2 for every ordering")
@@ -139,8 +157,8 @@ def write_decision_logs(repo_root: str | Path,
                         raise ValueError("Decision log has a broken incumbent chain")
                     if rule in ("R0", "R1") and row["verdict"] not in ("ACCEPT", "REJECT"):
                         raise ValueError("R0/R1 decision has an invalid verdict")
-                    if rule == "R2" and row["verdict"] == "ACCEPT" and \
-                            not _r2_gates_pass(row.get("gates")):
+                    if str(rule).startswith("R2") and row["verdict"] == "ACCEPT" and \
+                            not accept_gates_ok(rule, row.get("gates")):
                         raise ValueError("R2 cannot accept unless G1/G2/G3/G5/G6 pass")
                     if row["verdict"] == "ACCEPT":
                         incumbent = row["sha"]
@@ -161,10 +179,11 @@ def write_decision_logs(repo_root: str | Path,
             prepared.add(rel)
         if seen != expected_keys:
             raise ValueError("Decision logs must include R0, R1 and R2 for every ordering")
-        manifest = {"schema_version": 1, "rules": ["R0", "R1", "R2"],
+        manifest = {"schema_version": 1, "rules": list(FROZEN_RULES),
                     "orderings": ordering_count, "cells": sorted(expected_cells),
                     "files": sorted(paths),
-                    "proposals": {cell: sorted(shas) for cell, shas in sorted(proposal_sets.items())}}
+                    "proposals": {cell: sorted(shas) for cell, shas in sorted(proposal_sets.items())},
+                    "references": reference_block(sorted(expected_cells))}
         if metadata is not None:
             manifest["replay"] = metadata
         manifest_path = Path(temp) / MANIFEST_RELATIVE
@@ -174,7 +193,7 @@ def write_decision_logs(repo_root: str | Path,
         prepared.add(MANIFEST_RELATIVE.as_posix())
         # Apply the same complete schema checks as the freeze command before writing.
         decision_digest(temp)
-        for rule in ("R0", "R1", "R2"):
+        for rule in FROZEN_RULES:
             directory = repo / "runs/decisions" / rule
             if directory.exists() and any(p.is_file() and p.relative_to(repo).as_posix() not in prepared
                                           for p in directory.rglob("*")):
@@ -198,7 +217,3 @@ def write_decision_logs(repo_root: str | Path,
     return sorted(paths)
 
 
-def _r2_gates_pass(gates: object) -> bool:
-    if not isinstance(gates, dict):
-        return False
-    return all(gates.get(gate) == "pass" for gate in ("G1", "G2", "G3", "G5", "G6"))

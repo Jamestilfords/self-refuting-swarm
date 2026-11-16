@@ -5,7 +5,9 @@ import numpy as np
 import pytest
 from skeptic import store
 from skeptic.score_artifacts import auroc
-from skeptic.rules.common import CELLS, ScoreArtifact, load_ledger, matched_orderings
+from skeptic.rules.common import (
+    ACCEPT_GATES, ABLATION_SKIP, CELLS, FROZEN_RULES, ScoreArtifact, load_ledger, matched_orderings,
+)
 from skeptic.rules.critic import Critic
 from skeptic.rules.engine import combine_cells, replay_cell, write_decision_logs
 from skeptic.rules.ratchet import Ratchet
@@ -52,12 +54,14 @@ def _artifact(kind: str) -> ScoreArtifact:
 
 def _logs() -> dict:
     logs = {}
-    for rule in ("R0", "R1", "R2"):
+    for rule in FROZEN_RULES:
+        skip = ABLATION_SKIP.get(rule, frozenset())
+        extra = {}
+        if str(rule).startswith("R2"):
+            extra["gates"] = {gate: ("skipped" if gate in skip else "pass") for gate in ACCEPT_GATES}
         logs[(rule, 0)] = [
             {"schema_version": 1, "rule": rule, "cell": cell, "ordering": 0,
-             "idx": 0, "sha": GOOD, "incumbent": BASE, "verdict": "ACCEPT",
-             **({"gates": {gate: "pass" for gate in ("G1", "G2", "G3", "G5", "G6")}}
-                if rule == "R2" else {})}
+             "idx": 0, "sha": GOOD, "incumbent": BASE, "verdict": "ACCEPT", **extra}
             for cell in CELLS
         ]
     return logs
@@ -117,11 +121,15 @@ def test_replay_uses_same_order_for_every_rule_and_cell(tmp_path, ordering_count
                         _row(GOOD, "templated", .6, cell),
                         _row(BAD, "llm", .4, cell))}
 
-    def critic_factory(cell, ordering, initial):
+    def critic_factory(cell, ordering, initial, rule="R2"):
+        skip = ABLATION_SKIP[rule]
         def verdict(row, incumbent, state, position):
             state["t"] += 1
-            return FakeDecision(_critic_row(row["sha"], row["cell"], incumbent))
-        return Critic(initial, {"t": 0}, verdict)
+            gates = {gate: ("skipped" if gate in skip else "pass") for gate in ACCEPT_GATES}
+            row_out = _critic_row(row["sha"], row["cell"], incumbent)
+            row_out["gates"] = gates
+            return FakeDecision(row_out)
+        return Critic(initial, {"t": 0}, verdict, rule=rule)
 
     loader = lambda _cell, sha: _artifact("base" if sha == BASE else "good" if sha == GOOD else "bad")
     replays = [replay_cell(rows, cell, initial_sha=BASE, ordering_count=ordering_count, ordering_seed=8,
@@ -129,11 +137,11 @@ def test_replay_uses_same_order_for_every_rule_and_cell(tmp_path, ordering_count
                            noise_factory=lambda _cell, _ordering: ZeroNoise(),
                            critic_factory=critic_factory) for cell in CELLS]
     logs = combine_cells(*replays)
-    assert len(logs) == 3 * ordering_count and all(len(items) == 8 for items in logs.values())
+    assert len(logs) == len(FROZEN_RULES) * ordering_count and all(len(items) == 8 for items in logs.values())
     write_decision_logs(tmp_path, iter(logs.items()) if ordering_count == 200 else logs,
                         ordering_count=ordering_count)
     assert len(store.decision_digest(tmp_path)) == 64
-    assert len(list((tmp_path / "runs/decisions").glob("R*/ord_*.jsonl"))) == 3 * ordering_count
+    assert len(list((tmp_path / "runs/decisions").glob("R*/ord_*.jsonl"))) == len(FROZEN_RULES) * ordering_count
     assert matched_orderings(rows, "clinc150/bert", 2, 8) == matched_orderings(rows, "clinc150/bert", 2, 8)
     with pytest.raises(ValueError, match="R0, R1 and R2"):
         write_decision_logs(tmp_path / "partial", {("R0", 0): []}, ordering_count=1)

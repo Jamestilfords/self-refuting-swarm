@@ -333,6 +333,19 @@ The guarded Modal test scorer is available separately from validation. See
 [sealer setup, tests and expected results](docs/modal-sealer.md); a published
 experiment freeze is required before it reads test arrays.
 
+The sealer supports offline batch previews and bounded batch execution:
+
+```sh
+uv run --frozen python -m modal_jobs.seal plan --all
+```
+
+The preview requires `runs/decision_manifest.json` and the matching proposal
+sources, but starts no Modal jobs and reads no test data. After the reviewed
+freeze is published, `run --all` scores the manifest's proposal/cell jobs in
+chunks, records status-only progress, and safely reuses matching sealed scores.
+See the [batch and analysis handoff notes](docs/modal-sealer.md#handoff-to-the-truthreport-implementation)
+for reference-baseline authorization and the remaining reporting integration.
+
 ## ER-1 dependency and credit
 
 [ER-1 (Epistemic Ranker), by mid9t](https://github.com/mid9t/ER-1-Epistemic-Ranker-)

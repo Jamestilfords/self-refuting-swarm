@@ -12,6 +12,10 @@ to `/open/scores_isolated/<group>/<sha>.npz`; the local full ledger is
 `runs/ledger_isolated.jsonl`. A filtered run writes `ledger_isolated_partial.jsonl`.
 Older scores and ledgers are not overwritten. Use one source consistently.
 
+Banking77 jobs use the training identifier `banking77_oos` for run validation
+and cache-recipe checks; the on-volume directory remains `banking77_<backbone>`.
+This applies to both BERT and RoBERTa and avoids the earlier recipe mismatch.
+
 ## Local verification (no Modal jobs)
 
 ```sh

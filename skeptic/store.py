@@ -315,10 +315,16 @@ def _download(url: str, limit: int) -> bytes:
 
 def verify_remote_proposal(commit: str, cell: str, sha: str) -> None:
     """Allow test scoring only for code already named in the published decision set."""
+    verify_remote_proposals(commit, [(cell, sha)])
+
+
+def verify_remote_proposals(commit: str, targets: list[tuple[str, str]]) -> None:
+    """Authorize a whole batch against one pinned manifest before any test read."""
     if not isinstance(commit, str) or not _HEX40.fullmatch(commit) \
-            or not isinstance(sha, str) or not _SHA12.fullmatch(sha) \
-            or cell not in ("clinc150/bert", "clinc150/roberta",
-                            "banking77_oos/bert", "banking77_oos/roberta"):
+            or not targets or any(not isinstance(sha, str) or not _SHA12.fullmatch(sha)
+                or cell not in ("clinc150/bert", "clinc150/roberta",
+                                "banking77_oos/bert", "banking77_oos/roberta")
+                for cell, sha in targets):
         raise GuardError("Invalid frozen proposal identity")
     try:
         raw = _download(
@@ -330,7 +336,8 @@ def verify_remote_proposal(commit: str, cell: str, sha: str) -> None:
     proposals = manifest.get("proposals") if isinstance(manifest, dict) else None
     if not isinstance(manifest, dict) or manifest.get("schema_version") != 1 \
             or not isinstance(proposals, dict) \
-            or not isinstance(proposals.get(cell), list) or sha not in proposals[cell]:
+            or any(not isinstance(proposals.get(cell), list) or sha not in proposals[cell]
+                   for cell, sha in targets):
         raise GuardError("Proposal is not in the published decision set")
 
 

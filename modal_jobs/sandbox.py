@@ -51,6 +51,8 @@ sandbox_image = (
 
 
 def _spec(dataset: str, backbone: str, arm: str, seed: int) -> RunSpec:
+    # Cache recipes use the training identifier; only directory names omit _oos.
+    dataset = "banking77_oos" if dataset == "banking77" else dataset
     spec = RunSpec(dataset, backbone, arm, seed)
     if spec not in plan_runs():
         raise ValueError("Unknown E2 cell; choose dataset, backbone, arm and seed from train40 plan")

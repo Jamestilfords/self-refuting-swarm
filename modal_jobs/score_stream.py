@@ -20,9 +20,8 @@ import numpy as np
 
 from modal_jobs.app import open_volume, sealed_volume, settings
 from modal_jobs.config import OPEN_MOUNT, SEALED_MOUNT
-from modal_jobs.sandbox import (MAX_SOURCE_BYTES, _score_in_sandbox,
+from modal_jobs.sandbox import (MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
                                 prepare_cell, runner_image, sandbox_image)
-from modal_jobs.train40 import RunSpec
 from skeptic import api, runner
 from skeptic.score_artifacts import CELLS, ScoreArtifact, auroc
 
@@ -103,8 +102,6 @@ def score_one(task: dict, worker_image_id: str) -> dict:
         row.update(family=header["FAMILY"], parents=header["PARENTS"],
                    source=header["SOURCE"], memory_used=header["MEMORY_USED"])
         dataset, backbone = cell.split("/")
-        if dataset == "banking77_oos":
-            dataset = "banking77"
         group = CELLS[cell]
         open_volume.reload()
         target = Path(OPEN_MOUNT) / "scores_isolated" / group / f"{sha}.npz"
@@ -119,7 +116,7 @@ def score_one(task: dict, worker_image_id: str) -> dict:
         all_scores, all_pred, all_conf, runtimes = [], [], [], []
         n_in = n_total = has_probs = None
         for seed in range(5):
-            spec = RunSpec(dataset, backbone, arm, seed)
+            spec = _spec(dataset, backbone, arm, seed)
             full, subset, membership, subset_idx, k, permutation = prepare_cell(
                 Path(OPEN_MOUNT), spec, return_permutation=True)
             if n_in is None:

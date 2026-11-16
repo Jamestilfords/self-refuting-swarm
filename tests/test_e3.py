@@ -24,7 +24,8 @@ def _arrays(n, classes=150, *, first=0):
 def _open_cache(root: Path, spec: RunSpec):
     directory = root / spec.name
     directory.mkdir(parents=True)
-    train, val, oos = _arrays(6), _arrays(4, first=10), _arrays(3, first=30)
+    k = 150 if spec.dataset == "clinc150" else 50
+    train, val, oos = _arrays(6, k), _arrays(4, k, first=10), _arrays(3, k, first=30)
     arrays = {f"{split}__{key}": value for split, data in
               (("train", train), ("val", val), ("oos_val", oos)) for key, value in data.items()}
     arrays["train__labels"] = np.zeros(6, np.int64)
@@ -33,6 +34,18 @@ def _open_cache(root: Path, spec: RunSpec):
     (directory / "manifest.json").write_text(json.dumps({"run": recipe,
         "recipe_hash": _fingerprint(recipe)}), encoding="utf-8")
     return directory
+
+
+@pytest.mark.parametrize("dataset", ["banking77", "banking77_oos"])
+@pytest.mark.parametrize("backbone", ["bert", "roberta"])
+@pytest.mark.parametrize("arm", ["ce", "edl"])
+def test_banking_alias_uses_original_training_recipe_and_cache_path(tmp_path, dataset, backbone, arm):
+    canonical = RunSpec("banking77_oos", backbone, arm, 0)
+    spec = job._spec(dataset, backbone, arm, 0)
+    assert spec == canonical and spec.name == f"banking77_{backbone}/{arm}_seed0"
+    _open_cache(tmp_path, canonical)
+    full, _, _, _, k = job.prepare_cell(tmp_path, spec)
+    assert k == 50 and unpack_input(full).eval.logits.shape[1] == 50
 
 
 def test_prepare_cell_sends_anonymous_eval_and_rejects_extra_arrays(tmp_path):

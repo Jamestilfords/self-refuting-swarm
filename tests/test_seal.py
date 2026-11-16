@@ -11,16 +11,16 @@ from skeptic.sandbox import unpack_input
 from skeptic.streams.canaries import CANARIES
 from tests.test_store import decisions, HEAD, FIRST, CELLS
 
-def _sealed_caches(root: Path):
+def _sealed_caches(root: Path, dataset="clinc150", backbone="bert"):
     for seed in range(5):
-        spec = RunSpec("clinc150", "bert", "ce", seed)
+        spec = RunSpec(dataset, backbone, "ce", seed)
         directory = root / spec.name
         directory.mkdir(parents=True)
         arrays = {}
         pooled = {}
         for split, start in (("train", 10), ("test", 1), ("oos_test", 5)):
             n = 4
-            logits = np.zeros((n, 150), np.float32)
+            logits = np.zeros((n, 150 if dataset == "clinc150" else 50), np.float32)
             logits[:, 0] = np.arange(start, start + n)
             arrays[f"{split}__logits"] = logits
             arrays[f"{split}__feats"] = np.ones((n, 256), np.float32)
@@ -46,8 +46,14 @@ def test_sealed_guard_and_anonymous_test_payload(tmp_path, monkeypatch):
     with pytest.raises(store.GuardError, match="Unknown E2 run"):
         sealed.read_array("../../other", "test", "logits")
 
-def test_isolated_sealer_returns_status_and_keeps_scores_sealed(tmp_path, monkeypatch):
-    _sealed_caches(tmp_path)
+@pytest.mark.parametrize("dataset", ["clinc150", "banking77", "banking77_oos"])
+@pytest.mark.parametrize("backbone", ["bert", "roberta"])
+def test_isolated_sealer_returns_status_and_keeps_scores_sealed(tmp_path, monkeypatch, dataset, backbone):
+    canonical = "banking77_oos" if dataset == "banking77" else dataset
+    _sealed_caches(tmp_path, canonical, backbone)
+    cell = f"{canonical}/{backbone}"
+    group = RunSpec(canonical, backbone, "ce", 0).group
+    classes = 150 if canonical == "clinc150" else 50
     monkeypatch.setattr(seal, "SEALED_MOUNT", str(tmp_path))
     monkeypatch.setattr(store, "verify_remote_freeze", lambda c, d: store.UnsealPermit(d, c))
     monkeypatch.setattr(seal, "verify_remote_proposal", lambda c, cell, sha: None)
@@ -69,22 +75,22 @@ def test_isolated_sealer_returns_status_and_keeps_scores_sealed(tmp_path, monkey
 
     def score(_owner, _image, _text, _sha, payload, n, k, *, subset=False):
         ctx = unpack_input(payload)
-        assert ctx.eval.labels is None and len(ctx.eval) == n and k == 150
+        assert ctx.eval.labels is None and len(ctx.eval) == n and k == classes
         calls.append(subset)
         return np.asarray(ctx.eval.logits[:, 0], np.float64), 0.01
 
     monkeypatch.setattr(seal, "_score_in_sandbox", score)
     text = CANARIES[0]["text"]
     with pytest.warns(UserWarning, match="executing locally"):
-        result = seal.score_sealed.local(text, "clinc150", "bert", "ce", "a" * 40, "b" * 64, "im-test")
-    assert result == {"sha": api.proposal_sha(text), "cell": "clinc150/bert", "status": "sealed"}
+        result = seal.score_sealed.local(text, dataset, backbone, "ce", "a" * 40, "b" * 64, "im-test")
+    assert result == {"sha": api.proposal_sha(text), "cell": cell, "status": "sealed"}
     assert calls == [False, True] * 5 and commits == [True]
-    path = tmp_path / "scores/clinc150_bert" / f"{api.proposal_sha(text)}.npz"
+    path = tmp_path / "scores" / group / f"{api.proposal_sha(text)}.npz"
     with np.load(path, allow_pickle=False) as saved:
         assert saved["scores"].shape == (5, 8) and int(saved["n_in"]) == 4
         assert np.array_equal(saved["scores"][0], np.arange(1, 9))
     with pytest.warns(UserWarning, match="executing locally"):
-        again = seal.score_sealed.local(text, "clinc150", "bert", "ce", "a" * 40, "b" * 64, "im-test")
+        again = seal.score_sealed.local(text, dataset, backbone, "ce", "a" * 40, "b" * 64, "im-test")
     assert again["status"] == "already_sealed" and len(calls) == 10
 
 

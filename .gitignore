@@ -10,6 +10,7 @@ __pycache__/
 !.env.example
 runs/agents/
 runs/seal/
+sealed/
 .pytest_cache/
 .cache/
 *.egg-info/

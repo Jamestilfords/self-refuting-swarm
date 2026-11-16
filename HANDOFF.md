@@ -10,8 +10,8 @@ owner access.
 | 2 | `check_references`: open validation scores = ER-1 baseline arrays | James | **Passes** with the float32 fix below |
 | 3 | Re-run the replay with the PR code, commit `runs/decisions/` and the manifest with `references`, `make seal-hash`, push | Xay | **Open.** Blocks everything after it |
 | 4 | `make seal-check`, `python -m modal_jobs.seal plan --all --batch-size 25`, then `run --all` | James (Modal) | Waits on 3. Expect 1,968 jobs in 79 batches, several hours; terminal must stay open |
-| 5 | Implement the test-side plain ECE job | open | `modal_jobs/plain_ece.py` is a stub: it verifies the freeze and returns `needs_sealed_logits` |
-| 6 | `plain_ece`, `make unblind SEALED_ROOT=/sealed`, commit `runs/unblind.json` and `runs/guard.log`, `make report` | James (Modal) with Ryu | Waits on 4 and 5. `/sealed` is a Modal mount path, so these need a Modal wrapper (or a sealed-volume download after the freeze) |
+| 5 | Implement the test-side plain ECE job | open | `python -m modal_jobs.plain_ece` writes `/sealed/plain_ece.json` on the volume |
+| 6 | `python -m modal_jobs.plain_ece`, `make unblind`, commit `runs/unblind.json` and `runs/guard.log`, `make fetch-sealed`, `make report` | James (Modal) with Ryu | Waits on 4 and 5. Unblind hashes the volume; report reads the download in `./sealed` |
 
 ## Step 2 detail
 

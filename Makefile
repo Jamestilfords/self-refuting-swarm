@@ -2,9 +2,9 @@
 
 UV ?= uv
 PIPELINE_TARGETS := smoke exp2 testbed-b
-SEALED_ROOT ?= /sealed
+SEALED_ROOT ?= sealed
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan unblind report reproduce agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan unblind fetch-sealed report reproduce agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
@@ -31,7 +31,8 @@ help:
 	  'dashboard-test Test the dashboard data adapter and Streamlit controls' \
 	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
 	  'seal-check Verify a published decision freeze before test reads (E4)' \
-	  'unblind    Record sealed-file hashes after the published freeze (E6)' \
+	  'unblind    Hash the sealed volume and write runs/unblind.json (E6)' \
+	  'fetch-sealed  Download sealed scores into ./sealed after unblind' \
 	  'report     Write Experiment 1 tables from runs/unblind.json (E6)' \
 	  'reproduce  Same as report; no training and no new scoring' \
 	  'testbed-b  Probe-deferral stretch testbed (R4, E6)'
@@ -96,7 +97,13 @@ seal-check:
 	$(UV) run --frozen python -m skeptic.store unseal-check
 
 unblind:
-	$(UV) run --frozen python -m skeptic.analysis.unblind --sealed $(SEALED_ROOT)
+	$(UV) run --frozen python -m skeptic.analysis.unblind
+
+fetch-sealed:
+	@test -f runs/unblind.json || { echo "run make unblind first" >&2; exit 1; }
+	mkdir -p $(SEALED_ROOT)
+	modal volume get --env $${MODAL_ENVIRONMENT:-main} skeptic-sealed scores $(SEALED_ROOT)/
+	modal volume get --env $${MODAL_ENVIRONMENT:-main} skeptic-sealed plain_ece.json $(SEALED_ROOT)/
 
 report reproduce:
 	$(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT)

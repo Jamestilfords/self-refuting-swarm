@@ -16,6 +16,12 @@ Banking77 jobs use the training identifier `banking77_oos` for run validation
 and cache-recipe checks; the on-volume directory remains `banking77_<backbone>`.
 This applies to both BERT and RoBERTa and avoids the earlier recipe mismatch.
 
+Infrastructure timeouts allow 300 seconds per sandbox and 270 seconds for the
+worker process, including imports and array decoding. The five-seed scorer has
+a 55-minute job timeout. The registered 60-second `score(ctx)` limit is unchanged;
+a function exceeding that limit still receives `timeout`, even if the sandbox
+has time remaining. These limits are execution ceilings, not runtime estimates.
+
 ## Local verification (no Modal jobs)
 
 ```sh

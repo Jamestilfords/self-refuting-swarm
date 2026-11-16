@@ -28,8 +28,12 @@ from skeptic import api, ledger
 from skeptic.sandbox import pack_input, unpack_output
 
 MAX_SOURCE_BYTES = 256_000
-SANDBOX_TIMEOUT = 90
-WORKER_TIMEOUT = 75
+# Infrastructure wall time includes imports, input decoding and output transfer.
+# The registered score(ctx) limit remains api.MAX_SECONDS (60 seconds).
+SANDBOX_TIMEOUT = 300
+WORKER_TIMEOUT = 270
+SINGLE_SEED_JOB_TIMEOUT = 2 * SANDBOX_TIMEOUT + 120
+CELL_JOB_TIMEOUT = 10 * SANDBOX_TIMEOUT + 300  # Full/subset for five seeds + I/O.
 ER1_SOURCE = Path(__file__).resolve().parents[1] / "third_party" / "er1" / "src"
 ER1_BUNDLE = ER1_SOURCE if ER1_SOURCE.is_dir() else Path("/opt/er1/src")
 e3_app = modal.App(f"{settings.app_name}-e3")
@@ -191,7 +195,7 @@ def _score_in_sandbox(owner: modal.App, image: modal.Image, text: str, sha: str,
 
 @e3_app.function(image=runner_image,
                  volumes={OPEN_MOUNT: open_volume.with_mount_options(read_only=True)},
-                 cpu=2, memory=8192, timeout=300, max_containers=4)
+                 cpu=2, memory=8192, timeout=SINGLE_SEED_JOB_TIMEOUT, max_containers=4)
 def score_one(text: str, dataset: str, backbone: str, arm: str, seed: int, worker_image_id: str,
               stream: str = "unknown") -> dict:
     """Trusted wrapper; return a validation summary, never raw scores."""

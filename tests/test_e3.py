@@ -174,3 +174,73 @@ def test_trusted_wrapper_compares_fresh_subset_and_reports_only_auroc(tmp_path, 
     with pytest.warns(UserWarning, match="executing locally"):
         rejected = job.score_one.local(text, "clinc150", "bert", "ce", 0, "im-example", "canary")
     assert rejected["status"] == "subset_dependent" and rejected["validation_auroc"] is None
+
+
+@pytest.mark.parametrize("times_out", [False, True])
+def test_controller_passes_extended_deadlines_and_always_terminates(monkeypatch, times_out):
+    from types import SimpleNamespace
+
+    created, executed, terminated = [], [], []
+    output = io.BytesIO()
+    np.savez_compressed(output, scores=np.arange(7, dtype=float), probs=np.empty(0), runtime_s=45.0)
+    files = {"/tmp/status.json": b'{"status":"ok"}', "/tmp/output.npz": output.getvalue()}
+
+    def wait():
+        if times_out:
+            raise job.modal.exception.ExecTimeoutError("synthetic timeout")
+        return 0
+
+    def execute(*args, **kwargs):
+        executed.append(kwargs)
+        return SimpleNamespace(wait=wait)
+
+    fake = SimpleNamespace(
+        filesystem=SimpleNamespace(write_text=lambda *a: None, write_bytes=lambda *a: None,
+                                   stat=lambda path: SimpleNamespace(size=len(files[path])),
+                                   read_bytes=lambda path: files[path]),
+        exec=execute, terminate=lambda: terminated.append(True))
+
+    def create(*args, **kwargs):
+        created.append((args, kwargs))
+        return fake
+
+    monkeypatch.setattr(job.modal.Sandbox, "create", create)
+    if times_out:
+        with pytest.raises(api.Malformed) as exc:
+            job._score_in_sandbox(object(), object(), "source", "a" * 12, b"input", 7, 150)
+        assert exc.value.reason == "timeout"
+    else:
+        scores, runtime = job._score_in_sandbox(object(), object(), "source", "a" * 12, b"input", 7, 150)
+        assert np.array_equal(scores, np.arange(7)) and runtime == 45.0
+    assert created[0][1]["timeout"] == 300
+    assert executed[0]["timeout"] == 270
+    assert int(created[0][0][1]) > executed[0]["timeout"]
+    assert terminated == [True]
+
+
+@pytest.mark.parametrize("subset", [False, True])
+def test_extended_container_time_does_not_relax_registered_score_limit(tmp_path, monkeypatch, subset):
+    text = CANARIES[0]["text"]
+    path = tmp_path / f"{api.proposal_sha(text)}.py"
+    path.write_text(text)
+    train, evaluation = _arrays(6), _arrays(7, first=10)
+    train["labels"] = np.zeros(6, np.int64)
+    input_path = tmp_path / "input.npz"
+    input_path.write_bytes(pack_input(train, evaluation))
+    output_path, status_path = tmp_path / "output.npz", tmp_path / "status.json"
+    clock = iter([0.0, 61.0])
+    with monkeypatch.context() as patch:
+        patch.setattr(api.time, "perf_counter", lambda: next(clock))
+        worker(str(path), str(input_path), str(output_path), str(status_path), subset=subset)
+    assert json.loads(status_path.read_text()) == {"status": "timeout"}
+    assert not output_path.exists()
+
+
+def test_parent_deadlines_cover_nested_workers_within_modal_limit():
+    from modal_jobs import seal
+
+    assert job.SINGLE_SEED_JOB_TIMEOUT > 2 * job.SANDBOX_TIMEOUT
+    assert job.CELL_JOB_TIMEOUT > 10 * job.SANDBOX_TIMEOUT
+    assert seal.SEALED_CELL_TIMEOUT > job.CELL_JOB_TIMEOUT
+    assert seal.SEALED_BATCH_TIMEOUT >= seal.MAX_BATCH_SIZE * job.CELL_JOB_TIMEOUT
+    assert seal.SEALED_BATCH_TIMEOUT <= 24 * 60 * 60

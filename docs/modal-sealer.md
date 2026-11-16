@@ -97,8 +97,13 @@ chunk size is 25 proposal/cell jobs, with at most four batch containers running
 concurrently. Each container processes its chunk sequentially, verifies the
 full published freeze once, and checks every proposal's membership before
 reading any test arrays. Every proposal and seed still gets fresh isolated
-workers; batching does not share a proposal process. Each batch has a six-hour
-timeout. GitHub proof downloads remain bounded and occur once per chunk, not
+workers; batching does not share a proposal process. Each sandbox allows five
+minutes and its worker process allows 270 seconds. The registered 60-second
+`score(ctx)` validity limit is unchanged. A five-seed scoring budget is 55 minutes;
+the single-proposal sealer adds a 30-minute freeze-verification allowance (85
+minutes total). A full 25-job batch has a 23-hour 25-minute timeout, below Modal's
+24-hour function limit. These are worst-case budgets, not expected runtimes.
+GitHub proof downloads remain bounded and occur once per chunk, not
 once per proposal. Keep published main unchanged during the run: each new
 chunk must verify the same main commit.
 

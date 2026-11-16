@@ -20,7 +20,7 @@ import numpy as np
 
 from modal_jobs.app import sealed_volume, settings
 from modal_jobs.config import SEALED_MOUNT
-from modal_jobs.sandbox import (MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
+from modal_jobs.sandbox import (CELL_JOB_TIMEOUT, MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
                                 runner_image, sandbox_image)
 from modal_jobs.train40 import RunSpec, plan_runs
 from skeptic import api
@@ -32,6 +32,9 @@ REPO = Path(__file__).resolve().parents[1]
 seal_app = modal.App(f"{settings.app_name}-e4")
 MAX_BATCH_SIZE = 25
 MAX_CONCURRENT_BATCHES = 4
+FREEZE_VERIFICATION_ALLOWANCE = 30 * 60
+SEALED_CELL_TIMEOUT = CELL_JOB_TIMEOUT + FREEZE_VERIFICATION_ALLOWANCE
+SEALED_BATCH_TIMEOUT = MAX_BATCH_SIZE * CELL_JOB_TIMEOUT + FREEZE_VERIFICATION_ALLOWANCE
 
 
 def _cell(dataset: str, backbone: str) -> str:
@@ -106,7 +109,7 @@ def _existing_score(path: Path, sha: str, commit: str, digest: str) -> bool:
 
 
 @seal_app.function(image=runner_image, volumes={SEALED_MOUNT: sealed_volume},
-                   cpu=2, memory=8192, timeout=900, max_containers=4)
+                   cpu=2, memory=8192, timeout=SEALED_CELL_TIMEOUT, max_containers=4)
 def score_sealed(text: str, dataset: str, backbone: str, arm: str, commit: str,
                  digest: str, worker_image_id: str) -> dict:
     """Run five isolated seed scores and return status only, never test metrics."""
@@ -171,7 +174,7 @@ def _score_authorized(text, specs, store, commit, digest, worker_image_id):
 
 
 @seal_app.function(image=runner_image, volumes={SEALED_MOUNT: sealed_volume},
-                   cpu=2, memory=8192, timeout=6 * 60 * 60,
+                   cpu=2, memory=8192, timeout=SEALED_BATCH_TIMEOUT,
                    max_containers=MAX_CONCURRENT_BATCHES)
 def score_sealed_batch(jobs: list[dict], commit: str, digest: str, worker_image_id: str) -> list[dict]:
     """Verify once per bounded chunk; return statuses, never test metrics or errors' text."""

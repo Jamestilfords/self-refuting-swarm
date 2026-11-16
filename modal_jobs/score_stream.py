@@ -20,7 +20,7 @@ import numpy as np
 
 from modal_jobs.app import open_volume, sealed_volume, settings
 from modal_jobs.config import OPEN_MOUNT, SEALED_MOUNT
-from modal_jobs.sandbox import (MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
+from modal_jobs.sandbox import (CELL_JOB_TIMEOUT, MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
                                 prepare_cell, runner_image, sandbox_image)
 from skeptic import api, runner
 from skeptic.score_artifacts import CELLS, ScoreArtifact, auroc
@@ -86,7 +86,7 @@ def _existing(path: Path, sha: str) -> tuple[np.ndarray, int, float, bool] | Non
 
 
 @stream_app.function(image=runner_image, volumes={OPEN_MOUNT: open_volume},
-                     cpu=2, memory=8192, timeout=900, max_containers=4)
+                     cpu=2, memory=8192, timeout=CELL_JOB_TIMEOUT, max_containers=4)
 def score_one(task: dict, worker_image_id: str) -> dict:
     """Write a five-seed artifact and return only validation summary fields."""
     cell, sha, text, arm = (task[key] for key in ("cell", "sha", "text", "arm"))

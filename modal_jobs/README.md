@@ -153,7 +153,13 @@ The trusted CPU function verifies the E2 recipe and exact open-cache keys.
 It randomly mixes in-scope and OOS validation arrays without exposing the
 membership mask or shuffle seed. It runs the full batch and a hidden 10%
 subset in separate Modal Sandboxes. The Sandboxes use gVisor, two CPUs, 8 GiB
-RAM, a 90-second lifetime, blocked network, and no mounted volume or secret.
+RAM, a 300-second lifetime, blocked network, and no mounted volume or secret.
+The worker process has a 270-second deadline for imports, input decoding,
+scoring and output writing. The registered `score(ctx)` limit remains 60 seconds
+per seed: increasing infrastructure time does not relax proposal validity.
+The one-seed wrapper allows 12 minutes for full/subset workers and overhead;
+the five-seed validation scorer allows 55 minutes. These are maximum budgets,
+not runtime estimates.
 The function verifies score length, finiteness, probability rows, and subset
 consistency before computing validation AUROC. Only aggregate status, runtime,
 and validation AUROC enter the ledger; no test array or score is read.

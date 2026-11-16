@@ -4,6 +4,11 @@ The critic reads each reference from ``runs/scores/<group>/<sha>.npz``.
 ``python -m skeptic.critic.baselines`` writes the same arrays as
 ``runs/baselines/<group>/<name>/seed<k>.npy``. This check requires Spearman
 correlation 1 within 1e-12. A missing file exits 2. The first mismatch exits 1.
+
+Score files store float32. Rounding to float32 can turn two nearly equal float64 scores into a tie and
+flip their rank order, which breaks an exact rank match although nothing differs. A seed therefore also
+passes when the stored array equals the reference rounded to float32, which is a stricter test of
+identity than the rank check.
 """
 
 from __future__ import annotations
@@ -43,6 +48,8 @@ def arrays_match(open_scores, baseline_rows, tol: float = 1e-12) -> bool:
     for seed, row in enumerate(rows):
         if row.shape != open_scores[seed].shape:
             return False
+        if np.array_equal(open_scores[seed], row.astype(np.float32).astype(np.float64)):
+            continue          # identical at the precision the score files are stored in (float32)
         if abs(spearman(open_scores[seed], row) - 1.0) > tol:
             return False
     return True

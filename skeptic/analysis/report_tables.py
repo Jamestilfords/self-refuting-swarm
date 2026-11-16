@@ -269,8 +269,29 @@ def write_all(
     config: AnalysisConfig = DEFAULT,
     decisions_sha256: str = "",
     proposals: Sequence[str] | None = None,
+    exploratory: bool = False,
 ) -> dict[str, Path]:
-    """Write every Experiment 1 table. Call this once, after unblinding."""
+    """Write every Experiment 1 table. Call this once, after unblinding.
+
+    Confirmatory tables use orderings below ``registered_orderings``. When the
+    decision log also contains later orderings, the same tables are written
+    under ``exploratory/`` from the full log.
+    """
+    if not exploratory:
+        order = decisions["ordering"].astype(int)
+        registered = decisions.loc[order < int(config.registered_orderings)].copy()
+        written = write_all(
+            out_dir, decisions=registered, ledger=ledger, truth=truth,
+            test_source=test_source, val_source=val_source, config=config,
+            decisions_sha256=decisions_sha256, proposals=proposals, exploratory=True,
+        )
+        if (order >= int(config.registered_orderings)).any():
+            write_all(
+                Path(out_dir) / "exploratory", decisions=decisions, ledger=ledger, truth=truth,
+                test_source=test_source, val_source=val_source, config=config,
+                decisions_sha256=decisions_sha256, proposals=proposals, exploratory=True,
+            )
+        return written
     destination = Path(out_dir)
     destination.mkdir(parents=True, exist_ok=True)
     if decisions.empty:

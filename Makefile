@@ -1,9 +1,10 @@
 .DEFAULT_GOAL := help
 
 UV ?= uv
-PIPELINE_TARGETS := smoke exp2 unblind report reproduce testbed-b
+PIPELINE_TARGETS := smoke exp2 testbed-b
+SEALED_ROOT ?= /sealed
 
-.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
+.PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan unblind report reproduce agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
 
 help:
 	@printf '%s\n' \
@@ -30,9 +31,9 @@ help:
 	  'dashboard-test Test the dashboard data adapter and Streamlit controls' \
 	  'seal-hash  Freeze complete E5 decision logs after preregistration (E4)' \
 	  'seal-check Verify a published decision freeze before test reads (E4)' \
-	  'unblind    Guard check and truth tables (R5, E4)' \
-	  'report     Figures, tables, and scorecard (R5)' \
-	  'reproduce  Replay the ledger to regenerate every table (E8)' \
+	  'unblind    Record sealed-file hashes after the published freeze (E6)' \
+	  'report     Write Experiment 1 tables from runs/unblind.json (E6)' \
+	  'reproduce  Same as report; no training and no new scoring' \
 	  'testbed-b  Probe-deferral stretch testbed (R4, E6)'
 
 bootstrap:
@@ -93,6 +94,12 @@ seal-hash:
 
 seal-check:
 	$(UV) run --frozen python -m skeptic.store unseal-check
+
+unblind:
+	$(UV) run --frozen python -m skeptic.analysis.unblind --sealed $(SEALED_ROOT)
+
+report reproduce:
+	$(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT)
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

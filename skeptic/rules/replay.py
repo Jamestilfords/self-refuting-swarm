@@ -11,7 +11,7 @@ import re
 import sys
 import numpy as np
 
-from skeptic.rules.common import CELLS, IGNORE_PARENTS, load_ledger, matched_orderings
+from skeptic.rules.common import CELLS, FROZEN_RULES, IGNORE_PARENTS, load_ledger, matched_orderings
 from skeptic.rules.critic_bridge import ensure_er1_path, critic_factory
 from skeptic.rules.engine import replay_cell, combine_cells, write_decision_logs
 from skeptic.rules.thresholdout import laplace_noise, split_aurocs, stratified_split
@@ -123,8 +123,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     rows = replay_rows(args.ledger, args.baselines)
     config, critic_config = read_config(args.config, rows)
-    summary = {"rules": ["R0", "R1", "R2"], "orderings": config["orderings"],
-               "decision_files": 3 * config["orderings"],
+    summary = {"rules": list(FROZEN_RULES), "orderings": config["orderings"],
+               "decision_files": len(FROZEN_RULES) * config["orderings"],
                "proposals_per_cell": {c: len(matched_orderings(rows, c, 1, config["ordering_seed"])[0]) for c in CELLS}}
     if args.command == "plan":
         print(json.dumps(summary, sort_keys=True))
@@ -179,7 +179,7 @@ def main(argv=None):
                                   selected_orderings=[(ordering, orderings[cell][ordering])])
                        for cell in CELLS]
             combined = combine_cells(*replays)
-            for rule in ("R0", "R1", "R2"):
+            for rule in FROZEN_RULES:
                 yield (rule, ordering), combined[(rule, ordering)]
 
     metadata = {"config": config, "config_sha256": _hash(args.config),

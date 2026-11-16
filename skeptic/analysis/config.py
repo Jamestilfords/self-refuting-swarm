@@ -69,6 +69,7 @@ class AnalysisConfig:
         "R2-noG5",
         "R2-noG6",
     )
+    registered_orderings: int = 100
     density_names: tuple[str, ...] = (
         "d_port_ce",
         "d_full_ce",
@@ -116,6 +117,8 @@ def definitions_markdown(config: AnalysisConfig = DEFAULT) -> str:
         ("final_pick_ece †", config.final_pick_ece, "D5. Proposal probabilities, otherwise the arm's plain-model ECE."),
         ("rule_names", ", ".join(f"{src}→{dst}" for src, dst in config.rule_names.items()), "Decision directory names."),
         ("gate_variants", ", ".join(config.gate_variants), "Leave-one-gate-out directories. G4 has no variant."),
+        ("registered_orderings", str(config.registered_orderings),
+         "Confirmatory tables use orderings below this index. The rest are exploratory."),
         ("density_names", ", ".join(config.density_names), "Best single density is chosen on validation AUROC."),
         ("ratchet_rule", config.ratchet_rule, "Canonical name of the keep-if-better rule."),
         ("critic_rule", config.critic_rule, "Canonical name of the full critic."),

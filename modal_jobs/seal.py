@@ -229,12 +229,12 @@ def plan_jobs(proposal: Path | None, dataset: str | None, backbone: str | None) 
             raise ValueError("--proposal requires --dataset and --backbone")
         selected = [(_cell(dataset, backbone), proposal)]
     else:
-        _, proposals = _manifest_paths(REPO)
+        _, proposals, references = _manifest_paths(REPO)
         selected = [(cell, REPO / "proposals" / f"{sha}.py")
                     for cell in sorted(proposals)
                     if (dataset is None or cell.split("/")[0] == dataset)
                     and (backbone is None or cell.split("/")[1] == backbone)
-                    for sha in sorted(proposals[cell])]
+                    for sha in sorted(set(proposals[cell]) | set(references[cell].values()))]
     jobs = []
     for cell, path in selected:
         text, sha, arm = _read_proposal(path)

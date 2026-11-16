@@ -60,7 +60,7 @@ def experiment(tmp_path):
 def test_plan_run_and_freeze_are_separate(experiment, capsys):
     root, args = experiment
     assert main(["plan", *args]) == 0
-    assert json.loads(capsys.readouterr().out)["decision_files"] == 6
+    assert json.loads(capsys.readouterr().out)["decision_files"] == 16
     assert not (root / "runs").exists()
     with pytest.raises(GuardError, match="Preregistration"):
         main(["run", *args])
@@ -68,7 +68,7 @@ def test_plan_run_and_freeze_are_separate(experiment, capsys):
     write_score_manifest(root)
     assert main(["run", *args]) == 0
     paths = list((root / "runs/decisions").glob("R*/ord_*.jsonl"))
-    assert len(paths) == 6
+    assert len(paths) == 16
     before = {p: p.read_bytes() for p in paths}
     assert all(len(p.read_text().splitlines()) == 4 for p in paths)
     # A registered baseline tagged "templated" in the source ledger is still excluded.
@@ -119,7 +119,7 @@ def test_registered_config_plans_200_orderings(capsys):
             "--open-root", str(root / "runs"), "--source", "legacy", "--output", str(root)]
     assert main(["plan", *args]) == 0
     summary = json.loads(capsys.readouterr().out)
-    assert summary["orderings"] == 200 and summary["decision_files"] == 600
+    assert summary["orderings"] == 200 and summary["decision_files"] == 1600
     assert all(count == 487 for count in summary["proposals_per_cell"].values())
 
 

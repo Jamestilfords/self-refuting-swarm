@@ -409,5 +409,6 @@ It writes the hex digest to `runs/DECISIONS.sha256`. The ledger is in git alread
 
 **Later deviations:** append one line per change, with date, time, what changed and why. Every analysis outside this plan is labelled exploratory.
 
-- none
 - Score-file manifest (`runs/score_manifest.sha256`): its commit hash is written on this line when that file is committed, before the first decision file.
+- 2026-11-15 20:14 PT. Confirmatory tables and H1–H4 use orderings 0–99. All 200 orderings are published and copied to `tables/exploratory/`. The replay finished after the Sunday 05:00 PT fallback, so 200 orderings were available.
+- 2026-11-15 20:14 PT. Final picks that return probabilities are reported with the arm's plain-model test ECE. The sealer stores scores and does not store the proposal's own probabilities.

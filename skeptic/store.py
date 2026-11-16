@@ -37,19 +37,24 @@ class GuardError(RuntimeError):
     """The requested sealed read or unblind operation is not authorized."""
 
 
-def _r2_gates_pass(gates: object) -> bool:
-    if not isinstance(gates, dict):
-        return False
-    return all(gates.get(gate) == "pass" for gate in ("G1", "G2", "G3", "G5", "G6"))
+def _accept_gates_ok(rule: str, gates) -> bool:
+    from skeptic.rules.common import accept_gates_ok
+    return accept_gates_ok(rule, gates)
 
 
 def _decision_files(repo: Path) -> list[Path]:
+    from skeptic.rules.common import FROZEN_RULES
+
     root = repo / DECISIONS_RELATIVE
     if not root.is_dir() or root.is_symlink():
         raise GuardError("Decision directory is missing")
-    # E3 writes its own operational log here. Only the three E5 rule folders
-    # constitute the frozen decision set.
-    rule_dirs = [root / rule for rule in ("R0", "R1", "R2")]
+    # E3 writes its own operational log here. The frozen set is the eight
+    # registered rule folders: R0, R1, R2, and the five gate ablations.
+    unexpected = [child.name for child in root.iterdir()
+                  if child.name != ".gitkeep" and child.name not in FROZEN_RULES]
+    if unexpected:
+        raise GuardError("Unexpected decision directory")
+    rule_dirs = [root / rule for rule in FROZEN_RULES]
     if any(not path.is_dir() or path.is_symlink() for path in rule_dirs):
         raise GuardError("R0, R1 and R2 decision directories are required")
     files = sorted((p for directory in rule_dirs for p in directory.rglob("*.jsonl")),
@@ -63,7 +68,44 @@ def _decision_files(repo: Path) -> list[Path]:
     return files
 
 
-def _manifest_paths(repo: Path) -> tuple[set[str], dict[str, set[str]]]:
+def _check_manifest(manifest) -> tuple[set[str], dict[str, set[str]], dict[str, dict[str, str]]]:
+    from skeptic.rules.common import FROZEN_RULES, REFERENCE_BASELINES
+
+    paths = manifest.get("files") if isinstance(manifest, dict) else None
+    proposals = manifest.get("proposals") if isinstance(manifest, dict) else None
+    references = manifest.get("references") if isinstance(manifest, dict) else None
+    cells = ["banking77_oos/bert", "banking77_oos/roberta",
+             "clinc150/bert", "clinc150/roberta"]
+    rule_pattern = "|".join(re.escape(rule) for rule in FROZEN_RULES)
+    if (not isinstance(manifest, dict) or manifest.get("schema_version") != 1
+            or manifest.get("rules") != list(FROZEN_RULES)
+            or manifest.get("cells") != cells
+            or type(manifest.get("orderings")) is not int or manifest["orderings"] <= 0
+            or not isinstance(paths, list) or not paths
+            or len(paths) != len(FROZEN_RULES) * manifest["orderings"]
+            or any(not isinstance(p, str) or not re.fullmatch(
+                rf"runs/decisions/(?:{rule_pattern})/ord_[0-9]{{3,}}\.jsonl", p) for p in paths)
+            or len(paths) != len(set(paths))
+            or not isinstance(proposals, dict) or set(proposals) != set(cells)
+            or any(not isinstance(shas, list) or not shas
+                   or any(not isinstance(sha, str) or not _SHA12.fullmatch(sha)
+                          for sha in shas)
+                   or shas != sorted(set(shas))
+                   for shas in proposals.values())
+            or not isinstance(references, dict) or set(references) != set(cells)
+            or any(mapping != REFERENCE_BASELINES for mapping in references.values())
+            or any(set(REFERENCE_BASELINES.values()) & set(proposals[cell]) for cell in cells)):
+        raise GuardError("Invalid decision manifest file list")
+    expected = {f"runs/decisions/{rule}/ord_{i:03d}.jsonl"
+                for rule in manifest["rules"] for i in range(manifest["orderings"])}
+    if set(paths) != expected:
+        raise GuardError("Decision manifest does not cover all rules and orderings")
+    return (set(paths),
+            {cell: set(shas) for cell, shas in proposals.items()},
+            {cell: dict(mapping) for cell, mapping in references.items()})
+
+
+def _manifest_paths(repo: Path) -> tuple[set[str], dict[str, set[str]], dict[str, dict[str, str]]]:
     path = repo / MANIFEST_RELATIVE
     if not path.is_file() or path.is_symlink():
         raise GuardError("Decision manifest is missing")
@@ -71,38 +113,14 @@ def _manifest_paths(repo: Path) -> tuple[set[str], dict[str, set[str]]]:
         manifest = json.loads(path.read_text(encoding="utf-8"))
     except (ValueError, UnicodeError) as exc:
         raise GuardError("Invalid decision manifest") from exc
-    paths = manifest.get("files") if isinstance(manifest, dict) else None
-    proposals = manifest.get("proposals") if isinstance(manifest, dict) else None
-    cells = ["banking77_oos/bert", "banking77_oos/roberta",
-             "clinc150/bert", "clinc150/roberta"]
-    if (not isinstance(manifest, dict) or manifest.get("schema_version") != 1
-            or manifest.get("rules") != ["R0", "R1", "R2"]
-            or manifest.get("cells") != cells
-            or type(manifest.get("orderings")) is not int or manifest["orderings"] <= 0
-            or not isinstance(paths, list) or not paths
-            or len(paths) != 3 * manifest["orderings"]
-            or any(not isinstance(p, str) or not re.fullmatch(
-                r"runs/decisions/R[012]/ord_[0-9]{3,}\.jsonl", p) for p in paths)
-            or len(paths) != len(set(paths))
-            or not isinstance(proposals, dict) or set(proposals) != set(cells)
-            or any(not isinstance(shas, list) or not shas
-                   or any(not isinstance(sha, str) or not _SHA12.fullmatch(sha)
-                          for sha in shas)
-                   or shas != sorted(set(shas))
-                   for shas in proposals.values())):
-        raise GuardError("Invalid decision manifest file list")
-    expected = {f"runs/decisions/{rule}/ord_{i:03d}.jsonl"
-                for rule in manifest["rules"] for i in range(manifest["orderings"])}
-    if set(paths) != expected:
-        raise GuardError("Decision manifest does not cover all rules and orderings")
-    return set(paths), {cell: set(shas) for cell, shas in proposals.items()}
+    return _check_manifest(manifest)
 
 
 def decision_digest(repo_root: str | Path) -> str:
     """Hash exact relative paths and bytes for every declared decision log."""
     repo = Path(repo_root)
     files = _decision_files(repo)
-    expected, proposals = _manifest_paths(repo)
+    expected, proposals, _references = _manifest_paths(repo)
     actual = {p.relative_to(repo).as_posix() for p in files}
     if actual != expected:
         raise GuardError("Decision files do not match the manifest")
@@ -133,8 +151,8 @@ def decision_digest(repo_root: str | Path) -> str:
                     or row.get("verdict") not in ("ACCEPT", "REJECT", "INERT", "SCORE-MATCHED",
                                                   "NO EFFECT", "UNDERPOWERED", "MISCALIBRATES", "BUG") \
                     or (rule in ("R0", "R1") and row["verdict"] not in ("ACCEPT", "REJECT")) \
-                    or (rule == "R2" and row["verdict"] == "ACCEPT" and
-                        not _r2_gates_pass(row.get("gates"))) \
+                    or (str(rule).startswith("R2") and row["verdict"] == "ACCEPT" and
+                        not _accept_gates_ok(rule, row.get("gates"))) \
                     or any("test" in key.lower() or "truth" in key.lower() for key in row):
                 raise GuardError(f"Invalid decision row in {path.name}:{number}")
             cell_rows = by_cell.setdefault(row["cell"], {})
@@ -284,7 +302,7 @@ def verify_remote_freeze(commit: str, digest: str) -> UnsealPermit:
                 path = repo / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(_download(prefix + relative.as_posix(), limit))
-            expected, _ = _manifest_paths(repo)
+            expected, _, _ = _manifest_paths(repo)
             total = 0
             for relative in sorted(expected):
                 data = _download(prefix + relative, 16 * 1024 * 1024)
@@ -333,12 +351,13 @@ def verify_remote_proposals(commit: str, targets: list[tuple[str, str]]) -> None
         manifest = json.loads(raw)
     except (urllib.error.URLError, ValueError, UnicodeError, OSError) as exc:
         raise GuardError("Could not verify frozen proposal set") from exc
-    proposals = manifest.get("proposals") if isinstance(manifest, dict) else None
-    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1 \
-            or not isinstance(proposals, dict) \
-            or any(not isinstance(proposals.get(cell), list) or sha not in proposals[cell]
-                   for cell, sha in targets):
-        raise GuardError("Proposal is not in the published decision set")
+    try:
+        _paths, proposals, references = _check_manifest(manifest)
+    except GuardError as exc:
+        raise GuardError("Proposal is not in the published decision set") from exc
+    for cell, sha in targets:
+        if sha not in proposals[cell] and sha not in references[cell].values():
+            raise GuardError("Proposal is not in the published decision set")
 
 
 class SealedStore:

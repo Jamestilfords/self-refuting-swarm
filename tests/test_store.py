@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from skeptic import store
+from skeptic.rules.common import ACCEPT_GATES, ABLATION_SKIP, FROZEN_RULES, REFERENCE_BASELINES
 
 CELLS = ("banking77_oos/bert", "banking77_oos/roberta", "clinc150/bert", "clinc150/roberta")
 BASE, FIRST, SECOND = "a" * 12, "b" * 12, "c" * 12
@@ -21,7 +22,9 @@ def _write_rows(path, rows):
 def decisions(tmp_path):
     (tmp_path / "PREREGISTRATION.md").write_text("**Status: FROZEN**\n", encoding="utf-8")
     files = []
-    for rule in ("R0", "R1", "R2"):
+    for rule in FROZEN_RULES:
+        skip = ABLATION_SKIP.get(rule, frozenset())
+        gates = {gate: ("skipped" if gate in skip else "pass") for gate in ACCEPT_GATES}
         for ordering in range(2):
             relative = f"runs/decisions/{rule}/ord_{ordering:03d}.jsonl"
             path = tmp_path / relative
@@ -34,13 +37,14 @@ def decisions(tmp_path):
                     rows.append({"schema_version": 1, "rule": rule, "cell": cell,
                                  "ordering": ordering, "idx": idx, "sha": sha,
                                  "incumbent": incumbent, "verdict": "ACCEPT",
-                                 "gates": {gate: "pass" for gate in ("G1", "G2", "G3", "G5", "G6")}})
+                                 "gates": gates})
                     incumbent = sha
             _write_rows(path, rows)
             files.append(relative)
-    manifest = {"schema_version": 1, "rules": ["R0", "R1", "R2"], "orderings": 2,
+    manifest = {"schema_version": 1, "rules": list(FROZEN_RULES), "orderings": 2,
                 "cells": list(CELLS), "files": files,
-                "proposals": {cell: [FIRST, SECOND] for cell in CELLS}}
+                "proposals": {cell: [FIRST, SECOND] for cell in CELLS},
+                "references": {cell: dict(REFERENCE_BASELINES) for cell in CELLS}}
     (tmp_path / store.MANIFEST_RELATIVE).write_text(json.dumps(manifest) + "\n", encoding="utf-8")
     return tmp_path
 
@@ -193,6 +197,36 @@ def test_cache_directory_symlink_is_rejected(tmp_path):
     (root / "clinc150_bert").symlink_to(outside, target_is_directory=True)
     with pytest.raises(store.GuardError):
         store.SealedStore(root, tmp_path).read_array("clinc150_bert/ce_seed0", "val", "labels")
+
+
+def test_reference_baseline_is_authorized_and_not_a_candidate(decisions, monkeypatch):
+    from tests.test_seal import _publication
+
+    store.write_decision_hash(decisions)
+    monkeypatch.setattr(store, "_download", _publication(decisions))
+    store.verify_remote_proposal(HEAD, CELLS[0], REFERENCE_BASELINES["energy_ce"])
+    with pytest.raises(store.GuardError, match="not in the published"):
+        store.verify_remote_proposal(HEAD, CELLS[0], "f" * 12)
+    path = decisions / store.MANIFEST_RELATIVE
+    manifest = json.loads(path.read_text())
+    manifest["proposals"][CELLS[0]] = sorted(set(manifest["proposals"][CELLS[0]]) | {REFERENCE_BASELINES["energy_ce"]})
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(store.GuardError, match="manifest"):
+        store.decision_digest(decisions)
+
+
+def test_missing_ablation_or_extra_reference_cannot_freeze(decisions):
+    variant = decisions / "runs/decisions/R2-noG3/ord_000.jsonl"
+    variant.unlink()
+    with pytest.raises(store.GuardError):
+        store.write_decision_hash(decisions)
+    variant.write_text((decisions / "runs/decisions/R2/ord_000.jsonl").read_text().replace('"rule": "R2"', '"rule": "R2-noG3"'))
+    path = decisions / store.MANIFEST_RELATIVE
+    manifest = json.loads(path.read_text())
+    manifest["references"][CELLS[0]]["extra"] = "e" * 12
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(store.GuardError, match="manifest"):
+        store.write_decision_hash(decisions)
 
 
 def test_cli_hash_and_verify_only_touch_freeze_files(decisions, capsys):

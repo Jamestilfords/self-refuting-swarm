@@ -1,12 +1,14 @@
 """Batch planning/orchestration tests: synthetic proposals and mocked Modal/GitHub only."""
 import json
 from contextlib import nullcontext
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from modal_jobs import seal
 from skeptic import api, store
+from skeptic.rules.common import FROZEN_RULES, REFERENCE_BASELINES
 from skeptic.streams.canaries import CANARIES
 from tests.test_store import CELLS, HEAD, FIRST, decisions
 from tests.test_seal import _publication
@@ -22,9 +24,15 @@ def batch_repo(tmp_path, monkeypatch):
         sha = api.proposal_sha(text)
         (proposals / f"{sha}.py").write_text(text)
         shas.append(sha)
-    manifest = {"schema_version": 1, "rules": ["R0", "R1", "R2"], "orderings": 1,
-                "cells": list(CELLS), "files": [f"runs/decisions/{r}/ord_000.jsonl" for r in ("R0", "R1", "R2")],
-                "proposals": {cell: sorted(shas) for cell in CELLS}}
+    repo = Path(__file__).resolve().parents[1]
+    for sha in REFERENCE_BASELINES.values():
+        text = (repo / "proposals" / f"{sha}.py").read_text(encoding="utf-8")
+        (proposals / f"{sha}.py").write_text(text, encoding="utf-8")
+    manifest = {"schema_version": 1, "rules": list(FROZEN_RULES), "orderings": 1,
+                "cells": list(CELLS),
+                "files": [f"runs/decisions/{rule}/ord_000.jsonl" for rule in FROZEN_RULES],
+                "proposals": {cell: sorted(shas) for cell in CELLS},
+                "references": {cell: dict(REFERENCE_BASELINES) for cell in CELLS}}
     (tmp_path / "runs").mkdir()
     (tmp_path / store.MANIFEST_RELATIVE).write_text(json.dumps(manifest))
     monkeypatch.setattr(seal, "REPO", tmp_path)
@@ -36,14 +44,14 @@ def test_batch_plan_has_all_frozen_cells_and_no_side_effects(batch_repo, monkeyp
     monkeypatch.setattr(seal.seal_app, "run", lambda **kw: pytest.fail("Modal in plan"))
     assert seal.main(["plan", "--all", "--batch-size", "3"]) == 0
     plan = json.loads(capsys.readouterr().out)
-    assert plan["job_count"] == 8 and plan["batches"] == 3
-    assert plan["max_sandbox_executions"] == 80 and plan["freeze_verified"] is False
+    assert plan["job_count"] == 28 and plan["batches"] == 10
+    assert plan["max_sandbox_executions"] == 280 and plan["freeze_verified"] is False
     assert {j["cell"] for j in plan["jobs"]} == set(CELLS)
     assert all("text" not in j for j in plan["jobs"])
     assert not (batch_repo / "runs/seal").exists()
     assert seal.main(["plan", "--all", "--dataset", "banking77", "--backbone", "roberta"]) == 0
     filtered = json.loads(capsys.readouterr().out)
-    assert filtered["job_count"] == 2
+    assert filtered["job_count"] == 7
     assert all(j["dataset"] == "banking77_oos" for j in filtered["jobs"])
 
 
@@ -120,7 +128,7 @@ def test_remote_batch_verifies_before_scoring_and_continues_after_failure(batch_
     monkeypatch.setattr(seal, "_score_authorized", score)
     with pytest.warns(UserWarning, match="executing locally"):
         result = seal.score_sealed_batch.local(jobs, HEAD, "a" * 64, "im-test")
-    assert [r["status"] for r in result] == ["failed", "already_sealed"]
+    assert [r["status"] for r in result] == ["failed", *["already_sealed"] * 6]
     assert "PRIVATE" not in json.dumps(result)
     assert events.count("freeze") == 1 and events.count("membership") == 1
 
@@ -136,7 +144,7 @@ def test_batch_denied_before_any_scoring(batch_repo, monkeypatch, failure):
         monkeypatch.setattr(seal, "verify_remote_proposals", reject)
     monkeypatch.setattr(seal, "_score_authorized", lambda *a: pytest.fail("score before authorization"))
     with pytest.warns(UserWarning, match="executing locally"), pytest.raises(store.GuardError):
-        seal.score_sealed_batch.local(seal.plan_jobs(None, None, None), HEAD, "a" * 64, "im-test")
+        seal.score_sealed_batch.local(seal.plan_jobs(None, "banking77", "bert"), HEAD, "a" * 64, "im-test")
 
 
 def _cli_fixture(monkeypatch, mapping):
@@ -164,12 +172,12 @@ def test_cli_chunks_reports_failures_and_retries_all_remote_jobs(batch_repo, mon
     assert seal.main(args) == 1
     report = batch_repo / "runs/seal/status.jsonl"
     rows = [json.loads(l) for l in report.read_text().splitlines()]
-    assert len(rows) == 8 and sum(r["status"] == "failed" for r in rows) == 3
+    assert len(rows) == 28 and sum(r["status"] == "failed" for r in rows) == 3
     assert all(r["decision_commit"] == HEAD for r in rows)
     assert "PRIVATE" not in capsys.readouterr().out + report.read_text()
     assert seal.main(args) == 0
     assert calls[0] == calls[1]  # Local success rows never replace remote provenance checks.
-    assert len(report.read_text().splitlines()) == 16
+    assert len(report.read_text().splitlines()) == 56
 
 
 @pytest.mark.parametrize("damage", ["extra_metrics", "wrong_identity", "missing_result", "failed_status"])

@@ -18,7 +18,7 @@ from skeptic.analysis.config import DEFAULT, AnalysisConfig
 from skeptic.analysis.decisions import load_decisions, load_ledger
 from skeptic.analysis.report_tables import write_all
 from skeptic.analysis.scorecard import PAIRS, run_scorecard
-from skeptic.analysis.sources import OpenSource, SealedNpzSource
+from skeptic.analysis.sources import OpenSource, SealedNpzSource, file_sha256
 from skeptic.analysis.truth import compute_truth_table, plan_pairs
 from skeptic.store import UnsealPermit
 
@@ -115,6 +115,31 @@ def _truth(decisions, ledger, test_source, config):
     return compute_truth_table(pairs, source=test_source, config=config, strict=False)
 
 
+def verify_archive(sealed_root: Path, record: dict) -> None:
+    """Every unblinded path matches its sha256, and no extra score file is present."""
+    root = Path(sealed_root)
+    problems = []
+    files = record.get("files") or {}
+    for relative, digest in files.items():
+        path = root / relative
+        if path.is_symlink() or not path.is_file():
+            problems.append(f"missing {relative}")
+            continue
+        if file_sha256(path) != digest:
+            problems.append(f"hash {relative}")
+    scores = root / "scores"
+    if scores.is_dir():
+        for path in sorted(scores.rglob("*.npz")):
+            relative = path.relative_to(root).as_posix()
+            if path.is_symlink():
+                problems.append(f"symlink {relative}")
+                continue
+            if relative not in files:
+                problems.append(f"extra {relative}")
+    if problems:
+        raise ValueError("sealed archive does not match unblind.json:\n" + "\n".join(problems))
+
+
 def _sources_from_unblind(repo: Path, sealed_root: Path):
     record = json.loads((repo / "runs" / "unblind.json").read_text(encoding="utf-8"))
     permit = UnsealPermit(record["permit"]["digest"], record["permit"]["commit"])
@@ -122,7 +147,10 @@ def _sources_from_unblind(repo: Path, sealed_root: Path):
     ledger = load_ledger(repo / "runs" / "ledger.jsonl")
     arms = {(str(row.cell), str(row.sha)): str(row.arm)
             for row in ledger.itertuples(index=False) if getattr(row, "arm", None)}
-    test = SealedNpzSource(sealed_root, permit, manifest["references"], arms=arms, repo=repo)
+    test = SealedNpzSource(
+        sealed_root, permit, manifest["references"], arms=arms, repo=repo,
+        verified=record.get("files") or {},
+    )
     val = OpenSource(repo / "runs" / "scores", {})
     return ledger, test, val
 
@@ -144,6 +172,11 @@ def main(argv=None) -> int:
         print("report needs --sealed pointing at the released score archive", file=sys.stderr)
         return 1
     payload = json.loads(record.read_text(encoding="utf-8"))
+    try:
+        verify_archive(args.sealed, payload)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     ledger, test, val = _sources_from_unblind(args.repo, args.sealed)
     decisions = load_decisions(args.repo / "runs" / "decisions", ledger)
     build_report(

@@ -12,9 +12,9 @@ import pytest
 from modal_jobs.plain_ece import plain_model_ece
 from skeptic.analysis.check_references import arrays_match, first_mismatch, spearman
 from skeptic.analysis.config import AnalysisConfig
-from skeptic.analysis.report import build_report
+from skeptic.analysis.report import build_report, main as report_main, verify_archive
 from skeptic.analysis.report_tables import write_all
-from skeptic.analysis.sources import GuardError, SealedNpzSource
+from skeptic.analysis.sources import GuardError, SealedNpzSource, file_sha256
 from skeptic.analysis.unblind import open_sealed
 from skeptic.critic.er1 import softmax_ece
 from skeptic.rules.common import REFERENCE_BASELINES, TEST_N_IN
@@ -114,28 +114,173 @@ def test_plain_model_ece_matches_the_validation_definition():
     assert np.isfinite(edl)
 
 
-def test_unblind_refuses_a_missing_file_and_records_a_complete_set(tmp_path, monkeypatch):
+def _manifest(tmp_path: Path) -> None:
     from skeptic.score_artifacts import CELLS
 
-    _install(monkeypatch)
-    sealed = tmp_path / "sealed"
     manifest = {
         "proposals": {cell: ["d" * 12] for cell in CELLS},
         "references": {cell: dict(REFERENCE_BASELINES) for cell in CELLS},
     }
     (tmp_path / "runs").mkdir()
     (tmp_path / "runs" / "decision_manifest.json").write_text(json.dumps(manifest))
+
+
+def test_unblind_refuses_a_missing_file_and_records_a_complete_set(tmp_path, monkeypatch):
+    _install(monkeypatch)
+    _manifest(tmp_path)
+
+    def missing(_commit, _digest, expected):
+        assert "plain_ece.json" in expected
+        return {"files": {}, "missing": ["plain_ece.json"]}
+
     with pytest.raises(FileNotFoundError, match="missing"):
-        open_sealed(tmp_path, sealed, require_registered=False)
-    for cell in CELLS:
-        _write_npz(sealed, cell, "d" * 12)
-        for sha in set(REFERENCE_BASELINES.values()):
-            _write_npz(sealed, cell, sha)
-    (sealed / "plain_ece.json").write_text("{}\n")
-    record = open_sealed(tmp_path, sealed, require_registered=False)
+        open_sealed(tmp_path, hasher=missing, require_registered=False)
+    assert not (tmp_path / "runs" / "unblind.json").exists()
+    assert not (tmp_path / "runs" / "guard.log").exists()
+
+    def complete(_commit, _digest, expected):
+        return {"files": {relative: "ab" * 32 for relative in expected}, "missing": []}
+
+    record = open_sealed(tmp_path, hasher=complete, require_registered=False)
     assert record["counts"][CELL] == 1 + len(set(REFERENCE_BASELINES.values()))
+    assert "plain_ece.json" in record["files"]
     assert (tmp_path / "runs" / "unblind.json").is_file()
-    assert 'purpose="unblind"' in (tmp_path / "runs" / "guard.log").read_text(encoding="utf-8")
+    guard = (tmp_path / "runs" / "guard.log").read_text(encoding="utf-8")
+    assert guard.count('purpose="unblind"') == 1
+
+
+def test_hash_sealed_rejects_bad_paths_and_matches_file_bytes(tmp_path, monkeypatch):
+    import hashlib
+    from types import SimpleNamespace
+
+    from modal_jobs import unblind_remote
+
+    _write_npz(tmp_path, CELL, SHA)
+    (tmp_path / "plain_ece.json").write_bytes(b"{}\n")
+    relative = f"scores/clinc150_bert/{SHA}.npz"
+    events = []
+    monkeypatch.setattr(unblind_remote, "SEALED_MOUNT", str(tmp_path))
+    monkeypatch.setattr(unblind_remote, "sealed_volume", SimpleNamespace(reload=lambda: events.append("reload")))
+
+    def verify(commit, digest):
+        events.append("verify")
+        return UnsealPermit(digest, commit)
+
+    monkeypatch.setattr(unblind_remote, "verify_remote_freeze", verify)
+    with pytest.warns(UserWarning, match="executing locally"):
+        result = unblind_remote.hash_sealed.local(PERMIT.commit, PERMIT.digest, [relative, "plain_ece.json"])
+    assert events == ["reload", "verify"]
+    raw = (tmp_path / relative).read_bytes()
+    assert result["missing"] == []
+    assert result["files"][relative] == hashlib.sha256(raw).hexdigest()
+    from skeptic.store import GuardError as StoreGuardError
+
+    for bad in ("../x", "/tmp/x", "scores/clinc150_bert/../../x.npz"):
+        with pytest.raises(StoreGuardError):
+            unblind_remote.hash_sealed_files(tmp_path, PERMIT.commit, PERMIT.digest, [bad])
+    link = tmp_path / "scores" / "clinc150_bert" / f"{'c' * 12}.npz"
+    link.symlink_to(tmp_path / relative)
+    with pytest.raises(StoreGuardError, match="symlink"):
+        unblind_remote.hash_sealed_files(
+            tmp_path, PERMIT.commit, PERMIT.digest, [f"scores/clinc150_bert/{'c' * 12}.npz"],
+        )
+    _write_npz(tmp_path, CELL, "e" * 12, commit="c" * 40)
+    mismatched = unblind_remote.hash_sealed_files(
+        tmp_path, PERMIT.commit, PERMIT.digest, [f"scores/clinc150_bert/{'e' * 12}.npz"],
+    )
+    assert mismatched == {"files": {}, "missing": [f"scores/clinc150_bert/{'e' * 12}.npz"]}
+
+
+def _archive(tmp_path: Path) -> tuple[Path, dict]:
+    sealed = tmp_path / "sealed"
+    path = _write_npz(sealed, CELL, SHA)
+    plain = sealed / "plain_ece.json"
+    plain.write_text("{}\n", encoding="utf-8")
+    relative = f"scores/clinc150_bert/{SHA}.npz"
+    record = {"files": {relative: file_sha256(path), "plain_ece.json": file_sha256(plain)}}
+    return sealed, record
+
+
+def test_report_refuses_a_modified_missing_or_extra_file(tmp_path):
+    sealed, record = _archive(tmp_path)
+    verify_archive(sealed, record)
+    relative = next(iter(record["files"]))
+    target = sealed / relative
+    original = target.read_bytes()
+    target.write_bytes(original + b"\x00")
+    with pytest.raises(ValueError, match="hash"):
+        verify_archive(sealed, record)
+    target.unlink()
+    with pytest.raises(ValueError, match="missing"):
+        verify_archive(sealed, record)
+    target.write_bytes(original)
+    extra = _write_npz(sealed, CELL, "d" * 12)
+    with pytest.raises(ValueError, match="extra"):
+        verify_archive(sealed, record)
+    extra.unlink()
+    verify_archive(sealed, record)
+
+
+def test_report_runs_on_a_matching_archive(tmp_path, monkeypatch, capsys):
+    stream = make_stream(seed=0, n_true=2, n_null=2, n_seeds=2, sizes={"val": (30, 15), "test": (30, 15)})
+    decisions = replay(stream.val, stream.shas, stream.cell, n_orderings=2, seed=0)
+    extra = decisions.loc[decisions["ordering"] == 0].copy()
+    extra["ordering"] = 100
+    decisions = pd.concat([decisions, extra], ignore_index=True)
+    cell = stream.cell
+    config = AnalysisConfig(
+        cells=(cell,), test_B=20, test_seed=0, hyp_B=20, hyp_seed=0,
+        registered_orderings=100, h1_cells=(cell,), h3_cells=(cell,),
+        h4_small=(cell,), h4_large=(cell,), h2_min_cells=1,
+    )
+    sealed, record = _archive(tmp_path)
+    payload = {
+        "schema_version": 1,
+        "permit": {"commit": PERMIT.commit, "digest": PERMIT.digest},
+        "counts": {CELL: 1},
+        "files": record["files"],
+    }
+    (tmp_path / "runs").mkdir()
+    (tmp_path / "runs" / "unblind.json").write_text(json.dumps(payload), encoding="utf-8")
+    written = build_report(
+        tmp_path, decisions=decisions, ledger=stream.ledger,
+        test_source=stream.test, val_source=stream.val, config=config,
+        out_dir=tmp_path / "tables", decisions_sha256="a" * 64,
+    )
+    exploratory = (tmp_path / "tables" / "exploratory" / "exp1_per_ordering.csv").read_text(encoding="utf-8")
+    assert ",100," in exploratory
+    assert "hypotheses.csv" in written
+    monkeypatch.setattr(
+        "skeptic.analysis.report._sources_from_unblind",
+        lambda *_args, **_kwargs: (stream.ledger, stream.test, stream.val),
+    )
+    monkeypatch.setattr("skeptic.analysis.report.load_decisions", lambda *_args, **_kwargs: decisions)
+    monkeypatch.setattr("skeptic.analysis.report.build_report", lambda *_args, **_kwargs: written)
+    assert report_main(["--repo", str(tmp_path), "--sealed", str(sealed), "--out", str(tmp_path / "out")]) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "reported"
+    target = sealed / next(iter(record["files"]))
+    target.write_bytes(target.read_bytes() + b"\x00")
+    assert report_main(["--repo", str(tmp_path), "--sealed", str(sealed), "--out", str(tmp_path / "out")]) == 1
+    assert "hash" in capsys.readouterr().err
+
+
+def test_sealed_source_rechecks_the_unblind_hash(tmp_path, monkeypatch):
+    _install(monkeypatch)
+    sealed = tmp_path / "runs" / "sealed"
+    path = _write_npz(sealed, CELL, SHA)
+    relative = f"scores/clinc150_bert/{SHA}.npz"
+    source = SealedNpzSource(
+        sealed, PERMIT, {CELL: {"energy_ce": SHA}}, repo=tmp_path,
+        verified={relative: file_sha256(path)},
+    )
+    source.get(CELL, "energy_ce")
+    path.write_bytes(path.read_bytes() + b"\x00")
+    again = SealedNpzSource(
+        sealed, PERMIT, {CELL: {"energy_ce": SHA}}, repo=tmp_path,
+        verified={relative: file_sha256(path) + "00"},
+    )
+    with pytest.raises(GuardError, match="hash"):
+        again.get(CELL, "energy_ce")
 
 
 def test_report_needs_unblind_and_keeps_later_orderings_exploratory(tmp_path):

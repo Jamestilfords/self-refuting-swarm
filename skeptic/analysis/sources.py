@@ -19,6 +19,17 @@ class GuardError(RuntimeError):
     """The sealed volume is not open, or the decisions hash does not match."""
 
 
+def file_sha256(path: Path) -> str:
+    """sha256 of a file, read in 1 MiB chunks."""
+    import hashlib
+
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def hash_scores(id_scores, oos_scores) -> str:
     """sha256 of the float64 bytes and shapes, in seed order."""
     import hashlib
@@ -284,7 +295,7 @@ class SealedNpzSource:
     kind = "test"
 
     def __init__(self, sealed_root, permit, references: dict, arms: dict | None = None,
-                 repo: Path | None = None):
+                 repo: Path | None = None, verified: dict[str, str] | None = None):
         checked = _require_unsealed(repo if repo is not None else _repo_of(Path(sealed_root)))
         if checked.commit != permit.commit or checked.digest != permit.digest:
             raise GuardError("Sealed permit does not match the published freeze")
@@ -294,9 +305,19 @@ class SealedNpzSource:
                            for cell, mapping in references.items()}
         self._arms = {((str(cell), str(name)) if isinstance(key, tuple) else key): value
                       for key, value in (arms or {}).items()}
+        self._verified = {str(key): str(value) for key, value in (verified or {}).items()}
         self.guard_log = self.root / "guard.log"
         self._memo: dict[tuple[str, str], tuple[list[np.ndarray], list[np.ndarray]]] = {}
         self.kind = "test"
+
+    def _check_recorded_hash(self, relative: str, path: Path) -> None:
+        if not self._verified:
+            return
+        expected = self._verified.get(relative)
+        if expected is None:
+            raise GuardError(f"Sealed file is not in the unblind record: {relative}")
+        if file_sha256(path) != expected:
+            raise GuardError(f"Sealed file hash does not match the unblind record: {relative}")
 
     def _sha(self, cell: str, name: str) -> str:
         named = self.references.get(str(cell), {})
@@ -329,6 +350,9 @@ class SealedNpzSource:
             raise GuardError(f"Sealed score path is a symlink: {path}")
         if not path.is_file():
             raise GuardError(f"Sealed score is missing: {path}")
+        from skeptic.score_artifacts import CELLS
+
+        self._check_recorded_hash(f"scores/{CELLS[cell]}/{sha}.npz", path)
         from skeptic.rules.common import TEST_N_IN
 
         with np.load(path, allow_pickle=False) as saved:
@@ -382,6 +406,7 @@ class SealedNpzSource:
         path = self.root / "plain_ece.json"
         if path.is_symlink() or not path.is_file():
             return None
+        self._check_recorded_hash("plain_ece.json", path)
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("decision_commit") != self.permit.commit \
                 or payload.get("decision_digest") != self.permit.digest:

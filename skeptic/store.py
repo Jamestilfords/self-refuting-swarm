@@ -25,6 +25,8 @@ DECISIONS_RELATIVE = Path("runs/decisions")
 MANIFEST_RELATIVE = Path("runs/decision_manifest.json")
 REGISTRATION_RELATIVE = Path("PREREGISTRATION.md")
 PUBLISHED_REPO = "Jamestilfords/self-refuting-swarm"
+# Eight registered rule variants across 200 orderings exceed the old 1 GiB cap.
+MAX_DECISION_DOWNLOAD_BYTES = 8 * 1024 * 1024 * 1024
 _HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 _HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 _SHA12 = re.compile(r"[0-9a-f]{12}\Z")
@@ -307,7 +309,7 @@ def verify_remote_freeze(commit: str, digest: str) -> UnsealPermit:
             for relative in sorted(expected):
                 data = _download(prefix + relative, 16 * 1024 * 1024)
                 total += len(data)
-                if total > 1024 * 1024 * 1024:
+                if total > MAX_DECISION_DOWNLOAD_BYTES:
                     raise GuardError("Published decision set exceeds the download limit")
                 path = repo / relative
                 path.parent.mkdir(parents=True, exist_ok=True)

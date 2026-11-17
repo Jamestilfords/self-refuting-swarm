@@ -215,6 +215,19 @@ def test_reference_baseline_is_authorized_and_not_a_candidate(decisions, monkeyp
         store.decision_digest(decisions)
 
 
+def test_remote_freeze_total_download_bound(decisions, monkeypatch):
+    from tests.test_seal import _publication
+
+    digest = store.write_decision_hash(decisions)
+    monkeypatch.setattr(store, "_download", _publication(decisions))
+    total = sum(path.stat().st_size for path in (decisions / "runs/decisions").rglob("*.jsonl"))
+    monkeypatch.setattr(store, "MAX_DECISION_DOWNLOAD_BYTES", total)
+    assert store.verify_remote_freeze(HEAD, digest) == store.UnsealPermit(digest, HEAD)
+    monkeypatch.setattr(store, "MAX_DECISION_DOWNLOAD_BYTES", total - 1)
+    with pytest.raises(store.GuardError, match="exceeds the download limit"):
+        store.verify_remote_freeze(HEAD, digest)
+
+
 def test_missing_ablation_or_extra_reference_cannot_freeze(decisions):
     variant = decisions / "runs/decisions/R2-noG3/ord_000.jsonl"
     variant.unlink()

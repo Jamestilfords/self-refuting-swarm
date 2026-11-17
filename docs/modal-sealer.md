@@ -6,7 +6,7 @@ recomputes the decision digest. It also checks that the proposal's content
 hash is in that cell's frozen proposal set. Only then can it read test arrays.
 Network failures, changed main, draft registration, corrupt logs or mismatched
 hashes fail closed. Verification uses the public GitHub API/raw file endpoints.
-Downloads are bounded (16 MiB per manifest/log, 1 GiB of logs total).
+Downloads are bounded (16 MiB per manifest/log, 8 GiB of logs total to accommodate all eight registered rule variants across 200 orderings).
 
 Proposal code executes in fresh network-blocked gVisor sandboxes without
 volumes or secrets. Each of five seeds is checked against a hidden subset.

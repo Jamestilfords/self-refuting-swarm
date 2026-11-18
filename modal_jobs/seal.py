@@ -25,13 +25,13 @@ from modal_jobs.sandbox import (CELL_JOB_TIMEOUT, MAX_SOURCE_BYTES, _score_in_sa
 from modal_jobs.train40 import RunSpec, plan_runs
 from skeptic import api
 from skeptic.sandbox import pack_input
-from skeptic.store import (GuardError, SealedStore, _manifest_paths, verify_published_freeze,
+from skeptic.store import (GuardError, SealedStore, UnsealPermit, _manifest_paths, verify_published_freeze,
                            verify_remote_proposal, verify_remote_proposals)
 
 REPO = Path(__file__).resolve().parents[1]
 seal_app = modal.App(f"{settings.app_name}-e4")
 MAX_BATCH_SIZE = 25
-MAX_CONCURRENT_BATCHES = 4
+MAX_CONCURRENT_BATCHES = 40
 FREEZE_VERIFICATION_ALLOWANCE = 30 * 60
 SEALED_CELL_TIMEOUT = CELL_JOB_TIMEOUT + FREEZE_VERIFICATION_ALLOWANCE
 SEALED_BATCH_TIMEOUT = MAX_BATCH_SIZE * CELL_JOB_TIMEOUT + FREEZE_VERIFICATION_ALLOWANCE
@@ -176,7 +176,8 @@ def _score_authorized(text, specs, store, commit, digest, worker_image_id):
 @seal_app.function(image=runner_image, volumes={SEALED_MOUNT: sealed_volume},
                    cpu=2, memory=8192, timeout=SEALED_BATCH_TIMEOUT,
                    max_containers=MAX_CONCURRENT_BATCHES)
-def score_sealed_batch(jobs: list[dict], commit: str, digest: str, worker_image_id: str) -> list[dict]:
+def score_sealed_batch(jobs: list[dict], commit: str, digest: str, worker_image_id: str,
+                       authorization=None) -> list[dict]:
     """Verify once per bounded chunk; return statuses, never test metrics or errors' text."""
     if not jobs or len(jobs) > MAX_BATCH_SIZE:
         raise ValueError("Invalid sealed batch size")
@@ -194,8 +195,12 @@ def score_sealed_batch(jobs: list[dict], commit: str, digest: str, worker_image_
         raise ValueError("Duplicate sealed job")
     sealed_volume.reload()
     store = SealedStore(SEALED_MOUNT, REPO)
-    store.unseal_remote(commit, digest)
-    verify_remote_proposals(commit, targets)
+    if authorization is None:
+        # Standalone calls retain independent remote verification.
+        store.unseal_remote(commit, digest)
+        verify_remote_proposals(commit, targets)
+    else:
+        _authorize_batch(store, authorization, commit, digest, targets)
     results = []
     for job, specs in zip(jobs, specs_by_job):
         try:
@@ -247,7 +252,23 @@ def plan_jobs(proposal: Path | None, dataset: str | None, backbone: str | None) 
     return jobs
 
 
-def _collect_batches(jobs, permit, worker_image_id, batch_size, report):
+def _authorize_batch(store, authorization, commit, digest, targets):
+    """Accept only the trusted coordinator's workspace-authenticated run receipt.
+
+    This object is never passed into proposal sandboxes. Like the sealed volume,
+    it is a capability held only by trusted Modal functions and the coordinator.
+    """
+    store._permit = None
+    receipt = authorization.get("freeze")
+    if not isinstance(receipt, dict) or receipt.get("commit") != commit or receipt.get("digest") != digest:
+        raise GuardError("Invalid run freeze authorization")
+    allowed = {tuple(item) for item in receipt.get("targets", [])}
+    if not set(targets).issubset(allowed):
+        raise GuardError("Proposal is not in the authorized decision set")
+    store._permit = UnsealPermit(digest, commit)
+
+
+def _collect_batches(jobs, permit, worker_image_id, batch_size, report, authorization=None):
     """Append status-only progress; remote sealed artifacts are the resume authority."""
     chunks = [jobs[i:i + batch_size] for i in range(0, len(jobs), batch_size)]
     counts = {"sealed": 0, "already_sealed": 0, "failed": 0}
@@ -256,7 +277,7 @@ def _collect_batches(jobs, permit, worker_image_id, batch_size, report):
         raise ValueError("Status report cannot be a symlink")
     with report.open("a", encoding="utf-8") as handle:
         results = iter(score_sealed_batch.starmap(
-            [(chunk, permit.commit, permit.digest, worker_image_id) for chunk in chunks],
+            [(chunk, permit.commit, permit.digest, worker_image_id, authorization) for chunk in chunks],
             order_outputs=True, return_exceptions=True))
         for chunk in chunks:
             try:
@@ -320,7 +341,13 @@ def main(argv: list[str] | None = None) -> int:
     with modal.enable_output():
         with seal_app.run(environment_name=settings.environment):
             if args.all:
-                counts = _collect_batches(jobs, permit, sandbox_image.object_id, args.batch_size, args.report)
+                # The complete published freeze was verified above, once. Workers
+                # read this ephemeral capability instead of downloading 4 GiB each.
+                with modal.Dict.ephemeral(environment_name=settings.environment) as authorization:
+                    authorization["freeze"] = {"commit": permit.commit, "digest": permit.digest,
+                                                "targets": [(j["cell"], j["sha"]) for j in jobs]}
+                    counts = _collect_batches(jobs, permit, sandbox_image.object_id, args.batch_size,
+                                              args.report, authorization)
                 return int(counts["failed"] > 0)
             job = jobs[0]
             result = score_sealed.remote(job["text"], job["dataset"], job["backbone"], job["arm"],

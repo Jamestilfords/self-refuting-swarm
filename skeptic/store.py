@@ -27,6 +27,9 @@ REGISTRATION_RELATIVE = Path("PREREGISTRATION.md")
 PUBLISHED_REPO = "Jamestilfords/self-refuting-swarm"
 # Eight registered rule variants across 200 orderings exceed the old 1 GiB cap.
 MAX_DECISION_DOWNLOAD_BYTES = 8 * 1024 * 1024 * 1024
+# Published, immutable Experiment 1 freeze; runner-only commits keep this identity.
+REGISTERED_FREEZES = {"938bd4cee792c9fcf9bc60c5e283b88c12cc31524df56aa054412d10843ba17d":
+                     "0a48160cadf6127b47569607c87f49a806aab11e"}
 _HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 _HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 _SHA12 = re.compile(r"[0-9a-f]{12}\Z")
@@ -282,7 +285,12 @@ def verify_published_freeze(repo_root: str | Path) -> UnsealPermit:
         committed = _git_bytes(repo, "show", f"{head}:{relative}")
         if committed != path.read_bytes():
             raise GuardError(f"Published freeze differs from local file: {relative}")
-    return UnsealPermit(digest, head)
+    anchor = REGISTERED_FREEZES.get(digest, head)
+    if anchor != head:
+        for relative in (HASH_RELATIVE, MANIFEST_RELATIVE, REGISTRATION_RELATIVE, DECISIONS_RELATIVE):
+            if _git(repo, "rev-parse", f"{head}:{relative}") != _git(repo, "rev-parse", f"{anchor}:{relative}"):
+                raise GuardError("Published freeze differs from its registered commit")
+    return UnsealPermit(digest, anchor)
 
 
 def verify_remote_freeze(commit: str, digest: str) -> UnsealPermit:
@@ -294,7 +302,8 @@ def verify_remote_freeze(commit: str, digest: str) -> UnsealPermit:
         branch = json.loads(_download(
             f"https://api.github.com/repos/{PUBLISHED_REPO}/git/ref/heads/main", 131072))
         if not isinstance(branch, dict) or not isinstance(branch.get("object"), dict) \
-                or branch["object"].get("sha") != commit:
+                or (branch["object"].get("sha") != commit
+                    and REGISTERED_FREEZES.get(digest) != commit):
             raise GuardError("Remote main does not match the freeze commit")
         prefix = f"https://raw.githubusercontent.com/{PUBLISHED_REPO}/{commit}/"
         with tempfile.TemporaryDirectory(prefix="skeptic_freeze_") as temp:

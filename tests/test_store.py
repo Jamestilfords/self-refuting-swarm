@@ -248,3 +248,31 @@ def test_cli_hash_and_verify_only_touch_freeze_files(decisions, capsys):
     assert len(digest) == 64
     assert store.main(["verify", "--repo", str(decisions)]) == 0
     assert capsys.readouterr().out.strip() == digest
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_registered_freeze_identity_survives_only_runner_changes(decisions, monkeypatch, changed):
+    digest = store.write_decision_hash(decisions)
+    anchor = "e" * 40
+    monkeypatch.setattr(store, "REGISTERED_FREEZES", {digest: anchor})
+    original = _published_git(decisions)
+    def git(repo, *args):
+        if args[0] == "rev-parse" and ":" in args[1]:
+            commit, relative = args[1].split(":", 1)
+            return ("different" if changed and commit == anchor and relative == "runs/decisions"
+                    else "same").encode()
+        return original(repo, *args)
+    monkeypatch.setattr(store, "_git_bytes", git)
+    if changed:
+        with pytest.raises(store.GuardError, match="registered commit"):
+            store.verify_published_freeze(decisions)
+    else:
+        assert store.verify_published_freeze(decisions) == store.UnsealPermit(digest, anchor)
+
+
+def test_registered_remote_freeze_remains_pinned_after_runner_update(decisions, monkeypatch):
+    from tests.test_seal import _publication
+    digest = store.write_decision_hash(decisions)
+    monkeypatch.setattr(store, "REGISTERED_FREEZES", {digest: HEAD})
+    monkeypatch.setattr(store, "_download", _publication(decisions, head="e" * 40))
+    assert store.verify_remote_freeze(HEAD, digest) == store.UnsealPermit(digest, HEAD)

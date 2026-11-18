@@ -148,6 +148,8 @@ def test_batch_denied_before_any_scoring(batch_repo, monkeypatch, failure):
 
 
 def _cli_fixture(monkeypatch, mapping):
+    receipt = {}
+    monkeypatch.setattr(seal.modal.Dict, "ephemeral", lambda **kw: nullcontext(receipt))
     monkeypatch.setattr(seal, "verify_published_freeze", lambda *a: store.UnsealPermit("a" * 64, HEAD))
     monkeypatch.setattr(seal, "seal_app", SimpleNamespace(run=lambda **kw: nullcontext()))
     monkeypatch.setattr(seal.modal, "enable_output", nullcontext)
@@ -160,8 +162,9 @@ def test_cli_chunks_reports_failures_and_retries_all_remote_jobs(batch_repo, mon
     def mapping(inputs, **kwargs):
         assert kwargs == {"order_outputs": True, "return_exceptions": True}
         calls.append(inputs)
-        for i, (jobs, commit, digest, image) in enumerate(inputs):
+        for i, (jobs, commit, digest, image, authorization) in enumerate(inputs):
             assert len(jobs) <= 3 and commit == HEAD and image == "im-test"
+            assert authorization["freeze"]["commit"] == commit
             if len(calls) == 1 and i == 1:
                 yield RuntimeError("PRIVATE REMOTE ERROR")
             else:
@@ -207,3 +210,33 @@ def test_cli_guard_failure_never_starts_modal_or_creates_report(batch_repo, monk
     with pytest.raises(store.GuardError):
         seal.main(["run", "--all"])
     assert not (batch_repo / "runs/seal").exists()
+
+
+def test_shared_authorization_rejects_mismatch_before_test_reads(tmp_path):
+    sealed = store.SealedStore(tmp_path, tmp_path)
+    target = ("clinc150/bert", "a" * 12)
+    receipt = {"freeze": {"commit": HEAD, "digest": "b" * 64, "targets": [target]}}
+    for commit, digest, targets in (("e" * 40, "b" * 64, [target]),
+                                    (HEAD, "c" * 64, [target]),
+                                    (HEAD, "b" * 64, [(target[0], "f" * 12)])):
+        with pytest.raises(store.GuardError):
+            seal._authorize_batch(sealed, receipt, commit, digest, targets)
+        with pytest.raises(store.GuardError):
+            sealed.guard_read("test")
+    seal._authorize_batch(sealed, receipt, HEAD, "b" * 64, [target])
+    sealed.guard_read("test")
+
+
+def test_authorized_batch_does_not_download_github(batch_repo, monkeypatch):
+    monkeypatch.setattr(seal, "sealed_volume", SimpleNamespace(reload=lambda: None))
+    monkeypatch.setattr(store, "_download", lambda *a: pytest.fail("batch downloaded GitHub"))
+    jobs = seal.plan_jobs(None, "banking77", "bert")
+    receipt = {"freeze": {"commit": HEAD, "digest": "a" * 64,
+                           "targets": [(j["cell"], j["sha"]) for j in jobs]}}
+    def score(text, specs, sealed, *args):
+        sealed.guard_read("test")
+        return {"sha": api.proposal_sha(text), "cell": "banking77_oos/bert", "status": "already_sealed"}
+    monkeypatch.setattr(seal, "_score_authorized", score)
+    with pytest.warns(UserWarning, match="executing locally"):
+        result = seal.score_sealed_batch.local(jobs, HEAD, "a" * 64, "im-test", receipt)
+    assert len(result) == len(jobs) and all(r["status"] == "already_sealed" for r in result)

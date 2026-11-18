@@ -1,10 +1,10 @@
 # Guarded Modal test scoring
 
-The trusted sealer verifies the published main commit, downloads the frozen
+Standalone trusted sealer calls verify the published freeze, download the frozen
 preregistration, manifest and decision logs from that exact commit, and
 recomputes the decision digest. It also checks that the proposal's content
 hash is in that cell's frozen proposal set. Only then can it read test arrays.
-Network failures, changed main, draft registration, corrupt logs or mismatched
+Network failures, changed frozen inputs, draft registration, corrupt logs or mismatched
 hashes fail closed. Verification uses the public GitHub API/raw file endpoints.
 Downloads are bounded (16 MiB per manifest/log, 8 GiB of logs total to accommodate all eight registered rule variants across 200 orderings).
 
@@ -93,19 +93,36 @@ uv run --frozen python -m modal_jobs.seal run --all
 ```
 
 The same filters and `--batch-size` work with `run`. The default and maximum
-chunk size is 25 proposal/cell jobs, with at most four batch containers running
-concurrently. Each container processes its chunk sequentially, verifies the
-full published freeze once, and checks every proposal's membership before
-reading any test arrays. Every proposal and seed still gets fresh isolated
+chunk size is 25 proposal/cell jobs, with at most 40 batch containers running
+concurrently. The trusted local coordinator verifies the entire clean published
+checkout once and creates an ephemeral, workspace-authenticated Modal Dict
+containing the freeze identity and authorized proposal/cell pairs. Each batch
+checks this receipt before reading test arrays; batches perform no GitHub downloads.
+The Dict is kept alive for the run and is never given to proposal sandboxes.
+Each container processes its chunk and seeds sequentially. Every proposal and seed still gets fresh isolated
 workers; batching does not share a proposal process. Each sandbox allows five
 minutes and its worker process allows 270 seconds. The registered 60-second
 `score(ctx)` validity limit is unchanged. A five-seed scoring budget is 55 minutes;
 the single-proposal sealer adds a 30-minute freeze-verification allowance (85
 minutes total). A full 25-job batch has a 23-hour 25-minute timeout, below Modal's
 24-hour function limit. These are worst-case budgets, not expected runtimes.
-GitHub proof downloads remain bounded and occur once per chunk, not
-once per proposal. Keep published main unchanged during the run: each new
-chunk must verify the same main commit.
+Standalone calls retain bounded GitHub proof downloads. Batch runs use the
+already-verified local checkout and one `git ls-remote` check, avoiding 79 full
+GitHub downloads (over 300 GiB). Keep the coordinator terminal open.
+
+The registered digest is pinned to freeze commit `0a48160cadf6127b47569607c87f49a806aab11e`.
+Runner-only updates retain that decision identity only if the published decision
+directory, manifest, hash and preregistration Git objects are identical to the
+anchor. Thus the existing smoke result returns `already_sealed`, without deletion,
+restamping or recomputation. Any changed digest, proposal hash or unrelated commit
+still fails the provenance check. The analysis/unblinding guard uses the same identity.
+
+At 40 batches with sequential seeds, up to 40 sandbox workers accompany 40
+trusted containers. Workspace quotas and other running apps can reduce actual
+concurrency. James's single-job timing suggests roughly 10 hours of scoring
+at this concurrency, before startup and stragglers; benchmark the first wave
+before promising a seven-hour completion. Five-seed parallelism is deliberately
+disabled because it would multiply sandbox concurrency and memory demand.
 
 Progress is printed after each chunk is collected, in submission order. A slow
 earlier chunk may delay progress messages while later chunks finish. Statuses

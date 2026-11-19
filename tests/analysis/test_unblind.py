@@ -191,6 +191,42 @@ def test_hash_sealed_rejects_bad_paths_and_matches_file_bytes(tmp_path, monkeypa
     assert mismatched == {"files": {}, "missing": [f"scores/clinc150_bert/{'e' * 12}.npz"]}
 
 
+def test_hash_sealed_files_accepts_a_symlinked_root(tmp_path):
+    from modal_jobs import unblind_remote
+
+    real = tmp_path / "volume"
+    real.mkdir()
+    mount = tmp_path / "sealed"
+    mount.symlink_to(real, target_is_directory=True)
+    _write_npz(mount, CELL, SHA)
+    (mount / "plain_ece.json").write_bytes(b"{}\n")
+    relative = f"scores/clinc150_bert/{SHA}.npz"
+    result = unblind_remote.hash_sealed_files(
+        mount, PERMIT.commit, PERMIT.digest, [relative, "plain_ece.json"],
+    )
+    assert result["missing"] == []
+    assert result["files"][relative] == file_sha256(real / relative)
+
+
+def test_hash_sealed_files_rejects_a_link_below_the_root(tmp_path):
+    from modal_jobs import unblind_remote
+    from skeptic.store import GuardError as StoreGuardError
+
+    real = tmp_path / "volume"
+    real.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    linked = real / "scores" / "clinc150_bert"
+    linked.parent.mkdir(parents=True)
+    linked.symlink_to(outside, target_is_directory=True)
+    sha = "c" * 12
+    _write_npz(real, CELL, sha)
+    with pytest.raises(StoreGuardError, match="symlink"):
+        unblind_remote.hash_sealed_files(
+            real, PERMIT.commit, PERMIT.digest, [f"scores/clinc150_bert/{sha}.npz"],
+        )
+
+
 def _hash_mount(monkeypatch, root: Path):
     from types import SimpleNamespace
 

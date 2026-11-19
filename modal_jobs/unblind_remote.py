@@ -53,6 +53,7 @@ def _provenance_matches(path: Path, commit: str, digest: str) -> bool:
 
 def hash_sealed_files(root: Path, commit: str, digest: str, expected: list[str]) -> dict:
     """sha256 of each expected file under ``root``. Provenance mismatches are missing."""
+    root = Path(root).resolve(strict=True)
     files: dict[str, str] = {}
     missing: list[str] = []
     for relative in expected:

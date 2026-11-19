@@ -20,6 +20,7 @@ import modal
 import numpy as np
 
 from modal_jobs.app import sealed_volume, settings
+from modal_jobs.authorization import accept_freeze_receipt, freeze_receipt
 from modal_jobs.config import SEALED_MOUNT
 from modal_jobs.sandbox import runner_image
 
@@ -85,7 +86,7 @@ def _existing_plain_ece(root: Path, commit: str, digest: str) -> str | None:
 
 @ece_app.function(image=ece_image, volumes={SEALED_MOUNT: sealed_volume},
                  cpu=2, memory=8192, timeout=1800)
-def compute_plain_ece(commit: str, digest: str) -> dict:
+def compute_plain_ece(commit: str, digest: str, authorization=None) -> dict:
     """Write /sealed/plain_ece.json. Returns only status and counts."""
     from skeptic.rules.common import TEST_N_IN
     from skeptic.score_artifacts import CELLS
@@ -94,7 +95,11 @@ def compute_plain_ece(commit: str, digest: str) -> dict:
     sealed_volume.reload()
     root = Path(SEALED_MOUNT)
     store = SealedStore(root, REPO)
-    store.unseal_remote(commit, digest)
+    if authorization is None:
+        store.unseal_remote(commit, digest)  # standalone: full remote check
+    else:
+        store._permit = None
+        store._permit = accept_freeze_receipt(authorization, commit, digest, "plain_ece")
     present = _existing_plain_ece(root, commit, digest)
     if present:
         return {"status": present}
@@ -144,7 +149,9 @@ def main(argv=None) -> int:
     try:
         with modal.enable_output():
             with ece_app.run(environment_name=settings.environment):
-                result = compute_plain_ece.remote(permit.commit, permit.digest)
+                with modal.Dict.ephemeral(environment_name=settings.environment) as authorization:
+                    authorization["freeze"] = freeze_receipt(permit, "plain_ece")
+                    result = compute_plain_ece.remote(permit.commit, permit.digest, authorization)
     except GuardError as exc:
         print(json.dumps({"status": "failed", "error": str(exc)}))
         return 1

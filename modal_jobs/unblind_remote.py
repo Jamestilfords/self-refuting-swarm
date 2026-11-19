@@ -9,6 +9,7 @@ import modal
 import numpy as np
 
 from modal_jobs.app import sealed_volume, settings
+from modal_jobs.authorization import accept_freeze_receipt
 from modal_jobs.config import SEALED_MOUNT
 from modal_jobs.sandbox import runner_image
 from skeptic.analysis.sources import file_sha256
@@ -71,8 +72,11 @@ def hash_sealed_files(root: Path, commit: str, digest: str, expected: list[str])
 @unblind_app.function(image=runner_image,
                       volumes={SEALED_MOUNT: sealed_volume.with_mount_options(read_only=True)},
                       cpu=2, memory=4096, timeout=1800)
-def hash_sealed(commit: str, digest: str, expected: list[str]) -> dict:
+def hash_sealed(commit: str, digest: str, expected: list[str], authorization=None) -> dict:
     """sha256 of each expected file under /sealed. Returns {"files": {rel: hex}, "missing": [rel]}."""
     sealed_volume.reload()
-    verify_remote_freeze(commit, digest)
+    if authorization is None:
+        verify_remote_freeze(commit, digest)  # standalone: full remote check
+    else:
+        accept_freeze_receipt(authorization, commit, digest, "unblind")
     return hash_sealed_files(Path(SEALED_MOUNT), commit, digest, expected)

@@ -14,7 +14,7 @@ from pathlib import Path
 
 from skeptic.rules.common import REGISTERED_CANDIDATES_PER_CELL, REFERENCE_BASELINES
 from skeptic.score_artifacts import CELLS
-from skeptic.store import MANIFEST_RELATIVE, GuardError, verify_published_freeze
+from skeptic.store import MANIFEST_RELATIVE, GuardError, UnsealPermit, verify_published_freeze
 
 
 def expected_files(manifest: dict) -> dict[str, list[str]]:
@@ -80,6 +80,7 @@ def main(argv=None) -> int:
     import modal
 
     from modal_jobs.app import settings
+    from modal_jobs.authorization import freeze_receipt
     from modal_jobs.unblind_remote import hash_sealed, unblind_app
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -89,9 +90,12 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     def hasher(commit: str, digest: str, expected: list[str]) -> dict:
+        permit = UnsealPermit(digest, commit)  # values from open_sealed's local check
         with modal.enable_output():
             with unblind_app.run(environment_name=settings.environment):
-                return hash_sealed.remote(commit, digest, expected)
+                with modal.Dict.ephemeral(environment_name=settings.environment) as authorization:
+                    authorization["freeze"] = freeze_receipt(permit, "unblind")
+                    return hash_sealed.remote(commit, digest, expected, authorization)
 
     try:
         record = open_sealed(args.repo, hasher=hasher, require_registered=not args.allow_partial)

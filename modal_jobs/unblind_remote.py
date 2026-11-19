@@ -32,10 +32,10 @@ def _require_expected_path(relative: str) -> None:
 def _inside_root(root: Path, path: Path) -> bool:
     current = path
     while True:
-        if current.is_symlink():
-            raise GuardError("Sealed path is a symlink")
         if current == root:
             return True
+        if current.is_symlink():
+            raise GuardError("Sealed path is a symlink")
         if root not in current.parents:
             return False
         current = current.parent
@@ -53,6 +53,11 @@ def _provenance_matches(path: Path, commit: str, digest: str) -> bool:
 
 def hash_sealed_files(root: Path, commit: str, digest: str, expected: list[str]) -> dict:
     """sha256 of each expected file under ``root``. Provenance mismatches are missing."""
+    # Modal can expose a read-only mount as a symlink. Resolve the root once,
+    # then refuse any symlink below it.
+    root = Path(root).resolve(strict=True)
+    if not root.is_dir():
+        raise GuardError("Sealed root is not a directory")
     files: dict[str, str] = {}
     missing: list[str] = []
     for relative in expected:

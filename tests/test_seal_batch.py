@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from modal_jobs import seal
+from modal_jobs.authorization import freeze_receipt
 from skeptic import api, store
 from skeptic.rules.common import FROZEN_RULES, REFERENCE_BASELINES
 from skeptic.streams.canaries import CANARIES
@@ -215,7 +216,7 @@ def test_cli_guard_failure_never_starts_modal_or_creates_report(batch_repo, monk
 def test_shared_authorization_rejects_mismatch_before_test_reads(tmp_path):
     sealed = store.SealedStore(tmp_path, tmp_path)
     target = ("clinc150/bert", "a" * 12)
-    receipt = {"freeze": {"commit": HEAD, "digest": "b" * 64, "targets": [target]}}
+    receipt = {"freeze": freeze_receipt(store.UnsealPermit("b" * 64, HEAD), "seal", targets=[target])}
     for commit, digest, targets in (("e" * 40, "b" * 64, [target]),
                                     (HEAD, "c" * 64, [target]),
                                     (HEAD, "b" * 64, [(target[0], "f" * 12)])):
@@ -231,8 +232,9 @@ def test_authorized_batch_does_not_download_github(batch_repo, monkeypatch):
     monkeypatch.setattr(seal, "sealed_volume", SimpleNamespace(reload=lambda: None))
     monkeypatch.setattr(store, "_download", lambda *a: pytest.fail("batch downloaded GitHub"))
     jobs = seal.plan_jobs(None, "banking77", "bert")
-    receipt = {"freeze": {"commit": HEAD, "digest": "a" * 64,
-                           "targets": [(j["cell"], j["sha"]) for j in jobs]}}
+    receipt = {"freeze": freeze_receipt(
+        store.UnsealPermit("a" * 64, HEAD), "seal",
+        targets=[(j["cell"], j["sha"]) for j in jobs])}
     def score(text, specs, sealed, *args):
         sealed.guard_read("test")
         return {"sha": api.proposal_sha(text), "cell": "banking77_oos/bert", "status": "already_sealed"}

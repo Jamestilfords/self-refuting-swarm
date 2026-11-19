@@ -191,6 +191,69 @@ def test_hash_sealed_rejects_bad_paths_and_matches_file_bytes(tmp_path, monkeypa
     assert mismatched == {"files": {}, "missing": [f"scores/clinc150_bert/{'e' * 12}.npz"]}
 
 
+def _hash_mount(monkeypatch, root: Path):
+    from types import SimpleNamespace
+
+    from modal_jobs import unblind_remote
+
+    monkeypatch.setattr(unblind_remote, "SEALED_MOUNT", str(root))
+    monkeypatch.setattr(unblind_remote, "sealed_volume", SimpleNamespace(reload=lambda: None))
+    return unblind_remote
+
+
+def test_authorized_hash_sealed_never_downloads(tmp_path, monkeypatch):
+    from modal_jobs.authorization import freeze_receipt
+
+    unblind_remote = _hash_mount(monkeypatch, tmp_path)
+    _write_npz(tmp_path, CELL, SHA)
+    (tmp_path / "plain_ece.json").write_bytes(b"{}\n")
+    relative = f"scores/clinc150_bert/{SHA}.npz"
+    expected = [relative, "plain_ece.json"]
+    monkeypatch.setattr(unblind_remote, "verify_remote_freeze", lambda *_args, **_kwargs: pytest.fail("remote"))
+    monkeypatch.setattr("skeptic.store._download", lambda *_args, **_kwargs: pytest.fail("download"))
+    authorization = {"freeze": freeze_receipt(PERMIT, "unblind")}
+    with pytest.warns(UserWarning, match="executing locally"):
+        result = unblind_remote.hash_sealed.local(PERMIT.commit, PERMIT.digest, expected, authorization)
+    assert result == unblind_remote.hash_sealed_files(tmp_path, PERMIT.commit, PERMIT.digest, expected)
+
+
+@pytest.mark.parametrize("purpose,commit,digest", [
+    ("unblind", "c" * 40, PERMIT.digest),
+    ("unblind", PERMIT.commit, "d" * 64),
+    ("plain_ece", PERMIT.commit, PERMIT.digest),
+])
+def test_wrong_unblind_receipt_refuses_before_any_file_is_opened(tmp_path, monkeypatch, purpose, commit, digest):
+    from modal_jobs.authorization import freeze_receipt
+    from skeptic.store import GuardError as StoreGuardError
+
+    unblind_remote = _hash_mount(monkeypatch, tmp_path)
+    _write_npz(tmp_path, CELL, SHA)
+    monkeypatch.setattr(unblind_remote, "hash_sealed_files", lambda *_args, **_kwargs: pytest.fail("opened"))
+    authorization = {"freeze": freeze_receipt(UnsealPermit(digest, commit), purpose)}
+    with pytest.warns(UserWarning, match="executing locally"):
+        with pytest.raises(StoreGuardError, match="Invalid run freeze authorization"):
+            unblind_remote.hash_sealed.local(
+                PERMIT.commit, PERMIT.digest, [f"scores/clinc150_bert/{SHA}.npz"], authorization,
+            )
+
+
+def test_standalone_hash_sealed_keeps_the_full_check(tmp_path, monkeypatch):
+    unblind_remote = _hash_mount(monkeypatch, tmp_path)
+    _write_npz(tmp_path, CELL, SHA)
+    (tmp_path / "plain_ece.json").write_bytes(b"{}\n")
+    calls = []
+
+    def verify(commit, digest):
+        calls.append((commit, digest))
+        return UnsealPermit(digest, commit)
+
+    monkeypatch.setattr(unblind_remote, "verify_remote_freeze", verify)
+    expected = [f"scores/clinc150_bert/{SHA}.npz", "plain_ece.json"]
+    with pytest.warns(UserWarning, match="executing locally"):
+        unblind_remote.hash_sealed.local(PERMIT.commit, PERMIT.digest, expected, None)
+    assert calls == [(PERMIT.commit, PERMIT.digest)]
+
+
 def _archive(tmp_path: Path) -> tuple[Path, dict]:
     sealed = tmp_path / "sealed"
     path = _write_npz(sealed, CELL, SHA)

@@ -19,13 +19,14 @@ import modal
 import numpy as np
 
 from modal_jobs.app import sealed_volume, settings
+from modal_jobs.authorization import accept_freeze_receipt, freeze_receipt
 from modal_jobs.config import SEALED_MOUNT
 from modal_jobs.sandbox import (CELL_JOB_TIMEOUT, MAX_SOURCE_BYTES, _score_in_sandbox, _spec,
                                 runner_image, sandbox_image)
 from modal_jobs.train40 import RunSpec, plan_runs
 from skeptic import api
 from skeptic.sandbox import pack_input
-from skeptic.store import (GuardError, SealedStore, UnsealPermit, _manifest_paths, verify_published_freeze,
+from skeptic.store import (GuardError, SealedStore, _manifest_paths, verify_published_freeze,
                            verify_remote_proposal, verify_remote_proposals)
 
 REPO = Path(__file__).resolve().parents[1]
@@ -259,13 +260,11 @@ def _authorize_batch(store, authorization, commit, digest, targets):
     it is a capability held only by trusted Modal functions and the coordinator.
     """
     store._permit = None
-    receipt = authorization.get("freeze")
-    if not isinstance(receipt, dict) or receipt.get("commit") != commit or receipt.get("digest") != digest:
-        raise GuardError("Invalid run freeze authorization")
-    allowed = {tuple(item) for item in receipt.get("targets", [])}
+    permit = accept_freeze_receipt(authorization, commit, digest, "seal")
+    allowed = {tuple(item) for item in authorization["freeze"].get("targets", [])}
     if not set(targets).issubset(allowed):
         raise GuardError("Proposal is not in the authorized decision set")
-    store._permit = UnsealPermit(digest, commit)
+    store._permit = permit
 
 
 def _collect_batches(jobs, permit, worker_image_id, batch_size, report, authorization=None):
@@ -344,8 +343,8 @@ def main(argv: list[str] | None = None) -> int:
                 # The complete published freeze was verified above, once. Workers
                 # read this ephemeral capability instead of downloading 4 GiB each.
                 with modal.Dict.ephemeral(environment_name=settings.environment) as authorization:
-                    authorization["freeze"] = {"commit": permit.commit, "digest": permit.digest,
-                                                "targets": [(j["cell"], j["sha"]) for j in jobs]}
+                    authorization["freeze"] = freeze_receipt(
+                        permit, "seal", targets=[(j["cell"], j["sha"]) for j in jobs])
                     counts = _collect_batches(jobs, permit, sandbox_image.object_id, args.batch_size,
                                               args.report, authorization)
                 return int(counts["failed"] > 0)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -10,6 +11,7 @@ import numpy as np
 import pytest
 
 from modal_jobs import plain_ece
+from modal_jobs.authorization import freeze_receipt
 from skeptic.rules.common import TEST_N_IN
 from skeptic.score_artifacts import CELLS
 from skeptic.store import GuardError, SealedStore, UnsealPermit
@@ -161,6 +163,98 @@ def test_main_verifies_the_freeze_before_modal(monkeypatch):
 
     monkeypatch.setattr("skeptic.store.verify_published_freeze", verified)
     monkeypatch.setattr(plain_ece.ece_app, "run", lambda **_kwargs: Boom())
+    monkeypatch.setattr(plain_ece.modal.Dict, "ephemeral", lambda **_kwargs: pytest.fail("Dict"))
     with pytest.raises(RuntimeError, match="no modal"):
         plain_ece.main(["--repo", "."])
     assert order == ["verify", "verify", "modal"]
+
+
+def _receipt(purpose="plain_ece", commit=PERMIT.commit, digest=PERMIT.digest):
+    return {"freeze": freeze_receipt(UnsealPermit(digest, commit), purpose)}
+
+
+def test_authorized_plain_ece_never_downloads(tmp_path, monkeypatch):
+    _mount(monkeypatch, tmp_path)
+    for cell in TEST_N_IN:
+        monkeypatch.setitem(TEST_N_IN, cell, 4)
+    _cache(tmp_path, 4)
+    monkeypatch.setattr("skeptic.store._download", lambda *_args, **_kwargs: pytest.fail("download"))
+    monkeypatch.setattr(SealedStore, "unseal_remote", lambda *_args, **_kwargs: pytest.fail("unseal"))
+    with pytest.warns(UserWarning, match="executing locally"):
+        result = plain_ece.compute_plain_ece.local(PERMIT.commit, PERMIT.digest, _receipt())
+    assert result == {"status": "written", "cells": 4, "values": 40}
+    assert (tmp_path / "plain_ece.json").is_file()
+
+
+@pytest.mark.parametrize("authorization", [
+    _receipt(commit="c" * 40),
+    _receipt(digest="d" * 64),
+    _receipt(purpose="unblind"),
+])
+def test_wrong_plain_ece_receipt_refuses_before_any_read(tmp_path, monkeypatch, authorization):
+    _mount(monkeypatch, tmp_path)
+    monkeypatch.setattr(SealedStore, "read_array", lambda *_args, **_kwargs: pytest.fail("read"))
+    with pytest.warns(UserWarning, match="executing locally"):
+        with pytest.raises(GuardError, match="Invalid run freeze authorization"):
+            plain_ece.compute_plain_ece.local(PERMIT.commit, PERMIT.digest, authorization)
+
+
+def test_standalone_plain_ece_keeps_the_full_check(tmp_path, monkeypatch):
+    events = _mount(monkeypatch, tmp_path)
+    for cell in TEST_N_IN:
+        monkeypatch.setitem(TEST_N_IN, cell, 4)
+    _cache(tmp_path, 4)
+    with pytest.warns(UserWarning, match="executing locally"):
+        result = plain_ece.compute_plain_ece.local(PERMIT.commit, PERMIT.digest, None)
+    assert events.count("unseal") == 1
+    assert result == {"status": "written", "cells": 4, "values": 40}
+
+
+def test_main_issues_a_receipt_only_after_the_local_check(monkeypatch):
+    def denied(_repo):
+        raise GuardError("no freeze")
+
+    monkeypatch.setattr("skeptic.store.verify_published_freeze", denied)
+    monkeypatch.setattr(plain_ece.modal.Dict, "ephemeral", lambda **_kwargs: pytest.fail("Dict"))
+    monkeypatch.setattr(plain_ece.ece_app, "run", lambda **_kwargs: pytest.fail("Modal"))
+    assert plain_ece.main(["--repo", "."]) == 1
+
+    seen = {}
+
+    def verified(_repo):
+        return PERMIT
+
+    class Entered:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+    def ephemeral(**_kwargs):
+        box = {}
+
+        class DictCtx:
+            def __enter__(self):
+                return box
+
+            def __exit__(self, *_args):
+                return False
+
+        return DictCtx()
+
+    def remote(commit, digest, authorization):
+        seen["remote"] = (commit, digest, dict(authorization["freeze"]))
+        return {"status": "written", "cells": 4, "values": 40}
+
+    monkeypatch.setattr("skeptic.store.verify_published_freeze", verified)
+    monkeypatch.setattr(plain_ece.ece_app, "run", lambda **_kwargs: Entered())
+    monkeypatch.setattr(plain_ece.modal.Dict, "ephemeral", ephemeral)
+    monkeypatch.setattr(plain_ece.compute_plain_ece, "remote", remote)
+    monkeypatch.setattr(plain_ece.modal, "enable_output", nullcontext)
+    assert plain_ece.main(["--repo", "."]) == 0
+    assert seen["remote"][0] == PERMIT.commit
+    assert seen["remote"][1] == PERMIT.digest
+    assert seen["remote"][2] == {
+        "commit": PERMIT.commit, "digest": PERMIT.digest, "purpose": "plain_ece",
+    }

@@ -16,10 +16,12 @@ from pathlib import Path
 import pandas as pd
 
 from skeptic.analysis.config import DEFAULT, AnalysisConfig
-from skeptic.rules.common import REGISTERED_SCORE_SHAS
+from skeptic.rules.common import REFERENCE_BASELINES, REGISTERED_SCORE_SHAS
 
 _ORD = re.compile(r"ord_(\d+)$")
 _REFERENCE = "energy_ce"
+_REFERENCE_NAMES = {sha: name for name, sha in REFERENCE_BASELINES.items()}
+_BINARY_VERDICTS = {"ACCEPT": True, "REJECT": False}
 
 
 def canary_mask(frame: pd.DataFrame) -> pd.Series:
@@ -125,13 +127,21 @@ def _cell_from_path(root: Path, rule: str, path: Path) -> str | None:
 
 
 def _coerce_accepted(rule: str, row: dict) -> bool:
+    verdict = row.get("verdict")
     if "accepted" in row and row["accepted"] is not None:
-        return bool(row["accepted"])
+        accepted = bool(row["accepted"])
+        if verdict in _BINARY_VERDICTS and _BINARY_VERDICTS[verdict] != accepted:
+            raise ValueError(
+                f"{rule} decision for sha={row.get('sha')} has accepted {accepted} "
+                f"and verdict {verdict}"
+            )
+        return accepted
     if str(rule).startswith("R2"):
-        return row.get("verdict") == "ACCEPT"
+        return verdict == "ACCEPT"
+    if verdict in _BINARY_VERDICTS:
+        return _BINARY_VERDICTS[verdict]
     raise ValueError(
-        f"{rule} decision for sha={row.get('sha')} has no accepted flag; "
-        "R0 and R1 rows must include accepted (E5)"
+        f"{rule} decision for sha={row.get('sha')} has neither accepted nor an ACCEPT/REJECT verdict"
     )
 
 
@@ -153,7 +163,7 @@ def load_decisions(
         rule = config.canonical_rule(directory_name)
         path_cell = _cell_from_path(directory, directory_name, path)
         for raw in _parse_payload(path):
-            row = dict(raw)
+            row = {key: value for key, value in raw.items() if key != "detail"}
             if "sha" not in row or "idx" not in row or "incumbent" not in row:
                 raise ValueError(f"{path} is missing sha, idx, or incumbent")
             cell = str(row["cell"]) if row.get("cell") is not None else path_cell
@@ -171,7 +181,9 @@ def load_decisions(
             row["cell"] = cell
             row["sha"] = str(row["sha"])
             row["idx"] = int(row["idx"])
-            row["incumbent"] = str(row["incumbent"])
+            row["incumbent"] = _REFERENCE_NAMES.get(str(row["incumbent"]), str(row["incumbent"]))
+            if row.get("comparator") is not None:
+                row["comparator"] = _REFERENCE_NAMES.get(str(row["comparator"]), str(row["comparator"]))
             row["accepted"] = _coerce_accepted(rule, raw)
             rows.append(row)
     frame = pd.DataFrame(rows)

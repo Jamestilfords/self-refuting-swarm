@@ -370,6 +370,8 @@ Activation-Monitoring repository has been added by this scaffold.
 
 2026-11-19: `make report` computes test truth in parallel and caches each pair under `runs/truth/`. Pairs, seeds, B and every table are unchanged; equivalence is tested with 1 vs 2 workers.
 
+2026-11-20. The decision loader reads acceptance from `verdict` for R0 and R1 rows, maps the CE-energy hash `b1e4ba2e46d5` to `energy_ce`, and ignores the per-gate `detail` field. The published decision files are unchanged. These changes make the published format readable; they do not change any registered definition.
+
 The filled draft records these choices. They freeze only when that file is registered:
 
 - **D1.** Recall's numerator is the accepted proposals that sit in S_cell, the set of real improvements over CE energy. The numerator and the denominator use that same set, so recall cannot exceed 1.

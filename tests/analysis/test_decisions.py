@@ -67,14 +67,73 @@ def test_broken_incumbent_chain(tmp_path):
         load_decisions(tmp_path / "decisions", ledger=_ledger(["a", "b"]))
 
 
-def test_r0_without_accepted_raises(tmp_path):
-    rows = _rows("R0", 0, ["a"], set())
-    del rows[0]["accepted"]
-    folder = tmp_path / "decisions" / "R0"
-    folder.mkdir(parents=True)
-    (folder / "ord_000.jsonl").write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="accepted"):
+def _write_log(tmp_path, rule: str, rows: list[dict]) -> None:
+    folder = tmp_path / "decisions" / rule
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "ord_000.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8",
+    )
+
+
+def test_r0_and_r1_read_accepted_from_verdict(tmp_path):
+    body = [
+        {"sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "energy_ce", "verdict": "ACCEPT"},
+        {"sha": "b", "cell": "clinc150/bert", "idx": 1, "incumbent": "a", "verdict": "REJECT"},
+    ]
+    for rule in ("R0", "R1"):
+        _write_log(tmp_path, rule, [{**row, "rule": rule, "ordering": 0} for row in body])
+    loaded = load_decisions(tmp_path / "decisions", ledger=_ledger(["a", "b"]))
+    flags = {
+        (row.rule, row.sha): bool(row.accepted)
+        for row in loaded.itertuples(index=False)
+    }
+    assert flags == {("R0", "a"): True, ("R0", "b"): False, ("R1", "a"): True, ("R1", "b"): False}
+
+
+def test_binary_rule_with_unknown_verdict_raises(tmp_path):
+    unknown = {"sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "energy_ce", "verdict": "NO EFFECT"}
+    _write_log(tmp_path, "R0", [unknown])
+    with pytest.raises(ValueError, match="ACCEPT/REJECT"):
         load_decisions(tmp_path / "decisions", ledger=_ledger(["a"]))
+    missing = {"sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "energy_ce"}
+    _write_log(tmp_path, "R0", [missing])
+    with pytest.raises(ValueError, match="ACCEPT/REJECT"):
+        load_decisions(tmp_path / "decisions", ledger=_ledger(["a"]))
+
+
+def test_accepted_and_verdict_must_agree(tmp_path):
+    row = {
+        "sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "energy_ce",
+        "accepted": True, "verdict": "REJECT",
+    }
+    _write_log(tmp_path, "R0", [row])
+    with pytest.raises(ValueError, match="verdict"):
+        load_decisions(tmp_path / "decisions", ledger=_ledger(["a"]))
+
+
+def test_chain_starting_from_reference_hash(tmp_path):
+    rows = [
+        {"sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "b1e4ba2e46d5",
+         "comparator": "b1e4ba2e46d5", "verdict": "ACCEPT"},
+        {"sha": "b", "cell": "clinc150/bert", "idx": 1, "incumbent": "a",
+         "comparator": "a", "verdict": "ACCEPT"},
+    ]
+    _write_log(tmp_path, "R0", rows)
+    loaded = load_decisions(tmp_path / "decisions", ledger=_ledger(["a", "b"]))
+    assert loaded.loc[0, "incumbent"] == "energy_ce"
+    assert loaded.loc[0, "comparator"] == "energy_ce"
+    assert list(loaded["accepted"]) == [True, True]
+
+
+def test_detail_is_dropped(tmp_path):
+    row = {
+        "sha": "a", "cell": "clinc150/bert", "idx": 0, "incumbent": "energy_ce",
+        "verdict": "ACCEPT", "detail": {"G1": [0.1, 0.2]}, "gates": ["G1"],
+    }
+    _write_log(tmp_path, "R2", [row])
+    loaded = load_decisions(tmp_path / "decisions", ledger=_ledger(["a"]))
+    assert "detail" not in loaded.columns
+    assert loaded.loc[0, "gates"] == ["G1"]
 
 
 def test_r2_derives_accepted_from_verdict(tmp_path):

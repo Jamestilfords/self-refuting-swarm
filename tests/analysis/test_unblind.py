@@ -442,6 +442,49 @@ def test_report_one_and_two_workers_write_the_same_tables(tmp_path):
     assert _published_tables(serial) == _published_tables(parallel)
 
 
+def test_report_reads_published_decision_format(tmp_path):
+    from skeptic.analysis.decisions import load_decisions
+
+    stream, decisions, config = _report_inputs(tmp_path)
+    energy = "b1e4ba2e46d5"
+    for (rule, ordering), group in decisions.groupby(["rule", "ordering"], sort=True):
+        folder = tmp_path / "decisions" / str(rule)
+        folder.mkdir(parents=True, exist_ok=True)
+        lines = []
+        for record in group.sort_values("idx").to_dict(orient="records"):
+            record.pop("accepted", None)
+            for key in ("incumbent", "comparator"):
+                if record.get(key) == "energy_ce":
+                    record[key] = energy
+            record["detail"] = {"G1": [1, 2, 3]}
+            lines.append(json.dumps(record))
+        (folder / f"ord_{int(ordering):03d}.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    loaded = load_decisions(tmp_path / "decisions", ledger=stream.ledger)
+    assert "detail" not in loaded.columns
+    original = decisions.sort_values(["rule", "ordering", "idx"])
+    loaded = loaded.sort_values(["rule", "ordering", "idx"])
+    assert [
+        (str(row.rule), int(row.ordering), str(row.sha), bool(row.accepted), str(row.incumbent))
+        for row in loaded.itertuples(index=False)
+    ] == [
+        (str(row.rule), int(row.ordering), str(row.sha), bool(row.accepted), str(row.incumbent))
+        for row in original.itertuples(index=False)
+    ]
+    common = dict(
+        ledger=stream.ledger, test_source=stream.test, val_source=stream.val,
+        config=config, decisions_sha256="a" * 64, workers=1,
+    )
+    direct = tmp_path / "direct"
+    published = tmp_path / "published"
+    build_report(
+        tmp_path, decisions=decisions, out_dir=direct, cache_dir=tmp_path / "cache-direct", **common,
+    )
+    build_report(
+        tmp_path, decisions=loaded, out_dir=published, cache_dir=tmp_path / "cache-published", **common,
+    )
+    assert _published_tables(direct) == _published_tables(published)
+
+
 def test_report_resumes_from_cached_pairs(tmp_path, monkeypatch):
     import skeptic.analysis.truth as truth
 

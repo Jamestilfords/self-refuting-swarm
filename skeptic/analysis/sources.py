@@ -303,8 +303,10 @@ class SealedNpzSource:
         self.permit = permit
         self.references = {str(cell): {str(name): str(sha) for name, sha in mapping.items()}
                            for cell, mapping in references.items()}
-        self._arms = {((str(cell), str(name)) if isinstance(key, tuple) else key): value
-                      for key, value in (arms or {}).items()}
+        self._arms = {
+            (str(key[0]), str(key[1])) if isinstance(key, tuple) else key: value
+            for key, value in (arms or {}).items()
+        }
         self._verified = {str(key): str(value) for key, value in (verified or {}).items()}
         self.guard_log = self.root / "guard.log"
         self._memo: dict[tuple[str, str], tuple[list[np.ndarray], list[np.ndarray]]] = {}

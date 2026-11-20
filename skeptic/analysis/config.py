@@ -79,6 +79,21 @@ class AnalysisConfig:
     ratchet_rule: str = "R0"
     critic_rule: str = "R2"
 
+    def __getstate__(self) -> dict:
+        state = {field.name: getattr(self, field.name) for field in dataclasses.fields(self)}
+        names = state.get("rule_names")
+        if isinstance(names, Mapping):
+            state["rule_names"] = dict(names)
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        names = state.get("rule_names")
+        if isinstance(names, Mapping) and not isinstance(names, MappingProxyType):
+            state = dict(state)
+            state["rule_names"] = MappingProxyType(dict(names))
+        for key, value in state.items():
+            object.__setattr__(self, key, value)
+
     def digest(self) -> str:
         payload = {
             field.name: _plain(getattr(self, field.name))

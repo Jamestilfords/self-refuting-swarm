@@ -3,6 +3,7 @@
 UV ?= uv
 PIPELINE_TARGETS := smoke exp2 testbed-b
 SEALED_ROOT ?= sealed
+WORKERS ?= 0
 
 .PHONY: help bootstrap setup setup-check test train40 sanity e3-plan e3-canaries seal-hash seal-check exp1 exp1-plan unblind fetch-sealed report reproduce agents-bootstrap agents-plan agents-check agents-test stream dashboard dashboard-test $(PIPELINE_TARGETS)
 
@@ -35,6 +36,7 @@ help:
 	  'fetch-sealed  Download sealed scores into ./sealed after unblind' \
 	  'report     Write Experiment 1 tables from runs/unblind.json (E6)' \
 	  'reproduce  Same as report; no training and no new scoring' \
+	  'WORKERS=N  Parallel truth workers for report and reproduce (0 uses every core)' \
 	  'testbed-b  Probe-deferral stretch testbed (R4, E6)'
 
 bootstrap:
@@ -106,7 +108,7 @@ fetch-sealed:
 	modal volume get --env $${MODAL_ENVIRONMENT:-main} skeptic-sealed plain_ece.json $(SEALED_ROOT)/
 
 report reproduce:
-	PYTHONPATH=third_party/er1/src $(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT)
+	PYTHONPATH=third_party/er1/src $(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT) --workers $(WORKERS)
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

@@ -106,7 +106,7 @@ fetch-sealed:
 	modal volume get --env $${MODAL_ENVIRONMENT:-main} skeptic-sealed plain_ece.json $(SEALED_ROOT)/
 
 report reproduce:
-	$(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT)
+	PYTHONPATH=third_party/er1/src $(UV) run --frozen python -m skeptic.analysis.report --sealed $(SEALED_ROOT)
 
 # Replace each target with its implementation in the corresponding work package.
 # A placeholder must fail rather than report a successful experiment or unblind.

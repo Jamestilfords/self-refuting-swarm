@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -19,7 +20,7 @@ from skeptic.analysis.decisions import load_decisions, load_ledger
 from skeptic.analysis.report_tables import write_all
 from skeptic.analysis.scorecard import PAIRS, run_scorecard
 from skeptic.analysis.sources import OpenSource, SealedNpzSource, file_sha256
-from skeptic.analysis.truth import compute_truth_table, plan_pairs
+from skeptic.analysis.truth import TruthCache, compute_truth_table, plan_pairs
 from skeptic.store import UnsealPermit
 
 
@@ -91,14 +92,21 @@ def build_report(
     config: AnalysisConfig = DEFAULT,
     out_dir: Path | None = None,
     decisions_sha256: str = "",
+    cache_dir: Path | None = None,
+    workers: int = 1,
 ) -> dict:
     record = repo / "runs" / "unblind.json"
     if not record.is_file():
         raise FileNotFoundError("runs/unblind.json is missing; run make unblind first")
     destination = Path(out_dir) if out_dir is not None else repo / "tables"
+    if cache_dir is None:
+        cache_dir = Path(repo) / "runs" / "truth"
     written = write_all(
         destination, decisions=decisions, ledger=ledger,
-        truth=_truth(decisions, ledger, test_source, config),
+        truth=_truth(
+            decisions, ledger, test_source, config,
+            cache_dir=Path(cache_dir), workers=workers,
+        ),
         test_source=test_source, val_source=val_source, config=config,
         decisions_sha256=decisions_sha256,
     )
@@ -109,10 +117,24 @@ def build_report(
     return written
 
 
-def _truth(decisions, ledger, test_source, config):
+def _truth(decisions, ledger, test_source, config, cache_dir: Path, workers: int = 1):
     taken = decisions.loc[decisions["accepted"].fillna(False).astype(bool)] if "accepted" in decisions.columns else decisions
     pairs = plan_pairs(taken, ledger, config=config, strict=False)
-    return compute_truth_table(pairs, source=test_source, config=config, strict=False)
+    pairs = sorted(pairs, key=lambda pair: (pair[2], pair[1], pair[0]))
+    cache = TruthCache(cache_dir)
+    if workers == 1:
+        return compute_truth_table(
+            pairs, source=test_source, config=config, strict=False, cache=cache, map_fn=map,
+        )
+    import multiprocessing as mp
+
+    ctx = mp.get_context("spawn")
+    with ctx.Pool(processes=workers) as pool:
+        return compute_truth_table(
+            pairs, source=test_source, config=config, strict=False,
+            cache=cache,
+            map_fn=lambda function, jobs: pool.imap(function, jobs, chunksize=16),
+        )
 
 
 def verify_archive(sealed_root: Path, record: dict) -> None:
@@ -163,7 +185,14 @@ def main(argv=None) -> int:
     parser.add_argument("--repo", type=Path, default=Path("."))
     parser.add_argument("--sealed", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--truth-cache", type=Path, default=None)
+    parser.add_argument("--workers", type=int, default=0)
     args = parser.parse_args(argv)
+    if args.workers < 0:
+        print("--workers must be an integer >= 0", file=sys.stderr)
+        return 1
+    workers = (os.cpu_count() or 1) if args.workers == 0 else args.workers
+    cache_dir = args.truth_cache if args.truth_cache is not None else args.repo / "runs" / "truth"
     record = args.repo / "runs" / "unblind.json"
     if not record.is_file():
         print("runs/unblind.json is missing; run make unblind first", file=sys.stderr)
@@ -182,6 +211,7 @@ def main(argv=None) -> int:
     build_report(
         args.repo, decisions=decisions, ledger=ledger, test_source=test, val_source=val,
         decisions_sha256=payload["permit"]["digest"], out_dir=args.out,
+        cache_dir=cache_dir, workers=workers,
     )
     print(json.dumps({"status": "reported", "out": str(args.out or (args.repo / "tables"))}))
     return 0

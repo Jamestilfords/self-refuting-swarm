@@ -363,6 +363,140 @@ def test_report_runs_on_a_matching_archive(tmp_path, monkeypatch, capsys):
     assert "hash" in capsys.readouterr().err
 
 
+def _small_config(cell: str) -> AnalysisConfig:
+    return AnalysisConfig(
+        cells=(cell,), test_B=20, test_seed=0, hyp_B=20, hyp_seed=0,
+        registered_orderings=100, h1_cells=(cell,), h3_cells=(cell,),
+        h4_small=(cell,), h4_large=(cell,), h2_min_cells=1,
+    )
+
+
+def _report_inputs(tmp_path: Path):
+    stream = make_stream(seed=0, n_true=2, n_null=2, n_seeds=2, sizes={"val": (30, 15), "test": (30, 15)})
+    decisions = replay(stream.val, stream.shas, stream.cell, n_orderings=2, seed=0)
+    extra = decisions.loc[decisions["ordering"] == 0].copy()
+    extra["ordering"] = 100
+    decisions = pd.concat([decisions, extra], ignore_index=True)
+    (tmp_path / "runs").mkdir(exist_ok=True)
+    record = tmp_path / "runs" / "unblind.json"
+    if not record.is_file():
+        record.write_text("{}\n", encoding="utf-8")
+    return stream, decisions, _small_config(stream.cell)
+
+
+def _published_tables(root: Path) -> dict[str, bytes]:
+    tables = {}
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and (path.suffix == ".csv" or path.name == "SUMMARY.md"):
+            tables[path.relative_to(root).as_posix()] = path.read_bytes()
+    return tables
+
+
+def _count_bootstrap(monkeypatch):
+    import skeptic.analysis.truth as truth
+
+    calls = {"n": 0}
+    real = truth.paired_bootstrap_fast
+
+    def wrapped(*args, **kwargs):
+        calls["n"] += 1
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(truth, "paired_bootstrap_fast", wrapped)
+    return calls
+
+
+def test_report_caches_every_pair_and_skips_them_on_rerun(tmp_path, monkeypatch):
+    stream, decisions, config = _report_inputs(tmp_path)
+    cache = tmp_path / "runs" / "truth"
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    calls = _count_bootstrap(monkeypatch)
+    build_report(
+        tmp_path, decisions=decisions, ledger=stream.ledger,
+        test_source=stream.test, val_source=stream.val, config=config,
+        out_dir=first, decisions_sha256="a" * 64, cache_dir=cache, workers=1,
+    )
+    computed = calls["n"]
+    assert computed > 0
+    calls["n"] = 0
+    build_report(
+        tmp_path, decisions=decisions, ledger=stream.ledger,
+        test_source=stream.test, val_source=stream.val, config=config,
+        out_dir=second, decisions_sha256="a" * 64, cache_dir=cache, workers=1,
+    )
+    assert calls["n"] == 0
+    assert _published_tables(first) == _published_tables(second)
+
+
+def test_report_one_and_two_workers_write_the_same_tables(tmp_path):
+    stream, decisions, config = _report_inputs(tmp_path)
+    serial = tmp_path / "serial"
+    parallel = tmp_path / "parallel"
+    common = dict(
+        decisions=decisions, ledger=stream.ledger, test_source=stream.test,
+        val_source=stream.val, config=config, decisions_sha256="a" * 64,
+    )
+    build_report(tmp_path, out_dir=serial, cache_dir=tmp_path / "cache-1", workers=1, **common)
+    build_report(tmp_path, out_dir=parallel, cache_dir=tmp_path / "cache-2", workers=2, **common)
+    assert _published_tables(serial) == _published_tables(parallel)
+
+
+def test_report_resumes_from_cached_pairs(tmp_path, monkeypatch):
+    import skeptic.analysis.truth as truth
+
+    stream, decisions, config = _report_inputs(tmp_path)
+    cache = tmp_path / "runs" / "truth"
+    real = truth.paired_bootstrap_fast
+    state = {"n": 0}
+
+    def stop_after_two(*args, **kwargs):
+        state["n"] += 1
+        if state["n"] == 3:
+            raise RuntimeError("stop")
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(truth, "paired_bootstrap_fast", stop_after_two)
+    with pytest.raises(RuntimeError, match="stop"):
+        build_report(
+            tmp_path, decisions=decisions, ledger=stream.ledger,
+            test_source=stream.test, val_source=stream.val, config=config,
+            out_dir=tmp_path / "partial", decisions_sha256="a" * 64,
+            cache_dir=cache, workers=1,
+        )
+    assert len(list(cache.rglob("*.json"))) == 2
+    monkeypatch.undo()
+    calls = _count_bootstrap(monkeypatch)
+    resumed = tmp_path / "resumed"
+    clean_cache = tmp_path / "clean-cache"
+    clean = tmp_path / "clean"
+    common = dict(
+        decisions=decisions, ledger=stream.ledger, test_source=stream.test,
+        val_source=stream.val, config=config, decisions_sha256="a" * 64, workers=1,
+    )
+    build_report(tmp_path, out_dir=resumed, cache_dir=cache, **common)
+    resumed_calls = calls["n"]
+    calls["n"] = 0
+    build_report(tmp_path, out_dir=clean, cache_dir=clean_cache, **common)
+    assert resumed_calls == calls["n"] - 2
+    assert _published_tables(resumed) == _published_tables(clean)
+
+
+def test_sealed_npz_source_pickles(tmp_path, monkeypatch):
+    import pickle
+
+    _install(monkeypatch)
+    sealed = tmp_path / "runs" / "sealed"
+    _write_npz(sealed, CELL, SHA)
+    source = SealedNpzSource(sealed, PERMIT, {CELL: {"energy_ce": SHA}}, repo=tmp_path)
+    original = source.get(CELL, "energy_ce")
+    restored = pickle.loads(pickle.dumps(source))
+    again = restored.get(CELL, "energy_ce")
+    for left, right in zip(original, again):
+        for left_row, right_row in zip(left, right):
+            assert np.array_equal(left_row, right_row)
+
+
 def test_sealed_source_rechecks_the_unblind_hash(tmp_path, monkeypatch):
     _install(monkeypatch)
     sealed = tmp_path / "runs" / "sealed"

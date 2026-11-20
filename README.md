@@ -368,6 +368,8 @@ Activation-Monitoring repository has been added by this scaffold.
 
 `paired_bootstrap_fast` is an equivalence-tested vectorisation of ER-1's `paired_bootstrap` at commit `e877e9159d`. It draws the same resample indices and returns the same tie-aware weighted AUROC. Truth intervals use B = 5,000. The first truth pair in a process is checked against ER-1 at B = 20.
 
+2026-11-19: `make report` computes test truth in parallel and caches each pair under `runs/truth/`. Pairs, seeds, B and every table are unchanged; equivalence is tested with 1 vs 2 workers.
+
 The filled draft records these choices. They freeze only when that file is registered:
 
 - **D1.** Recall's numerator is the accepted proposals that sit in S_cell, the set of real improvements over CE energy. The numerator and the denominator use that same set, so recall cannot exceed 1.

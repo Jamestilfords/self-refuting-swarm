@@ -10,6 +10,7 @@ __pycache__/
 !.env.example
 runs/agents/
 runs/seal/
+runs/truth/
 sealed/
 .pytest_cache/
 .cache/

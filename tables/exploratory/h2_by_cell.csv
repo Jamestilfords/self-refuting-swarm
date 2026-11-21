@@ -1,0 +1,6 @@
+# config_digest=baf57109cdf32bc9501af6c2576dd0786288771bb6d3a0d2150f51521bfce5b0 er1_commit=e877e9159d decisions_sha256=938bd4cee792c9fcf9bc60c5e283b88c12cc31524df56aa054412d10843ba17d
+cell,estimate,ci_low,ci_high,p_two_sided,n_orderings,n_excluded_orderings,n_changes,supported,config_digest
+clinc150/bert,,,,1.000000,200,200,1080,false,baf57109cdf32bc9501af6c2576dd0786288771bb6d3a0d2150f51521bfce5b0
+clinc150/roberta,,,,1.000000,200,200,1202,false,baf57109cdf32bc9501af6c2576dd0786288771bb6d3a0d2150f51521bfce5b0
+banking77_oos/bert,,,,1.000000,200,200,1292,false,baf57109cdf32bc9501af6c2576dd0786288771bb6d3a0d2150f51521bfce5b0
+banking77_oos/roberta,,,,1.000000,200,200,1328,false,baf57109cdf32bc9501af6c2576dd0786288771bb6d3a0d2150f51521bfce5b0

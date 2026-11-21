@@ -1,0 +1,9 @@
+number,cell,candidate,incumbent,scorecard_verdict,stream_verdict,grade,delta_val,ci_low,ci_high,p,alpha_t,note
+1,clinc150/bert,vacuity_edl,msp_ce,SCORE-MATCHED,SCORE-MATCHED,strict,,,,,,"Vacuity minus CE MSP is a scoring-rule effect, and vacuity matches energy."
+2,clinc150/bert,d_port_edl,d_port_edl_unwhitened,INERT,INERT,strict,,,,,,Whitening is a no-op for tied Mahalanobis. The candidate is the registered score.
+3,clinc150/bert,qsigmoid_mul_d_port_edl,vacuity_edl,NO EFFECT,NO EFFECT,strict,-0.0019723333333333537,,,1.0,0.002675838545630043,"Coupled vacuity is harmful, and it can also fail calibration."
+4,clinc150/bert,qsigmoid_mul_d_port_edl,d_port_edl,NO EFFECT,NO EFFECT,miss,-9.00000000000123e-05,,,1.0,0.002675838545630043,The coupling stays within 0.001 AUROC of the density.
+5,clinc150/bert,d_bottleneck_edl,d_port_edl,ACCEPT,SCORE-MATCHED,strict,0.002215333333333325,0.0009474253603268797,0.00348324130633977,0.0003079456370499445,0.002675838545630043,No-PCA bottleneck density versus PCA-128. Likely underpowered on CLINC150.
+6,banking77_oos/bert,d_port_edl,vacuity_edl,ACCEPT,SCORE-MATCHED,strict,0.014477796576252078,0.00662723576409428,0.022328357388409877,0.00015045593344009678,0.002675838545630043,Bottleneck density beats vacuity on Banking77-OOS.
+7,banking77_oos/bert,ecdf_add_log_d_full_edl,vacuity_edl,ACCEPT,SCORE-MATCHED,strict,0.007279011806654623,0.0023848355030033856,0.01217318811030586,0.001778352991912313,0.002675838545630043,add_log at lambda 5 over vacuity. Likely underpowered.
+8,clinc150/bert,relative_mahalanobis_edl,d_full_edl,NO EFFECT,NO EFFECT,strict,-0.0012253333333333005,,,1.0,0.002675838545630043,Relative Mahalanobis loses to the full density.

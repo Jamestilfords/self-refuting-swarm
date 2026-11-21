@@ -372,6 +372,8 @@ Activation-Monitoring repository has been added by this scaffold.
 
 2026-11-20. The decision loader reads acceptance from `verdict` for R0 and R1 rows, maps the CE-energy hash `b1e4ba2e46d5` to `energy_ce`, and ignores the per-gate `detail` field. The published decision files are unchanged. These changes make the published format readable; they do not change any registered definition.
 
+2026-11-20. The report reads validation scores in their published `.npz` format, checked against `runs/score_manifest.sha256`. No value changes.
+
 The filled draft records these choices. They freeze only when that file is registered:
 
 - **D1.** Recall's numerator is the accepted proposals that sit in S_cell, the set of real improvements over CE energy. The numerator and the denominator use that same set, so recall cannot exceed 1.

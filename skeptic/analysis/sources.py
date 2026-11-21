@@ -8,6 +8,7 @@ and a fake store for the guard.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol, runtime_checkable
@@ -427,3 +428,152 @@ class SealedNpzSource:
         line = f'{stamp}, purpose="truth", cell="{cell}", name="{name}"\n'
         with self.guard_log.open("a", encoding="utf-8") as handle:
             handle.write(line)
+
+
+_SCORE_MANIFEST_LINE = re.compile(
+    r"([0-9a-f]{64})  (runs/scores/[a-z0-9_]+/[0-9a-f]{12}\.npz)\Z"
+)
+
+
+class OpenNpzSource:
+    """Validation ``runs/scores/<group>/<sha>.npz`` files.
+
+    Names in ``references[cell]`` resolve to those hashes. A 12-hex name is
+    the file hash. The first read of each file must match
+    ``runs/score_manifest.sha256``. That manifest is pinned by
+    ``decision_manifest.json`` ``replay.score_manifest_sha256``.
+    """
+
+    kind = "val"
+
+    def __init__(self, scores_root, references: dict, repo: Path | None = None):
+        self.root = Path(scores_root)
+        if repo is not None:
+            self.repo = Path(repo)
+        elif self.root.name == "scores" and self.root.parent.name == "runs":
+            self.repo = self.root.parent.parent
+        else:
+            self.repo = self.root.parent
+        self.references = {
+            str(cell): {str(name): str(sha) for name, sha in mapping.items()}
+            for cell, mapping in references.items()
+        }
+        self._hashes: dict[str, str] | None = None
+        self._memo: dict[tuple[str, str], tuple[list[np.ndarray], list[np.ndarray]]] = {}
+        self.kind = "val"
+
+    def _manifest(self) -> dict[str, str]:
+        if self._hashes is not None:
+            return self._hashes
+        path = self.repo / "runs" / "score_manifest.sha256"
+        pinned = self.repo / "runs" / "decision_manifest.json"
+        if path.is_symlink() or not path.is_file() or pinned.is_symlink() or not pinned.is_file():
+            raise GuardError("Validation score manifest is missing")
+        try:
+            recorded = json.loads(pinned.read_text(encoding="utf-8"))["replay"]["score_manifest_sha256"]
+        except (KeyError, TypeError, ValueError, UnicodeError) as exc:
+            raise GuardError("Validation score manifest is not pinned by the published freeze") from exc
+        if not isinstance(recorded, str) or file_sha256(path) != recorded:
+            raise GuardError("Validation score manifest does not match the published freeze")
+        hashes: dict[str, str] = {}
+        try:
+            lines = path.read_text(encoding="ascii").splitlines()
+        except UnicodeError as exc:
+            raise GuardError("Invalid validation score manifest") from exc
+        for number, line in enumerate(lines, 1):
+            match = _SCORE_MANIFEST_LINE.fullmatch(line)
+            if match is None or match.group(2) in hashes:
+                raise GuardError(f"Invalid validation score manifest row {number}")
+            hashes[match.group(2)] = match.group(1)
+        if not hashes:
+            raise GuardError("Validation score manifest is empty")
+        self._hashes = hashes
+        return hashes
+
+    def _sha(self, cell: str, name: str) -> str:
+        named = self.references.get(str(cell), {})
+        if name in named:
+            return named[name]
+        if len(str(name)) == 12 and all(ch in "0123456789abcdef" for ch in str(name)):
+            return str(name)
+        raise KeyError(f"{cell} has no validation scores for {name}")
+
+    def _path(self, cell: str, sha: str) -> tuple[Path, str]:
+        from skeptic.score_artifacts import CELLS
+
+        group = CELLS[cell]
+        relative = f"runs/scores/{group}/{sha}.npz"
+        path = self.root / group / f"{sha}.npz"
+        if path != self.repo / relative:
+            raise GuardError(f"Validation score path is not the published location: {relative}")
+        return path, relative
+
+    def has(self, cell: str, name: str) -> bool:
+        try:
+            path, _relative = self._path(cell, self._sha(cell, name))
+        except KeyError:
+            return False
+        return path.is_file() and not path.is_symlink()
+
+    def _load(self, cell: str, name: str):
+        sha = self._sha(cell, name)
+        key = (str(cell), sha)
+        if key in self._memo:
+            return self._memo[key]
+        path, relative = self._path(cell, sha)
+        if any(part.is_symlink() for part in (path, path.parent, path.parent.parent)):
+            raise GuardError(f"Validation score path is a symlink: {path}")
+        if not path.is_file():
+            raise GuardError(f"Validation score is missing: {path}")
+        expected = self._manifest().get(relative)
+        if expected is None:
+            raise GuardError(f"Validation file is not in the score manifest: {relative}")
+        if file_sha256(path) != expected:
+            raise GuardError(f"Validation file hash does not match the score manifest: {relative}")
+        from skeptic.rules.common import VAL_N_IN
+
+        try:
+            with np.load(path, allow_pickle=False) as saved:
+                if "scores" not in saved.files or "n_in" not in saved.files:
+                    raise GuardError(f"Validation scores are not five finite seeds: {sha}")
+                scores = np.array(saved["scores"], dtype=np.float64, copy=True)
+                n_in = int(saved["n_in"])
+        except GuardError:
+            raise
+        except (KeyError, ValueError, OSError) as exc:
+            raise GuardError(f"Validation scores are not five finite seeds: {sha}") from exc
+        if scores.ndim != 2 or scores.shape[0] != 5 or not np.isfinite(scores).all():
+            raise GuardError(f"Validation scores are not five finite seeds: {sha}")
+        if n_in != VAL_N_IN[cell] or not 0 < n_in < scores.shape[1]:
+            raise GuardError(f"Validation n_in for {cell} is {n_in}, expected {VAL_N_IN[cell]}")
+        ident = [np.ascontiguousarray(row[:n_in]) for row in scores]
+        oos = [np.ascontiguousarray(row[n_in:]) for row in scores]
+        self._memo[key] = (ident, oos)
+        return self._memo[key]
+
+    def get(self, cell: str, name: str):
+        return self._load(cell, name)
+
+    def content_hash(self, cell: str, name: str) -> str:
+        ident, oos = self._load(cell, name)
+        return hash_scores(ident, oos)
+
+    def probabilities(self, cell: str, name: str):
+        return None
+
+    def labels_oos_type(self, cell: str):
+        return None
+
+    def arm_of(self, cell: str, name: str) -> str | None:
+        from skeptic.rules.common import REFERENCE_ARMS
+
+        if str(name) in REFERENCE_ARMS:
+            return REFERENCE_ARMS[str(name)]
+        if str(name).endswith("_edl"):
+            return "edl"
+        if str(name).endswith("_ce"):
+            return "ce"
+        return None
+
+    def plain_ece(self, cell: str, arm: str) -> float | None:
+        return None

@@ -63,6 +63,13 @@ TEST_N_IN = {
     "banking77_oos/bert": 2000,
     "banking77_oos/roberta": 2000,
 }
+# In-scope length of the published validation arrays. CLINC150 is 3000; Banking77-OOS is 1506.
+VAL_N_IN = {
+    "clinc150/bert": 3000,
+    "clinc150/roberta": 3000,
+    "banking77_oos/bert": 1506,
+    "banking77_oos/roberta": 1506,
+}
 REGISTERED_CANDIDATES_PER_CELL = 487
 _SHA = re.compile(r"[0-9a-f]{12}\Z")
 

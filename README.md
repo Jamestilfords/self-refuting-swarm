@@ -387,6 +387,90 @@ The filled draft records these choices. They freeze only when that file is regis
 
 A finite test set misses some real gains. In the low-power synthetic check (`delta_auc = 0.005`) no planted improvement cleared a 95% interval above zero, so S_cell was empty and measured recall was undefined rather than written as 0. When that recall is defined, the test requires it to be at most the recall against the planted effects.
 
+## Experiment 1 results
+
+Confirmatory orderings are 0–99. The support rules are the registered ones in `PREREGISTRATION.md` §1. Tables are in `tables/`. Strict FDP was not computed: test truth was built with `strict=False`, so `true_strict` is empty and `fdp_strict_mean` is blank in every row of `tables/exp1_fdp_recall.csv`.
+
+### Hypotheses
+
+| ID | Estimate | 95% CI | Holm p | Verdict under the registered rule |
+|---|---|---|---|---|
+| H1 | 0.000952 | [0.000313, 0.001710] | 0.009 | Supported. The interval is above 0 and the Holm p-value is at most 0.05. |
+| H2 | — | — | — | Not evaluable. R2 accepted 0 changes in all 400 cell-orderings, so every paired FDP difference was excluded. Support would have required the interval above 0 in at least 3 of the 4 cells and a Holm p-value at most 0.05. |
+| H3 | 0.000000 | [0.000000, 0.000000] | 0.002 | Not supported. Support requires the point estimate to be at least 0.5. The estimate is 0. The interval and the Holm p-value are reported either way; the Holm test rejects a ratio of 0.5 and does not by itself support the claim. |
+| H4 | 0.066168 | [−0.066197, 0.202020] | 0.724 | Not supported. The interval is not entirely above 0, and the Holm p-value is above 0.05. |
+
+### FDP and recall
+
+Pooled stream, mean over the orderings where the value is defined. `dropped` is the number of orderings, out of 100, in which that rule accepted nothing, so FDP is undefined. Recall is the share of S_cell, the proposals whose test gain over CE energy has a combined 95% interval above 0. The templated and llm splits are in `tables/exp1_fdp_recall.csv`. On CLINC150/BERT the templated slice of S_cell is empty, so that slice's recall is undefined.
+
+| Rule | Cell | FDP | Recall | Dropped | \|S_cell\| |
+|---|---|---|---|---|---|
+| R0 | Banking77-OOS/BERT | 0.606 [0.575, 0.636] | 0.022 [0.021, 0.024] | 0 | 267 |
+| R0 | Banking77-OOS/RoBERTa | 0.673 [0.645, 0.699] | 0.021 [0.020, 0.023] | 0 | 310 |
+| R0 | CLINC150/BERT | 0.850 [0.825, 0.876] | 0.015 [0.000, 0.035] | 0 | 2 |
+| R0 | CLINC150/RoBERTa | 0.562 [0.533, 0.590] | 0.030 [0.025, 0.034] | 0 | 46 |
+| R1 | Banking77-OOS/BERT | 0.734 [0.720, 0.747] | 0.099 [0.091, 0.107] | 0 | 267 |
+| R1 | Banking77-OOS/RoBERTa | 0.769 [0.758, 0.779] | 0.105 [0.099, 0.111] | 0 | 310 |
+| R1 | CLINC150/BERT | 0.665 [0.658, 0.673] | 0.250 [0.190, 0.310] | 0 | 2 |
+| R1 | CLINC150/RoBERTa | 0.650 [0.640, 0.660] | 0.219 [0.206, 0.232] | 0 | 46 |
+| R2 | Banking77-OOS/BERT | undefined | 0.000 [0.000, 0.000] | 100 | 267 |
+| R2 | Banking77-OOS/RoBERTa | undefined | 0.000 [0.000, 0.000] | 100 | 310 |
+| R2 | CLINC150/BERT | undefined | 0.000 [0.000, 0.000] | 100 | 2 |
+| R2 | CLINC150/RoBERTa | undefined | 0.000 [0.000, 0.000] | 100 | 46 |
+
+R0's templated slice of CLINC150/RoBERTa drops 8 orderings. Every other R0 and R1 cell-stream in the confirmatory log drops none, except where a stream's S_cell is empty and recall is left blank. R2, R2 without G1, R2 without G5, and R2 without G6 drop all 100 orderings in every cell.
+
+### Gate ablation
+
+The contrast is the mean, over orderings, of false accepts under the variant minus false accepts under full R2. Full R2 accepted nothing, so its FDP is undefined and `d_fdp_vs_R2` is blank. Intervals are the two-level bootstrap on the false-accept contrast.
+
+| Variant | Cell | Extra false accepts | 95% CI | Slipped per ordering |
+|---|---|---|---|---|
+| R2 without G1, G5, or G6 | all four | 0.00 | [0.00, 0.00] | 0.00 |
+| R2 without G2 | CLINC150/BERT | 0.00 | [0.00, 0.00] | 0.00 |
+| R2 without G2 | CLINC150/RoBERTa | 0.00 | [0.00, 0.00] | 0.00 |
+| R2 without G2 | Banking77-OOS/BERT | 0.17 | [0.04, 0.39] | 0.17 |
+| R2 without G2 | Banking77-OOS/RoBERTa | 0.05 | [0.00, 0.14] | 0.05 |
+| R2 without G3 | CLINC150/BERT | 3.04 | [1.38, 5.29] | 3.04 |
+| R2 without G3 | CLINC150/RoBERTa | 1.26 | [0.25, 2.64] | 1.26 |
+| R2 without G3 | Banking77-OOS/BERT | 1.16 | [0.27, 2.43] | 1.16 |
+| R2 without G3 | Banking77-OOS/RoBERTa | 2.03 | [0.32, 4.68] | 2.03 |
+
+### Final pick
+
+The last accepted proposal of each ordering, or CE energy when the ordering accepted nothing. The comparison density is the best of `d_port_ce`, `d_full_ce`, `d_port_edl`, and `d_full_edl` by validation AUROC. The AUROC below is the seed-mean test AUROC. R0 and R2 have IQR 0: every ordering ends on the same score. R2 ends on CE energy in every cell.
+
+| Rule | Cell | Median test AUROC | CE energy | Best validation density | That density's test AUROC |
+|---|---|---|---|---|---|
+| R0 | Banking77-OOS/BERT | 0.941052 | 0.926771 | d_port_ce | 0.941450 |
+| R0 | Banking77-OOS/RoBERTa | 0.940589 | 0.927752 | d_port_ce | 0.944068 |
+| R0 | CLINC150/BERT | 0.976140 | 0.979219 | d_full_ce | 0.977679 |
+| R0 | CLINC150/RoBERTa | 0.983125 | 0.981002 | d_full_ce | 0.982679 |
+| R2 | Banking77-OOS/BERT | 0.926771 | 0.926771 | d_port_ce | 0.941450 |
+| R2 | Banking77-OOS/RoBERTa | 0.927752 | 0.927752 | d_port_ce | 0.944068 |
+| R2 | CLINC150/BERT | 0.979219 | 0.979219 | d_full_ce | 0.977679 |
+| R2 | CLINC150/RoBERTa | 0.981002 | 0.981002 | d_full_ce | 0.982679 |
+
+R1's medians move between orderings. On Banking77-OOS/BERT the median is 0.941052 (IQR 0.001390), against CE energy 0.926771 and `d_port_ce` 0.941450. On Banking77-OOS/RoBERTa it is 0.941791 (IQR 0.002940), against 0.927752 and 0.944068. On CLINC150/BERT it is 0.978906 (IQR 0.001021), against 0.979219 and `d_full_ce` 0.977679. On CLINC150/RoBERTa it is 0.982423 (IQR 0.000990), against 0.981002 and 0.982679.
+
+### Scorecard
+
+Eight published templated pairs, graded on validation only. A strict match is the registered verdict. A lenient match includes the registered near misses, and a strict match counts as lenient. Result: 7 strict matches out of 8, and 7 lenient matches out of 8.
+
+| # | Scorecard verdict | Stream verdict | Grade |
+|---|---|---|---|
+| 1 | SCORE-MATCHED | SCORE-MATCHED | strict |
+| 2 | INERT | INERT | strict |
+| 3 | NO EFFECT | NO EFFECT | strict |
+| 4 | NO EFFECT | NO EFFECT | miss |
+| 5 | ACCEPT | SCORE-MATCHED | strict |
+| 6 | ACCEPT | SCORE-MATCHED | strict |
+| 7 | ACCEPT | SCORE-MATCHED | strict |
+| 8 | NO EFFECT | NO EFFECT | strict |
+
+Pair 2 is EDL D_port without whitening, proposal `c0fdb8397000`. Pair 4's validation gain is about −0.00009, so the critic returns NO EFFECT. The strict expectation was INERT, and SCORE-MATCHED was the only lenient alternative, so the pair is a miss.
+
 ## Research state
 
 `PREREGISTRATION.md` is registered; its status line records commit
@@ -395,8 +479,9 @@ the score-file manifest are committed. The matching per-item score files must
 be downloaded before the main replay. The critic's `g2_mode="scorecard"` is the
 scorecard rule in §4.6; the proposal stream stays on `g2_mode="stream"`.
 Keep sealed test arrays and scores outside git, the public ledger, shared
-memory, and agent inputs. E4 supplies the guard and decision-hash checks;
-scoring integration and the approved unblinding analysis remain pending.
+memory, and agent inputs. E4 supplies the guard and decision-hash checks.
+The confirmatory Experiment 1 tables are in `tables/`, and the registered
+reading of them is in the results section above.
 
 ### E5 decision replay
 

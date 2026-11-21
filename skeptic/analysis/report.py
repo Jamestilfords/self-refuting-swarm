@@ -24,7 +24,22 @@ from skeptic.analysis.truth import TruthCache, compute_truth_table, plan_pairs
 from skeptic.store import UnsealPermit
 
 
-def _summary(hypotheses_csv: Path, scorecard_note: str, registered_orderings: int) -> str:
+_SUPPORTED_IF = {
+    "H1": "95% CI > 0 and Holm-adjusted p ≤ 0.05",
+    "H2": "95% CI > 0 in at least 3 of the 4 cells and Holm-adjusted p ≤ 0.05",
+    "H3": "the point estimate is at least 0.5. The CI and Holm-adjusted p are reported either way",
+    "H4": "95% CI > 0 and Holm-adjusted p ≤ 0.05",
+}
+
+
+def _summary(
+    hypotheses_csv: Path,
+    scorecard_note: str,
+    registered_orderings: int,
+    *,
+    critic_accepts: int,
+    n_cells: int,
+) -> str:
     lines = [
         "# Experiment 1",
         "",
@@ -37,12 +52,65 @@ def _summary(hypotheses_csv: Path, scorecard_note: str, registered_orderings: in
     text = hypotheses_csv.read_text(encoding="utf-8").splitlines()
     body = "\n".join(line for line in text if not line.startswith("#"))
     for row in csv.DictReader(body.splitlines()):
-        lines.append(
-            f"{row['hypothesis']}: estimate={row['estimate']} "
-            f"ci=[{row['ci_low']}, {row['ci_high']}] p_holm={row['p_holm']} reject={row['reject']}"
-        )
+        lines.append(_hypothesis_line(row, critic_accepts=critic_accepts, n_cells=n_cells))
     lines.append("")
     return "\n".join(lines)
+
+
+def _hypothesis_line(row: dict, *, critic_accepts: int, n_cells: int) -> str:
+    name = row["hypothesis"]
+    rule = _SUPPORTED_IF[name]
+    supported = row["supported_by_rule"]
+    if name == "H2" and not row["estimate"].strip():
+        excluded = int(float(row["n_excluded_orderings"]))
+        full = int(float(row["n_orderings"])) * n_cells
+        if excluded == full:
+            where = f"in all {excluded} cell-orderings (all excluded)"
+        else:
+            where = f"with {excluded} of {full} cell-orderings excluded"
+        return (
+            f"H2: not evaluable: R2 accepted {int(critic_accepts)} changes "
+            f"{where}; supported if {rule}"
+        )
+    return (
+        f"{name}: estimate={row['estimate']} ci=[{row['ci_low']}, {row['ci_high']}] "
+        f"p_holm={row['p_holm']} supported={supported}; supported if {rule}"
+    )
+
+
+def _critic_accepts(decisions: pd.DataFrame, config: AnalysisConfig) -> int:
+    if decisions.empty or "accepted" not in decisions.columns:
+        return 0
+    frame = decisions
+    if "ordering" in frame.columns:
+        frame = frame.loc[frame["ordering"].astype(int) < int(config.registered_orderings)]
+    if "rule" in frame.columns:
+        frame = frame.loc[frame["rule"].astype(str) == config.critic_rule]
+    return int(frame["accepted"].fillna(False).astype(bool).sum())
+
+
+def _baseline_names_by_sha(path: Path) -> dict[str, str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload["proposals"] if isinstance(payload, dict) else payload
+    return {str(row["sha"]): str(row["name"]).replace("@", "_") for row in rows}
+
+
+def _scorecard_shas(repo: Path) -> dict[int, tuple[str, str]]:
+    path = repo / "proposals" / "templated.json"
+    if not path.is_file():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    found = {}
+    for row in payload.get("scorecard") or []:
+        found[int(row["n"])] = (str(row["candidate"]), str(row["incumbent"]))
+    return found
+
+
+def _score_for(loaded, sha: str, names_by_sha: dict[str, str]):
+    baseline = names_by_sha.get(sha)
+    if baseline and baseline in loaded.baselines.scores:
+        return loaded.baselines.scores[baseline]
+    return loaded.candidates.get(sha)
 
 
 def _scorecard_note(repo: Path, out_dir: Path) -> str:
@@ -58,19 +126,31 @@ def _scorecard_note(repo: Path, out_dir: Path) -> str:
         for pair in PAIRS:
             if pair.cell not in cells:
                 cells[pair.cell] = load_cell(pair.cell, scores_root, ledger_path, baselines_path)
+        published = _scorecard_shas(repo)
+        names_by_sha = _baseline_names_by_sha(baselines_path)
         scores = {}
         baselines = {}
+        resolved = {}
         for pair in PAIRS:
             loaded = cells[pair.cell]
             baselines[pair.cell] = loaded.baselines
-            for name in (pair.candidate, pair.incumbent):
-                if name in loaded.baselines.scores:
-                    scores[(pair.cell, name)] = loaded.baselines.scores[name]
-                elif name in loaded.candidates:
-                    scores[(pair.cell, name)] = loaded.candidates[name]
-                else:
-                    return f"Scorecard: {pair.cell} has no scores named {name}."
-        rows = run_scorecard(scores, baselines)
+            if pair.number not in published:
+                return f"Scorecard: pair {pair.number} is missing from proposals/templated.json."
+            candidate_sha, incumbent_sha = published[pair.number]
+            candidate = _score_for(loaded, candidate_sha, names_by_sha)
+            incumbent = _score_for(loaded, incumbent_sha, names_by_sha)
+            if candidate is None:
+                return (
+                    f"Scorecard: {pair.cell} has no scores for {pair.candidate} ({candidate_sha})."
+                )
+            if incumbent is None:
+                return (
+                    f"Scorecard: {pair.cell} has no scores for {pair.incumbent} ({incumbent_sha})."
+                )
+            resolved[pair.number] = (candidate, incumbent)
+            scores[(pair.cell, pair.candidate)] = candidate
+            scores[(pair.cell, pair.incumbent)] = incumbent
+        rows = run_scorecard(scores, baselines, resolved=resolved)
     except (OSError, ValueError, KeyError, FileNotFoundError) as exc:
         return f"Scorecard: not scored ({exc})."
     path = out_dir / "scorecard.csv"
@@ -111,7 +191,10 @@ def build_report(
         decisions_sha256=decisions_sha256,
     )
     note = _scorecard_note(repo, destination)
-    summary = _summary(destination / "hypotheses.csv", note, config.registered_orderings)
+    summary = _summary(
+        destination / "hypotheses.csv", note, config.registered_orderings,
+        critic_accepts=_critic_accepts(decisions, config), n_cells=len(config.cells),
+    )
     (destination / "SUMMARY.md").write_text(summary, encoding="utf-8")
     written["SUMMARY.md"] = destination / "SUMMARY.md"
     return written

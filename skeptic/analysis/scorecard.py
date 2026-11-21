@@ -104,15 +104,22 @@ def run_scorecard(
     baselines: Mapping[str, BaselineSet],
     *,
     config: CriticConfig = DEFAULT_CONFIG,
+    resolved: Mapping[int, tuple[ScoreSet, ScoreSet]] | None = None,
 ) -> list[dict]:
     """Run each registered pair in scorecard mode and again in stream mode.
 
     Each call gets a fresh LORD++ state. ``scores`` is keyed by (cell, name).
+    ``resolved`` supplies the candidate and incumbent for a pair number when the
+    published file is addressed by proposal hash rather than by that name.
     """
     rows = []
     for pair in PAIRS:
-        candidate = drop_ignored_parents(scores[(pair.cell, pair.candidate)])
-        incumbent = scores[(pair.cell, pair.incumbent)]
+        if resolved is not None and pair.number in resolved:
+            candidate, incumbent = resolved[pair.number]
+        else:
+            candidate = scores[(pair.cell, pair.candidate)]
+            incumbent = scores[(pair.cell, pair.incumbent)]
+        candidate = drop_ignored_parents(candidate)
         cell_baselines = baselines[pair.cell]
         scorecard = verdict(
             candidate, incumbent, cell_baselines, LordPlusPlus(alpha=config.fdr_alpha, w0=config.fdr_w0),

@@ -19,7 +19,7 @@ from skeptic.analysis.config import DEFAULT, AnalysisConfig
 from skeptic.analysis.decisions import load_decisions, load_ledger
 from skeptic.analysis.report_tables import write_all
 from skeptic.analysis.scorecard import PAIRS, run_scorecard
-from skeptic.analysis.sources import OpenSource, SealedNpzSource, file_sha256
+from skeptic.analysis.sources import OpenNpzSource, SealedNpzSource, file_sha256
 from skeptic.analysis.truth import TruthCache, compute_truth_table, plan_pairs
 from skeptic.store import UnsealPermit
 
@@ -173,7 +173,7 @@ def _sources_from_unblind(repo: Path, sealed_root: Path):
         sealed_root, permit, manifest["references"], arms=arms, repo=repo,
         verified=record.get("files") or {},
     )
-    val = OpenSource(repo / "runs" / "scores", {})
+    val = OpenNpzSource(repo / "runs" / "scores", manifest["references"], repo=repo)
     return ledger, test, val
 
 

@@ -12,12 +12,13 @@ import pytest
 from modal_jobs.plain_ece import plain_model_ece
 from skeptic.analysis.check_references import arrays_match, first_mismatch, spearman
 from skeptic.analysis.config import AnalysisConfig
-from skeptic.analysis.report import build_report, main as report_main, verify_archive
+from skeptic.analysis.decisions import load_decisions
+from skeptic.analysis.report import _sources_from_unblind, build_report, main as report_main, verify_archive
 from skeptic.analysis.report_tables import write_all
-from skeptic.analysis.sources import GuardError, SealedNpzSource, file_sha256
+from skeptic.analysis.sources import GuardError, OpenNpzSource, SealedNpzSource, file_sha256
 from skeptic.analysis.unblind import open_sealed
 from skeptic.critic.er1 import softmax_ece
-from skeptic.rules.common import REFERENCE_BASELINES, TEST_N_IN
+from skeptic.rules.common import REFERENCE_BASELINES, TEST_N_IN, VAL_N_IN
 from skeptic.store import UnsealPermit
 from tests.fixtures.analysis.replay import replay
 from tests.fixtures.analysis.synth_stream import make_stream
@@ -103,6 +104,78 @@ def test_sealed_npz_resolves_names_and_refuses_bad_files(tmp_path, monkeypatch):
     link.symlink_to(target)
     with pytest.raises(GuardError, match="symlink"):
         source.get(CELL, other)
+
+
+def _write_val_npz(repo: Path, cell: str, sha: str, *, n_in=None, finite=True):
+    from skeptic.score_artifacts import CELLS
+
+    n_in = VAL_N_IN[cell] if n_in is None else n_in
+    scores = np.arange(5 * (n_in + 10), dtype=np.float32).reshape(5, n_in + 10)
+    if not finite:
+        scores = scores.astype(np.float64)
+        scores[0, 0] = np.nan
+    folder = repo / "runs" / "scores" / CELLS[cell]
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{sha}.npz"
+    np.savez(path, scores=scores, n_in=n_in)
+    return path
+
+
+def _pin_score_manifest(repo: Path, paths: list[Path], references: dict) -> None:
+    lines = [f"{file_sha256(path)}  {path.relative_to(repo).as_posix()}\n" for path in paths]
+    manifest = repo / "runs" / "score_manifest.sha256"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text("".join(lines), encoding="ascii")
+    decision = {
+        "references": references,
+        "replay": {"score_manifest_sha256": file_sha256(manifest)},
+    }
+    (repo / "runs" / "decision_manifest.json").write_text(json.dumps(decision), encoding="utf-8")
+
+
+def _open_val(repo: Path, cell: str, sha: str, **kwargs):
+    path = _write_val_npz(repo, cell, sha, **kwargs)
+    references = {cell: {"energy_ce": sha}}
+    _pin_score_manifest(repo, [path], references)
+    return OpenNpzSource(repo / "runs" / "scores", references, repo=repo), path
+
+
+def test_open_npz_resolves_names_and_refuses_bad_files(tmp_path):
+    assert VAL_N_IN == {
+        "clinc150/bert": 3000,
+        "clinc150/roberta": 3000,
+        "banking77_oos/bert": 1506,
+        "banking77_oos/roberta": 1506,
+    }
+    source, path = _open_val(tmp_path, CELL, SHA)
+    n_in = VAL_N_IN[CELL]
+    ident, oos = source.get(CELL, "energy_ce")
+    assert len(ident) == 5 and ident[0].dtype == np.float64
+    assert ident[0].shape == (n_in,) and oos[0].shape == (10,)
+    assert ident[0][0] == 0 and oos[0][0] == n_in
+    assert source.arm_of(CELL, "energy_ce") == "ce"
+    path.unlink()
+    cached, _oos = source.get(CELL, SHA)
+    assert cached[0][0] == ident[0][0]
+
+    fresh, changed = _open_val(tmp_path / "mismatch", CELL, SHA)
+    changed.write_bytes(changed.read_bytes() + b"\x00")
+    with pytest.raises(GuardError, match="score manifest"):
+        fresh.get(CELL, "energy_ce")
+    missing = OpenNpzSource(
+        tmp_path / "mismatch" / "runs" / "scores",
+        {CELL: {"energy_ce": "c" * 12}},
+        repo=tmp_path / "mismatch",
+    )
+    with pytest.raises(GuardError, match="missing"):
+        missing.get(CELL, "c" * 12)
+
+    short = _open_val(tmp_path / "short", CELL, "d" * 12, n_in=10)[0]
+    with pytest.raises(GuardError, match="n_in"):
+        short.get(CELL, "d" * 12)
+    poisoned = _open_val(tmp_path / "nan", CELL, "e" * 12, finite=False)[0]
+    with pytest.raises(GuardError, match="finite"):
+        poisoned.get(CELL, "e" * 12)
 
 
 def test_plain_model_ece_matches_the_validation_definition():
@@ -360,6 +433,75 @@ def test_report_runs_on_a_matching_archive(tmp_path, monkeypatch, capsys):
     target = sealed / next(iter(record["files"]))
     target.write_bytes(target.read_bytes() + b"\x00")
     assert report_main(["--repo", str(tmp_path), "--sealed", str(sealed), "--out", str(tmp_path / "out")]) == 1
+    assert "hash" in capsys.readouterr().err
+
+
+def test_report_runs_on_a_matching_archive_with_validation_npz(tmp_path, monkeypatch, capsys):
+    _install(monkeypatch)
+    cell = CELL
+    candidate, other = "a" * 12, "b" * 12
+    energy = REFERENCE_BASELINES["energy_ce"]
+    monkeypatch.setitem(VAL_N_IN, cell, 30)
+    monkeypatch.setitem(TEST_N_IN, cell, 30)
+    sealed = tmp_path / "sealed"
+    sealed_paths = {sha: _write_npz(sealed, cell, sha, n_in=30) for sha in (energy, candidate, other)}
+    plain = sealed / "plain_ece.json"
+    plain.write_text("{}\n", encoding="utf-8")
+    payload = {
+        "schema_version": 1,
+        "permit": {"commit": PERMIT.commit, "digest": PERMIT.digest},
+        "counts": {cell: 3},
+        "files": {
+            **{f"scores/clinc150_bert/{sha}.npz": file_sha256(path) for sha, path in sealed_paths.items()},
+            "plain_ece.json": file_sha256(plain),
+        },
+    }
+    (tmp_path / "runs").mkdir()
+    (tmp_path / "runs" / "unblind.json").write_text(json.dumps(payload), encoding="utf-8")
+    val_paths = [_write_val_npz(tmp_path, cell, sha, n_in=30) for sha in (energy, candidate, other)]
+    _pin_score_manifest(tmp_path, val_paths, {cell: dict(REFERENCE_BASELINES)})
+    ledger_rows = [
+        {"sha": candidate, "cell": cell, "status": "ok", "stream": "templated"},
+        {"sha": other, "cell": cell, "status": "ok", "stream": "llm"},
+    ]
+    (tmp_path / "runs" / "ledger.jsonl").write_text(
+        "".join(json.dumps(row) + "\n" for row in ledger_rows), encoding="utf-8",
+    )
+    decisions = [
+        {"cell": cell, "sha": candidate, "idx": 0, "ordering": 0, "rule": "R0",
+         "incumbent": "energy_ce", "verdict": "ACCEPT", "accepted": True},
+        {"cell": cell, "sha": other, "idx": 1, "ordering": 0, "rule": "R0",
+         "incumbent": candidate, "verdict": "REJECT", "accepted": False},
+    ]
+    folder = tmp_path / "runs" / "decisions" / "R0"
+    folder.mkdir(parents=True)
+    (folder / "ord_000.jsonl").write_text("".join(json.dumps(row) + "\n" for row in decisions), encoding="utf-8")
+
+    ledger, test, val = _sources_from_unblind(tmp_path, sealed)
+    assert isinstance(val, OpenNpzSource)
+    loaded = load_decisions(tmp_path / "runs" / "decisions", ledger)
+    build_report(
+        tmp_path, decisions=loaded, ledger=ledger, test_source=test, val_source=val,
+        config=_small_config(cell), out_dir=tmp_path / "tables",
+        decisions_sha256=PERMIT.digest, workers=1,
+    )
+    winners = (tmp_path / "tables" / "exp1_winners_curse.csv").read_text(encoding="utf-8")
+    assert "mean_delta_val" in winners
+    body = [line for line in winners.splitlines() if line and not line.startswith("#")]
+    assert len(body) > 1 and body[1].split(",")[-2] not in {"", "nan"}
+
+    def spy(repo, **kwargs):
+        assert isinstance(kwargs["val_source"], OpenNpzSource)
+        ident, oos = kwargs["val_source"].get(cell, "energy_ce")
+        assert ident[0].shape == (30,) and oos[0].shape == (10,)
+        return {}
+
+    monkeypatch.setattr("skeptic.analysis.report.build_report", spy)
+    assert report_main(["--repo", str(tmp_path), "--sealed", str(sealed), "--out", str(tmp_path / "out"), "--workers", "1"]) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "reported"
+    target = sealed / f"scores/clinc150_bert/{energy}.npz"
+    target.write_bytes(target.read_bytes() + b"\x00")
+    assert report_main(["--repo", str(tmp_path), "--sealed", str(sealed), "--out", str(tmp_path / "out"), "--workers", "1"]) == 1
     assert "hash" in capsys.readouterr().err
 
 
